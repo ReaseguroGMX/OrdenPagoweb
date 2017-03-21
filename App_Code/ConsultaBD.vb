@@ -432,7 +432,7 @@ Public Class ConsultaBD
 
         sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
 
-        sSel = "INSERT INTO rEndososNoPago VALUES(" & id_pv & ",'" & cod_usuario_NT & "','" & Month(Today) & "/" & Day(Today) & "/" & Year(Today) & "')"
+        sSel = "spI_PolNoPago " & id_pv & ",'" & cod_usuario_NT & "'"
 
         Dim da As SqlDataAdapter
         Dim dtRes As DataTable
