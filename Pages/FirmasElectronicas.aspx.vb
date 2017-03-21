@@ -536,16 +536,6 @@ Partial Class Pages_FirmasElectronicas
 
     End Function
 
-
-    Protected Sub chk_FirmaSol_CheckedChanged(sender As Object, e As EventArgs)
-        'For Each row In gvd_LstOrdenPago.Rows
-        '    Dim chkSol = DirectCast(row.FindControl("chk_FirmaSol"), CheckBox)
-        '    If chkSol.Checked = True Then
-        '        ScriptManager.RegisterStartupScript(Me, Me.GetType, "Open Modal Autoriza", "OpenPopup('#AutorizaModal');", True)
-
-        '    End If
-        'Next
-    End Sub
     Private Sub LlenaUsuarioFirma(tPersona As Integer)
         Dim wsGmx As New GMXServices.GeneralesClient
         Dim ListaResultado As IList = Nothing
