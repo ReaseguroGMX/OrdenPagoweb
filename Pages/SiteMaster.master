@@ -1,0 +1,198 @@
+﻿<%@ Master Language="VB" CodeFile="SiteMaster.master.vb" Inherits="SiteMaster" %>
+
+<%--<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>--%>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+
+    <asp:ContentPlaceHolder id="head" runat="server">
+           <script type="text/javascript">
+                function Redireccionar(pagina) {
+                    location.href = pagina;
+                }
+            </script>
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+
+    <form id="frmMaster" style="overflow-x:hidden" runat="server">
+        <div id="mySidenav" class="sidenav">
+            <a>MENU</a>
+            <a>___________________________________</a>
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="Inicio.aspx">Inicio</a>
+            <a href="OrdenPago.aspx">Órdenes de Pago</a>
+            <a href="FirmasElectronicas.aspx">Firmas Electrónicas</a> 
+            <a href="NotasCobertura.aspx">Notas de Cobertura</a> 
+        </div>
+
+
+        <div id="main">
+
+            <%-- <script src="../Scripts/jsUpdateProgress.js"></script>--%>
+
+            <script src="../Scripts/jquery.min.js"></script>    
+            <script src="../Scripts/bootstrap.min.js"></script>
+            <%-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>--%>
+
+            <link href="../Content/jquery-ui.css" rel="stylesheet" />
+            <link href="../Content/bootstrap.min.css" rel="stylesheet" />
+            <%--<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />--%>
+            <link href="../Content/bootstrapValidator.min.css" rel="stylesheet" />
+            <link href="../Content/bootstrap.min.css" rel="stylesheet" />
+            <link href="../Content/GMX.css" rel="stylesheet" /> 
+            <link href="../Content/GridviewScroll.css" rel="stylesheet" />
+            <link href="../Content/Navigation.css" rel="stylesheet" />
+
+            <script src="../Scripts/jquery-ui.min.js"></script>
+            <script src="../Scripts/bootstrapValidator.min.js"></script>
+            <script src="../Scripts/jquery.tablePagination.0.1.js"></script>
+            <script src="../Scripts/Image.js"></script>
+
+            <script type="text/javascript">
+                $("body").on("click", ".despliegaMenu", function () {
+                    openNav()
+                    event.preventDefault();
+                });
+
+                /* Set the width of the side navigation to 250px */
+                function openNav() {
+                    document.getElementById("mySidenav").style.width = "250px";
+                    document.getElementById("main").style.marginLeft = "250px";
+                }
+
+                /* Set the width of the side navigation to 0 */
+                function closeNav() {
+                    document.getElementById("mySidenav").style.width = "0";
+                    document.getElementById("main").style.marginLeft = "0";
+                    event.preventDefault();
+                }
+            </script>
+
+            <asp:ScriptManager runat="server" ID="ScrManagerMaster">
+            </asp:ScriptManager>
+
+            <asp:UpdateProgress ID="prgLoadingStatus" runat="server" DynamicLayout="true">
+                <ProgressTemplate>
+                    <div id="overlay">
+                        <div id="modalprogress" style="width:150px; height:95px">
+                                <img src="../Images/loading.gif" />
+                                Procesando.....
+                        </div>
+                    </div>
+                </ProgressTemplate>
+            </asp:UpdateProgress>  
+
+            <div id="menu_contenedor">
+                <div style="width:100%; min-width:1366px; height:30px;" class="row">
+                        <div class="col-md-7" style="vertical-align:central;">
+                        </div>
+                         <div class="col-md-4" style="text-align:right;">
+                              <img src="../Images/user-icon.png" />
+                              <asp:Label runat="server" ID="lbl_Usuario" Text="Inicia Sesión" ForeColor="#00004f" Font-Bold="true"></asp:Label>
+                              <asp:HiddenField runat="server" ID="hid_codUsuario" Value="" />
+                              <asp:HiddenField runat="server" ID="hid_codSuc" Value="0" />
+                              <asp:HiddenField runat="server" ID="hid_codSector" Value="0" />
+                              <asp:HiddenField runat="server" ID="hid_HostName" Value="" />
+                        </div>        
+                        <div class="col-md-1" style="text-align:right;">
+                            <asp:ImageButton runat="server" ID="btn_CerrarSesion" ImageUrl="~/Images/CierraSesion.png"  />
+                        </div>
+                </div>
+                     
+
+                <table style="background:url('../Images/menu_fondo_pleca.jpg'); width:100%;  min-width:1366px; height:90px; border:0px;" > 
+                    <tbody>               
+                        <tr>
+                            <td rowspan="2" style="width:160px">
+                                <img class="despliegaMenu" style="background-image:url('../Images/menu_fondo_logo_gmx_2.jpg');" src="../Images/imagen.gif" width="160" height="90" oncontextmenu="return false"/>
+                            </td>
+                            <td>
+                                <h1 class="info_titulo">REASEGURO</h1>
+                            </td>
+                                <td  style="height:26px; text-align:left;""   >       
+                                    <div id="menu_superior">
+                                        <ul>
+                                            <li><a href="http://www.gmx.com.mx/index.html">www.gmx.com.mx</a></li>
+                                        </ul>
+                                    </div>        
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+       
+
+
+        <div id="inicio_contenidos">
+            <table>
+                <tr>
+                    <td>
+                        <div style="width:200px; top:120px; padding-top:50px; position:fixed; min-width:200px">
+                            <div class="text-center">
+                                <img  class="profile-img despliegaMenu" src ="../Images/icono-pago.png" alt=""/> 
+                            </div>
+               
+                            <div class="clear padding20"></div>
+
+                            <div class="text-center">
+                                <img class="profile-img" src="../Images/icono-ambiente.png" />
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="padding-left:200px">
+                            <asp:ContentPlaceHolder id="ContentMaster" runat="server">
+
+                            </asp:ContentPlaceHolder>
+                        </div>
+                         
+                    </td>
+                </tr>
+            </table>
+               
+        </div>
+
+ 
+        <div id="pie_contenedor">
+            <table style="background:url('../Images/pie_fondo.jpg'); width:100%;  min-width:1366px; height:50px; border:0px;">
+                <tr>
+                    <td><div class="pie_esquina"></div></td>
+                    <td><div id="pie">
+                            <div id="pie_menu">
+                                <ul>
+                                    <li><a href="aviso_legal.html" onclick="return popup(this)">Aviso Legal</a></li>
+
+                                    <li><a href="aviso_de_privacidad.html" onclick="return popup(this)">Aviso de Privacidad</a></li>
+
+                                    <li><a href="http://www.twitter.com/#!/@GMXSeguros" class="pie_twitter" target="_blank" onmouseover="MM_swapImage('twitter','','../Images/pie_logo_twitter_over.png',1)" onmouseout="MM_swapImgRestore()"><img src="../Images/pie_logo_twitter_up.png" alt="Síguenos en Twitter - GMX Seguros" width="38" height="40" border="0" id="twitter" /><div class="pie_twitter_ventana">Síguenos en Twitter</div></a></li>
+
+                                    <li><a href="https://www.facebook.com/pages/GMX-Seguros/212294618921704?fref=ts" class="pie_facebook" target="_blank" onmouseover="MM_swapImage('facebook','','../Images/pie_logo_facebook_over.png',1)" onmouseout="MM_swapImgRestore()"><img src="../Images/pie_logo_facebook_up.png" alt="Síguenos en Facebook - GMX Seguros"  width="38" height="40" border="0" id="facebook" /><div class="pie_facebook_ventana">Síguenos en Facebook</div></a></li>
+
+                                    <li><a href="http://www.buro.gob.mx/" class="pie_buro" target="_blank" onmouseover="MM_swapImage('buro','','../Images/pie_logo_buro_over.png',1)" onmouseout="MM_swapImgRestore()"><img src="../Images/pie_logo_buro_up.png" alt="Buró Financiero"  width="38" height="40" border="0" id="buro" /><div class="pie_buro_ventana">Buró Financiero</div></a></li>
+
+                                    <li><a href="http://www.condusef.gob.mx/" target="_blank" class="pie_condusef" onmousedown="MM_swapImage('condusef','','../Images/imagen.gif',1)" onmouseover="MM_swapImage('condusef','','../Images/pie_logo_condusef_over.png',1)" onmouseout="MM_swapImgRestore()"><img src="../Images/pie_logo_condusef_up.png" alt="CONDUSEF" width="74" height="40" border="0" id="condusef" oncontextmenu="return false" /><div class="pie_condusef_ventana">CONDUSEF</div></a></li>
+
+                                    <li><a href="esr.html" class="pie_esr" onmousedown="MM_swapImage('esr','','../Images/imagen.gif',1)" onmouseover="MM_swapImage('esr','','../Images/pie_logo_esr_over.png',1)" onmouseout="MM_swapImgRestore()" onclick="return popup(this)"><img src="../Images/pie_logo_esr_up.png" alt="Somos una Empresa Socialmente Responsable"  width="74" height="40" border="0" id="esr" oncontextmenu="return false"  /><div class="pie_esr_ventana">Somos una Empresa Socialmente Responsable</div></a></li>
+  
+                                </ul>
+                            </div>
+                    </div></td>
+
+                    <td><div class="pie_esquina"></div></td>
+                </tr>
+            </table>
+        </div>
+
+       </div>
+        
+
+    </form>
+</body>
+</html>
