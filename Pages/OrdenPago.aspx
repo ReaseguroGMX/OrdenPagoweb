@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="VB" MasterPageFile="SiteMaster.master" AutoEventWireup="false" ClientIDMode="AutoID" CodeFile="OrdenPago.aspx.vb" Inherits="Pages_OrdenPago" %>
 <%@ MasterType VirtualPath="~/Pages/SiteMaster.master" %>
-<%@ Register TagPrefix="FTB" Namespace="FreeTextBoxControls" Assembly="FreeTextBox" %>
+
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentMaster" Runat="Server">
     <script src="../Scripts/jquery.maskedinput.js"></script>
@@ -10,6 +10,7 @@
 
  <script type="text/javascript"> 
      Sys.WebForms.PageRequestManager.getInstance().add_endRequest(PageLoad);
+
 </script> 
 
         <asp:UpdatePanel runat="server" ID="upOcultos">
