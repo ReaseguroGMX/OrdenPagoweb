@@ -192,7 +192,7 @@
 
                                             <asp:TemplateField HeaderText="Solicitante" ItemStyle-HorizontalAlign="Center">
                                                 <ItemTemplate>
-                                                        <asp:CheckBox runat="server" Text="Firma" Width="90px" ID="chk_FirmaSol" Checked='<%# Eval("sn_Solicita") %>' AutoPostBack="true" OnCheckedChanged ="chk_FirmaSol_CheckedChanged"/>
+                                                        <asp:CheckBox runat="server" Text="Firma" Width="90px" ID="chk_FirmaSol" Checked='<%# Eval("sn_Solicita") %>' AutoPostBack="true"/>
                                                 </ItemTemplate>
                                             </asp:TemplateField >
 

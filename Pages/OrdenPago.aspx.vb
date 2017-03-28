@@ -627,6 +627,8 @@ Partial Class Pages_OrdenPago
                 Dim div_comision As HtmlGenericControl = TryCast(e.Row.FindControl("div_comision"), HtmlGenericControl)
                 Dim btn_Detalle As ImageButton = TryCast(e.Row.FindControl("btn_Detalle"), ImageButton)
                 Dim btn_GeneraOP As Button = TryCast(e.Row.FindControl("btn_GeneraOP"), Button)
+                Dim btn_DetalleCuotas As Button = TryCast(e.Row.FindControl("btn_DetalleCuotas"), Button)
+
 
                 Dim lbl_SaldoCob As Label = TryCast(e.Row.FindControl("lbl_SaldoCob"), Label)
 
@@ -697,6 +699,7 @@ Partial Class Pages_OrdenPago
                     lbl_MntPCRecuperada.BackColor = Drawing.Color.LightBlue
 
                     btn_GeneraOP.Visible = True
+                    btn_DetalleCuotas.Visible = True
 
                     If Val(lbl_SaldoCob.Text) < 0 Then
                         lbl_SaldoCob.ForeColor = Drawing.Color.Red
@@ -1894,6 +1897,13 @@ Partial Class Pages_OrdenPago
 
                 hid_Moneda.Value = gvd_Reaseguro.DataKeys(Index)("cod_moneda")
                 ddl_MonedaEnd.SelectedValue = gvd_Reaseguro.DataKeys(Index)("cod_moneda")
+
+            ElseIf e.CommandName.Equals("DetalleCob") Then
+
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+
+                DetalleCobranzas(gvd_Reaseguro.DataKeys(Index)("id_pv"), gvd_Reaseguro.DataKeys(Index)("Poliza"))
+
             End If
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-: ROWCOMMAND Póliza", ex.Message)
@@ -4219,6 +4229,103 @@ Partial Class Pages_OrdenPago
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-:  ", ex.Message)
             LogError("(chk_NoPago_CheckedChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub gvd_Pagadores_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvd_Pagadores.RowCommand
+        Try
+            If e.CommandName.Equals("DetallePagador") Then
+                Dim ConsultaBD As ConsultaBD
+                ConsultaBD = New ConsultaBD
+
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+                Dim id_pv As Integer = gvd_Pagadores.DataKeys(Index)("id_pv")
+                Dim cod_aseg As Integer = gvd_Pagadores.DataKeys(Index)("cod_aseg")
+                Dim ind_pagador As Integer = gvd_Pagadores.DataKeys(Index)("cod_ind_pagador")
+
+                lbl_DetPagador.Text = "Cuotas Pagador >> " & cod_aseg
+                gvd_PagadorCuota.DataSource = ConsultaBD.ConsultaDetallePagador(id_pv, cod_aseg, ind_pagador)
+                gvd_PagadorCuota.DataBind()
+
+                Dim nro_cuota As Integer = gvd_PagadorCuota.DataKeys(0)("nro_cuota")
+
+                lbl_DetCuota.Text = "Pagos Cuota >> " & nro_cuota
+                gvd_DetCuotaPagador.DataSource = ConsultaBD.ConsultaDetalleCuota(id_pv, cod_aseg, ind_pagador, nro_cuota)
+                gvd_DetCuotaPagador.DataBind()
+
+            End If
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(gvd_Pagadores_RowCommand)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub gvd_PagadorCuota_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvd_PagadorCuota.RowCommand
+        Try
+            If e.CommandName.Equals("DetalleCuotaPagador") Then
+                Dim ConsultaBD As ConsultaBD
+                ConsultaBD = New ConsultaBD
+
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+
+                Dim id_pv As Integer = gvd_PagadorCuota.DataKeys(Index)("id_pv")
+                Dim cod_aseg As Integer = gvd_PagadorCuota.DataKeys(Index)("cod_aseg")
+                Dim ind_pagador As Integer = gvd_PagadorCuota.DataKeys(Index)("cod_ind_pagador")
+                Dim nro_cuota As Integer = gvd_PagadorCuota.DataKeys(Index)("nro_cuota")
+
+                lbl_DetCuota.Text = "Pagos Cuota >> " & nro_cuota
+                gvd_DetCuotaPagador.DataSource = ConsultaBD.ConsultaDetalleCuota(id_pv, cod_aseg, ind_pagador, nro_cuota)
+                gvd_DetCuotaPagador.DataBind()
+            End If
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(gvd_PagadorCuota_RowCommand)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub DetalleCobranzas(ByVal id_pv As Integer, ByVal Poliza As String)
+        Dim ConsultaBD As ConsultaBD
+        ConsultaBD = New ConsultaBD
+
+        lbl_PolizaCobranzas.Text = "Detalle Cobranzas >> " & Poliza
+
+        gvd_Pagadores.DataSource = ConsultaBD.ConsultaPagador(id_pv)
+        gvd_Pagadores.DataBind()
+
+        Dim cod_aseg As Integer = gvd_Pagadores.DataKeys(0)("cod_aseg")
+        Dim ind_pagador As Integer = gvd_Pagadores.DataKeys(0)("cod_ind_pagador")
+
+        lbl_DetPagador.Text = "Cuotas Pagador >> " & cod_aseg
+        gvd_PagadorCuota.DataSource = ConsultaBD.ConsultaDetallePagador(id_pv, cod_aseg, ind_pagador)
+        gvd_PagadorCuota.DataBind()
+
+        Dim nro_cuota As Integer = gvd_PagadorCuota.DataKeys(0)("nro_cuota")
+
+        lbl_DetCuota.Text = "Pagos Cuota >> " & nro_cuota
+        gvd_DetCuotaPagador.DataSource = ConsultaBD.ConsultaDetalleCuota(id_pv, cod_aseg, ind_pagador, nro_cuota)
+        gvd_DetCuotaPagador.DataBind()
+
+        ScriptManager.RegisterStartupScript(Me, Me.GetType, "Open Modal", "OpenPopup('#CobranzasModal');", True)
+    End Sub
+
+    Private Sub gvd_GrupoPolizas_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvd_GrupoPolizas.RowCommand
+        Try
+            If e.CommandName.Equals("Cobranzas") Then
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+                Dim id_pv As Integer = gvd_GrupoPolizas.DataKeys(Index)("id_pv")
+
+                Dim cod_suc As Integer = gvd_GrupoPolizas.DataKeys(Index)("cod_suc")
+                Dim cod_ramo As Integer = gvd_GrupoPolizas.DataKeys(Index)("cod_ramo")
+                Dim nro_pol As Integer = gvd_GrupoPolizas.DataKeys(Index)("nro_pol")
+                Dim aaaa_endoso As Integer = gvd_GrupoPolizas.DataKeys(Index)("aaaa_endoso")
+                Dim nro_endoso As Integer = gvd_GrupoPolizas.DataKeys(Index)("nro_endoso")
+
+                DetalleCobranzas(id_pv, cod_suc & "-" & cod_ramo & "-" & nro_pol & "-" & aaaa_endoso & "-" & nro_endoso)
+            End If
+
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(gvd_GrupoPolizas_RowCommand)" & ex.Message)
         End Try
     End Sub
 
