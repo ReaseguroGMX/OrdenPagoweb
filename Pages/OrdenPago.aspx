@@ -2143,7 +2143,7 @@
 
                                     <asp:TemplateField HeaderText="Pagos">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Pagos" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_total")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Pagos" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_parcial")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -2159,9 +2159,15 @@
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
+                                    <asp:TemplateField HeaderText="Pendiente">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Pendiente" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_pendiente")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
                                     <asp:TemplateField HeaderText="Estado">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Estado" Enabled="false" Text='<%# Eval("Estado")   %>' Width="80px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Estado" Enabled="false" Text='<%# Eval("Estado")   %>' Width="180px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
