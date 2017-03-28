@@ -812,7 +812,8 @@
                                                 <label style="width:75px">Recargo:</label>
                                                 <asp:Label runat="server"  ID="lbl_Recargo" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Recargo")))  %>' BorderColor="DarkBlue" Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                         </div>   
-                                        <asp:Button runat="server" ID="btn_GeneraOP" CommandName="GeneraOP" Text="Generar Órden de Pago" CssClass="form-control btn-primary" Visible="false" Height="44px" />   
+                                        <asp:Button runat="server" ID="btn_DetalleCuotas" CommandName="DetalleCob" Text="Detalle Cuotas" CssClass="form-control btn-success" Visible="false" Height="22px" />   
+                                        <asp:Button runat="server" ID="btn_GeneraOP" CommandName="GeneraOP" Text="Generar Órden de Pago" CssClass="form-control btn-primary" Visible="false" Height="22px" />   
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
@@ -1044,7 +1045,7 @@
                                </div>
                            </div>
                            <div style="width: 100%; height: 360px; overflow-y: scroll; overflow-x: scroll;">
-                               <asp:GridView runat="server" ID="gvd_GrupoPolizas" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal" DataKeyNames="id_pv,cod_grupo_endo" AllowPaging="true" PageSize="13" ShowHeaderWhenEmpty="true">
+                               <asp:GridView runat="server" ID="gvd_GrupoPolizas" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal" DataKeyNames="id_pv,cod_grupo_endo,cod_suc,cod_ramo,nro_pol,aaaa_endoso,nro_endoso" AllowPaging="true" PageSize="13" ShowHeaderWhenEmpty="true">
                                    <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
                                    <Columns>
                                        <asp:TemplateField HeaderText="">
@@ -1097,6 +1098,12 @@
                                        <asp:TemplateField HeaderText="">
                                            <ItemTemplate>
                                                <asp:Button runat="server" ID="btn_Aclaracion" CommandName="Aclaracion" Text="Aclaraciones" Width="90px" CssClass="form-control btn btn-primary MuestraAclaracion" Height="26px" Font-Size="10px"  data-toggle="modal" data-target="#EsperaModal"></asp:Button>
+                                           </ItemTemplate>
+                                       </asp:TemplateField>
+
+                                       <asp:TemplateField HeaderText="">
+                                           <ItemTemplate>
+                                               <asp:Button runat="server" ID="btn_Cobranzas" CommandName="Cobranzas" Text="Cobranzas" Width="90px" CssClass="form-control btn btn-primary" Height="26px" Font-Size="10px" ></asp:Button>
                                            </ItemTemplate>
                                        </asp:TemplateField>
 
@@ -1984,5 +1991,304 @@
               </div>
     </div>
    
+    <div id="CobranzasModal" style="width:1300px; height:650px"  class="modalPoliza">
+        <button type="button" class="close"  data-dismiss="modal">&times;</button>
+        <div class="modal-header" style="height:40px">
+             <asp:UpdatePanel runat="server" ID="upTitulo">
+                <ContentTemplate>
+                <h4 class="modal-title"><asp:Label runat="server" ID="lbl_PolizaCobranzas" Font-Bold="true" ForeColor="DarkBlue"></asp:Label></h4>
+                </ContentTemplate>
+            </asp:UpdatePanel>
+        </div>
+
+
+        <div class="modal-body" style="height:598px">
+            <asp:UpdatePanel runat="server" ID="upCobranzas">
+                <ContentTemplate>
+                    <asp:Label runat="server" Text="Pagadores:" Font-Bold="true" Font-Size ="12px" ForeColor="DarkBlue"></asp:Label>
+                    <asp:Panel runat="server" ID="pnlPagadores" Width="100%" Height="120px" ScrollBars="Both">
+                        <asp:GridView runat="server" ID="gvd_Pagadores" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true" DataKeyNames="id_pv,cod_aseg,cod_ind_pagador" >
+                        <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+                            <Columns>
+                                    <asp:TemplateField HeaderText="Codigo" ItemStyle-CssClass="ClaveCia">
+                                        <ItemTemplate>
+                                            <asp:linkbutton runat="server" ID="lnk_Codigo" CommandName="DetallePagador" Text='<%# Eval("cod_aseg") %>' Width="60px" Font-Size="10px" Font-Bold="true" CssClass="Centro"></asp:linkbutton>
+                                            <asp:hiddenfield runat="server" ID="hid_indPagador" value='<%# Eval("cod_ind_pagador") %>'></asp:hiddenfield>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Apellidos y Nombre">
+                                        <ItemTemplate>
+                                                <asp:textbox runat="server" ID="lbl_Pagador" Enabled="false" Text='<%# Eval("pagador")   %>' Width="300px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:textbox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Medios de Pago">
+                                        <ItemTemplate>
+                                                <asp:textbox runat="server" ID="lbl_Medio" Enabled="false" Text='<%# Eval("txt_desc")   %>' Width="140px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:textbox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Conducto de Pago">
+                                        <ItemTemplate>
+                                                <asp:textbox runat="server" ID="lbl_Conducto" Enabled="false" Text='<%# Eval("txt_desc_cond")   %>' Width="140px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:textbox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Medio Actual">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_MedioActual" Text='<%# Eval("Med_Pago_Act")   %>' Width="140px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Conducto Actual">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_ConductoActual" Text='<%# Eval("Cond_Act")   %>' Width="140px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            </Columns>
+                               
+                            <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                            <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
+                            <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+                            <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                            <EditRowStyle BackColor="#999999" />
+                            <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+                        </asp:GridView>
+                    </asp:Panel>
+
+                    <div class="clear padding5"></div>
+                    <asp:Label runat="server" ID="lbl_DetPagador" Text="" Font-Bold="true" Font-Size ="12px" ForeColor="DarkBlue"></asp:Label>
+                    <asp:Panel runat="server" ID="pnlPagadorCuota" Width="100%" Height="230px" ScrollBars="Both">
+                        <asp:GridView runat="server" ID="gvd_PagadorCuota" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true" DataKeyNames="id_pv,cod_aseg,cod_ind_pagador,nro_cuota" >
+                        <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+                            <Columns>
+                                    <asp:TemplateField HeaderText="Cuota" ItemStyle-CssClass="ClaveCia">
+                                        <ItemTemplate>
+                                            <asp:linkbutton runat="server" ID="lnk_Cuota" CommandName="DetalleCuotaPagador" Text='<%# Eval("nro_cuota") %>' Width="50px" CssClass="Centro" Font-Bold="true" Font-Size="10px"></asp:linkbutton>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Documento">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Documento" Enabled="false" Text='<%# Eval("Documento")   %>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Vencimiento">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Venc" Enabled="false" Text='<%# String.Format("{0:dd/MM/yyyy}", CDate(Eval("fec_venc")))  %>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Fecha Inicio">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_inicio" Enabled="false" Text='<%# String.Format("{0:dd/MM/yyyy}", CDate(Eval("inicio_vigencia")))  %>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Fecha Fin">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_fin" Enabled="false" Text='<%# String.Format("{0:dd/MM/yyyy}", CDate(Eval("fin_vigencia")))  %>'  Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Prima Neta">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_PrimaNeta" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_prima_me")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Recargos">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Recargos" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_rec_fin_me")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Der. Emision">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_DerEmision" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_der_emi_me")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="I.V.A.">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_IVA" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_iva_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Prima Total">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_PrimaTotal" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_premio_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Imp. Art. 41">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_ImpArt41" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_decreto_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="IVA Art. 41">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_IvaArt41" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_dto_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Compensado">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Compensado" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_compensado")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Pagos">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Pagos" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_total")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Cancelado">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Cancelado" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_cancelado")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Devuelto">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Devuelto" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_devuelto")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Estado">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Estado" Enabled="false" Text='<%# Eval("Estado")   %>' Width="80px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Fecha Debito">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Debito" Enabled="false" Text='<%# String.Format("{0:dd/MM/yyyy}", CDate(Eval("fecha_debito")))  %>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            </Columns>
+                               
+                            <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                            <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
+                            <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+                            <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                            <EditRowStyle BackColor="#999999" />
+                            <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+                        </asp:GridView>
+                    </asp:Panel>
+
+                    <div class="clear padding5"></div>
+                    <asp:Label runat="server" ID="lbl_DetCuota" Text="" Font-Bold="true" Font-Size ="12px" ForeColor="DarkBlue"></asp:Label>
+                    <asp:Panel runat="server" ID="pnlDetalleCuota" Width="100%" Height="120px" ScrollBars="Both">
+                        <asp:GridView runat="server" ID="gvd_DetCuotaPagador" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true" >
+                        <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+                            <Columns>
+                                    <asp:TemplateField HeaderText="Pago" ItemStyle-CssClass="ClaveCia">
+                                        <ItemTemplate>
+                                            <asp:label runat="server" ID="lbl_pago" CommandName="DetalleCuotaPagador" Text='<%# Eval("nro_correlativo") %>' Width="40px" CssClass="Centro" Font-Bold="true" Font-Size="10px"></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Transacción">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_transaccion"  Text='<%# Eval("nro_recibo")   %>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="[Anulación]">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_anulacion" Text='<%# Eval("nro_recibo_anula")  %>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Aplicación">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Aplicacion"  Text='<%# String.Format("{0:dd/MM/yyyy}", CDate(Eval("fec_cobranza")))  %>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Prima Cobrada">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_PrimaCob" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_prima")))%>'  Width="120px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Der. Póliza">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_DerPoliza" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_gastos_emision")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Imp. IVA">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_ImpIVA" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_iva")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Recargo Fin">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Recargo" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_recargo")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Prima Total">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_PrimaTotal" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_premio_bruto")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Fecha Pago">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_FechaPago" Text='<%# String.Format("{0:dd/MM/yyyy}", CDate(Eval("fec_real_pago")))  %>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Comisión Desc.">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_ComDesc" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_comis_normal_descon")))%>' Width="120px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Imp. Art. 41">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_ImpArt41" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_art41")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Concepto">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_Concepto" Text='<%# Eval("text_caja") %>' Width="250px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Imp. Cambio">
+                                        <ItemTemplate>
+                                                <asp:label runat="server" ID="lbl_ImpCambio" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_cambio")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                   
+                            </Columns>
+                               
+                            <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                            <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
+                            <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+                            <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                            <EditRowStyle BackColor="#999999" />
+                            <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+                        </asp:GridView>
+                    </asp:Panel>
+
+                    <div style="width:100%; text-align:right;">
+                        <asp:Button runat="server" id="Button2" class="btn btn-danger" Text="Cerrar" data-dismiss="modal"  style="height:30px; width:80px;" />
+                    </div>
+                </ContentTemplate>
+            </asp:UpdatePanel>
+        </div>
+    </div>
 </asp:Content>
 
