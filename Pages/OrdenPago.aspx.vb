@@ -1311,18 +1311,18 @@ Partial Class Pages_OrdenPago
                         nro_op = Split(Datos, "|")(1)
 
                         'Valida si se repite el Id_imputacion------------------------------------------------------------------------
-                        If EvaluaImputacion(id_imputacion) > 1 Then
+                        'If EvaluaImputacion(id_imputacion) > 1 Then
 
-                            Dim ConsultaBD As ConsultaBD
-                            ConsultaBD = New ConsultaBD
-                            ConsultaBD.InsertaBitacora(Master.cod_usuario, Master.HostName, "Correción de Imputación (Orden de Pago)", nro_op & " --> " & id_imputacion)
+                        '    Dim ConsultaBD As ConsultaBD
+                        '    ConsultaBD = New ConsultaBD
+                        '    ConsultaBD.InsertaBitacora(Master.cod_usuario, Master.HostName, "Correción de Imputación (Orden de Pago)", nro_op & " --> " & id_imputacion)
 
-                            id_imputacion = CorrigeImputacion(nro_op, 1)
+                        '    id_imputacion = CorrigeImputacion(nro_op, 1)
 
-                            InsertaMovimientos(id_imputacion, strMontos, strMontosReas, strMontosISR, nro_op)
+                        '    InsertaMovimientos(id_imputacion, strMontos, strMontosReas, strMontosISR, nro_op)
 
-                            InsertaMovimientosResp(nro_op, id_imputacion, strMontos, strMontosReas, strMontosISR)
-                        End If
+                        '    InsertaMovimientosResp(nro_op, id_imputacion, strMontos, strMontosReas, strMontosISR)
+                        'End If
 
                         'Actuliza movimientos Contables
                         Actualiza_Mov_Contable(id_imputacion, nro_op)
@@ -1431,20 +1431,16 @@ Partial Class Pages_OrdenPago
         trOP = conn.BeginTransaction()
 
         Try
-            'Comando = New SqlClient.SqlCommand("spS_CatalogosOP 'Imp'", conn)
-            'Comando.Transaction = trOP
-            'id_imputacion = Convert.ToInt32(Comando.ExecuteScalar())
 
-            ''ANTES DE GUARDAR
-            ''Valida id_imputacion repetida antes de guardar la OP--------------------------------------------------------
-            'If EvaluaImputacion(id_imputacion) > 0 Then
-            '    Comando = New SqlClient.SqlCommand("spS_CatalogosOP 'Imp'", conn)
-            '    Comando.Transaction = trOP
-            '    id_imputacion = Convert.ToInt32(Comando.ExecuteScalar())
-            'End If
-            ''------------------------------------------------------------------------------------------------------------
             nro_op = 0
             id_imputacion = 0
+
+            sSel = "DECLARE @nro_imputacion int " &
+                   "EXEC spiu_tvarias_ult_nro -1,'tmp_imputacion', @ult_nro = @nro_imputacion output"
+            Comando = New SqlClient.SqlCommand(sSel, conn)
+            Comando.Transaction = trOP
+            id_imputacion = Convert.ToInt32(Comando.ExecuteScalar())
+
 
             ' 8 es modulo reaseguro
             ' 13 es Reaseguradora
@@ -1470,20 +1466,6 @@ Partial Class Pages_OrdenPago
 
         '--------------------------------------------------------------------MOVIMIENTOS-----------------------------------------------------
         If nro_op > 0 Then
-            id_imputacion = ConsultaImputacion(nro_op)
-
-            'Valida si se repite el Id_imputacion------------------------------------------------------------------------
-            If EvaluaImputacion(id_imputacion) > 1 Then
-                Dim id_imputacionAnt As Integer = id_imputacion
-
-                id_imputacion = CorrigeImputacion(nro_op, 1)
-
-                Dim ConsultaBD As ConsultaBD
-                ConsultaBD = New ConsultaBD
-                ConsultaBD.InsertaBitacora(Master.cod_usuario, Master.HostName, "Correción de Imputación (Orden de Pago)", id_imputacionAnt & " --> " & id_imputacion)
-            End If
-
-            EliminaImputacion(id_imputacion)
 
             If InsertaMovimientos(id_imputacion, MontosGen, MontosReas, MontosISR, nro_op) = False Then
                 Return ""
@@ -1498,22 +1480,22 @@ Partial Class Pages_OrdenPago
 
     End Function
 
-    Private Function ConsultaImputacion(ByVal nro_op As Integer) As Double
-        Dim sCnn As String = ""
-        Dim sSel As String
-        Dim da As SqlDataAdapter
-        Dim dtRes As DataTable
+    'Private Function ConsultaImputacion(ByVal nro_op As Integer) As Double
+    '    Dim sCnn As String = ""
+    '    Dim sSel As String
+    '    Dim da As SqlDataAdapter
+    '    Dim dtRes As DataTable
 
-        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+    '    sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
 
-        sSel = "SELECT id_imputacion FROM mop WHERE nro_op = " & nro_op
+    '    sSel = "SELECT id_imputacion FROM mop WHERE nro_op = " & nro_op
 
-        dtRes = New DataTable
-        da = New SqlDataAdapter(sSel, sCnn)
-        da.Fill(dtRes)
+    '    dtRes = New DataTable
+    '    da = New SqlDataAdapter(sSel, sCnn)
+    '    da.Fill(dtRes)
 
-        Return dtRes(0)("id_imputacion")
-    End Function
+    '    Return dtRes(0)("id_imputacion")
+    'End Function
 
     Private Function DeshacerOrdenPago(ByVal nro_op As Integer) As Boolean
         Dim sCnn As String = ""
@@ -1532,22 +1514,22 @@ Partial Class Pages_OrdenPago
         Return True
     End Function
 
-    Private Function EvaluaImputacion(ByVal id_imputacion As Integer) As Integer
-        Dim sCnn As String = ""
-        Dim sSel As String
-        Dim da As SqlDataAdapter
-        Dim dtRes As DataTable
+    'Private Function EvaluaImputacion(ByVal id_imputacion As Integer) As Integer
+    '    Dim sCnn As String = ""
+    '    Dim sSel As String
+    '    Dim da As SqlDataAdapter
+    '    Dim dtRes As DataTable
 
-        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+    '    sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
 
-        sSel = "spS_EvaluaImputacion " & id_imputacion
+    '    sSel = "spS_EvaluaImputacion " & id_imputacion
 
-        dtRes = New DataTable
-        da = New SqlDataAdapter(sSel, sCnn)
-        da.Fill(dtRes)
+    '    dtRes = New DataTable
+    '    da = New SqlDataAdapter(sSel, sCnn)
+    '    da.Fill(dtRes)
 
-        Return CInt(dtRes.Rows(0)("Repetidos"))
-    End Function
+    '    Return CInt(dtRes.Rows(0)("Repetidos"))
+    'End Function
 
     Private Function CorrigeImputacion(ByVal nro_op As Integer, ByVal sn_BorraMov As Integer) As Integer
         Dim sCnn As String = ""
@@ -1694,31 +1676,6 @@ Partial Class Pages_OrdenPago
 
         Return dtRes.Rows(0)("Resultado")
     End Function
-
-    Private Function ObtieneNoImputacion() As Double
-        clCatalogo = New Catalogo
-        Return clCatalogo.ObtieneCatalogo("Imp").Rows(0)("id_imputacion")
-    End Function
-
-
-    Private Sub EliminaImputacion(ByVal id_imputacion As Double)
-        Dim sCnn As String
-        Dim dtImputacion As DataTable
-
-        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
-
-        Dim sSel As String = "spD_imputacion " & id_imputacion
-
-        Dim da As SqlDataAdapter
-
-        dtImputacion = New DataTable
-
-        da = New SqlDataAdapter(sSel, sCnn)
-
-        da.Fill(dtImputacion)
-
-    End Sub
-
 
     Private Sub btn_OkPoliza_Click(sender As Object, e As EventArgs) Handles btn_OkPoliza.Click
         Try
