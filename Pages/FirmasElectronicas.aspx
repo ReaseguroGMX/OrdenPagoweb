@@ -139,48 +139,44 @@
                                         </Columns>
                                         <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
                                         <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
-                                        <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+                                       <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
                                         <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
                                         <EditRowStyle BackColor="#999999" />
-                                        <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
-                                    </asp:GridView>
+                                        <AlternatingRowStyle BackColor="White" ForeColor="#284775" />                                    </asp:GridView>
                                 </asp:Panel>
                                 <div style="width:100%;  text-align:right">
                                     <button type="button" id="btn_AddEstatus" class="btn btn-success" data-toggle="modal" data-target="#EsperaModal"  >Añadir</button>
-                                </div>
+                               </div>
                             </ContentTemplate>
-                        </asp:UpdatePanel> 
+                       </asp:UpdatePanel> 
                         </div>
                     </div>
                 </div>
-        </div>
-                                    
+        </div>                                    
         <div class="row">
             <div class="col-md-12">
                     <div class="form-group">
-                        <div class="input-group">
-                            <asp:UpdatePanel runat="server" ID="upLstOP">
+                       <div class="input-group">
+                           <asp:UpdatePanel runat="server" ID="upLstOP">
                             <ContentTemplate>
                                 <div class="panel-heading">
                                     <strong>Órdenes de Pago</strong>
                                 </div>
-                                <div class="clear padding10"></div>
-                                <asp:Panel runat="server" ID="pnlOrdenP" Width="860px" Height="440px" ScrollBars="Vertical">
+                                <div class="clear padding10"></div>                                <asp:Panel runat="server" ID="pnlOrdenP" Width="860px" Height="440px" ScrollBars="Vertical">
                                     <asp:GridView runat="server" ID="gvd_LstOrdenPago" AutoGenerateColumns="false" ForeColor="#333333" 
                                                     GridLines="Horizontal"  ShowHeaderWhenEmpty="true" AllowPaging="true" PageSize="10" 
                                                     DataKeyNames="nro_op,id_imputacion,id_pv,cod_estatus_op,fec_baja,fec_autoriz_sector,fec_autoriz_contab,fec_pago">
-                                        <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+                                       <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
                                         <Columns>
-                                            <asp:TemplateField HeaderText="Filtro" ItemStyle-HorizontalAlign="Center">
+                                            <asp:TemplateField HeaderText="" ItemStyle-HorizontalAlign="Center">
                                                 <ItemTemplate>
-                                                        <asp:CheckBox runat="server"  Width="40px" ID="chk_SelOp" Checked='<%# Eval("tSEl_Val") %>'/>
+                                                        <asp:CheckBox runat="server"  Width="0px" ID="chk_SelOp" Checked='<%# Eval("tSEl_Val") %>' Visible="false" />
                                                 </ItemTemplate>
                                             </asp:TemplateField >
 
                                             <asp:TemplateField HeaderText="Nro Op">
                                                 <ItemTemplate>
                                                     <asp:LinkButton runat="server" ID="lbl_OrdenPago" Text='<%# Eval("nro_op")%>' CssClass="form-control DetExh Link" Height="25px"></asp:LinkButton>
-                                                    <%--<asp:Label runat="server" ID="lbl_OrdenPago" Text='<%# Eval("nro_op") %>' Width="60px" Font-Size="10px" ></asp:Label>--%>
                                                 </ItemTemplate>
                                             </asp:TemplateField>
 
@@ -192,25 +188,26 @@
 
                                             <asp:TemplateField HeaderText="Solicitante" ItemStyle-HorizontalAlign="Center">
                                                 <ItemTemplate>
-                                                        <asp:CheckBox runat="server" Text="Firma" Width="90px" ID="chk_FirmaSol" Checked='<%# Eval("sn_Solicita") %>' AutoPostBack="true"/>
+   <asp:CheckBox runat="server" Text="Firma" Width="90px" ID="chk_FirmaSol" Checked='<%# Eval("sn_Solicita") %>' Enabled='<%# Eval("GeneraOp_Solicitante") %>' OnCheckedChanged="chk_FirmaSol_CheckedChanged" AutoPostBack="true"/>
+
                                                 </ItemTemplate>
                                             </asp:TemplateField >
 
                                             <asp:TemplateField HeaderText="Jefe Inmediato" ItemStyle-HorizontalAlign="Center">
                                                 <ItemTemplate>
-                                                        <asp:CheckBox runat="server" Text="Firma" Width="100px" ID="chk_FirmaJefe" Checked='<%# Eval("sn_JefeDirecto") %>'/>
+                                                        <asp:CheckBox runat="server" Text="Firma" Width="100px" ID="chk_FirmaJefe" Checked='<%# Eval("sn_JefeDirecto") %>' Enabled='<%# Eval("Autoriza_JefeInmediato") %>' OnCheckedChanged="chk_FirmaJefe_CheckedChanged" AutoPostBack="true" />
                                                 </ItemTemplate>
                                             </asp:TemplateField >
 
                                             <asp:TemplateField HeaderText="Dirección Area" ItemStyle-HorizontalAlign="Center">
                                                 <ItemTemplate>
-                                                        <asp:CheckBox runat="server" Text="Firma" Width="100px" ID="chk_FirmaDir" Checked='<%# Eval("sn_DireccionArea") %>'/>
+                                                        <asp:CheckBox runat="server" Text="Firma" Width="100px" ID="chk_FirmaDir" Checked='<%# Eval("sn_DireccionArea") %>' Enabled='<%# Eval("Autoriza_DirArea") %>' OnCheckedChanged="chk_FirmaDir_CheckedChanged" AutoPostBack="true" />
                                                 </ItemTemplate>
                                             </asp:TemplateField >
 
                                             <asp:TemplateField HeaderText="Contabilidad" ItemStyle-HorizontalAlign="Center">
                                                 <ItemTemplate>
-                                                        <asp:CheckBox runat="server" Text="Firma" Width="100px" ID="chk_FirmaCon" Checked='<%# Eval("sn_Contabilidad") %>'/>
+                                                        <asp:CheckBox runat="server" Text="Firma" Width="100px" ID="chk_FirmaCon" Checked='<%# Eval("sn_Contabilidad") %>' Enabled='<%# Eval("Autoriza_Conta") %>' OnCheckedChanged="chk_FirmaCon_CheckedChanged" AutoPostBack="true"/>
                                                 </ItemTemplate>
                                             </asp:TemplateField >
 
@@ -269,11 +266,7 @@
                                                
                                         <asp:Button runat="server" ID="btn_BuscaOP" Text="Buscar OP" CssClass="btn btn-primary" />
                                         <asp:Button runat="server" ID="btn_Imprimir" Text="Imprimir" CssClass="btn btn-default" />
-
-                                        <asp:Button runat="server" ID="btn_Solicitante" Text="Solicitate" CssClass="btn btn-primary" data-toggle="modal" data-target="#AutorizaModal" Enabled="false" />
-                                        <asp:Button runat="server" ID="btn_Jefe" Text="Jefe Inmediato" CssClass="btn btn-primary" data-toggle="modal" data-target="#AutorizaModal" Enabled="false" />
-                                        <asp:Button runat="server" ID="btn_Direccion" Text="Dirección Area" CssClass="btn btn-primary" data-toggle="modal" data-target="#AutorizaModal" Enabled="false" />
-                                        <asp:Button runat="server" ID="btn_Contabilidad" Text="Contabilidad" CssClass="btn btn-primary" data-toggle="modal" data-target="#AutorizaModal" Enabled="false" />
+                                        <asp:Button runat="server" ID="btn_Firmar" Text="Firmar" CssClass="btn btn-primary" data-toggle="modal" data-target="#AutorizaModal" Enabled="false" />
                                         <asp:Button runat="server" ID="btn_Limpiar" Text="Limpiar" CssClass="btn btn-danger" />
                                 </div>
                             </ContentTemplate>
@@ -339,7 +332,6 @@
     </div>
 
     <div id="AutorizaModal" style="width:350px; height:360px"  class="modalAutoriza">
-       <%-- <div class="modal-content" width:100%">--%>
             <div class="panel-heading">
                 <strong>FIRMAS ELECTRÓNICAS</strong>
             </div>
@@ -372,16 +364,6 @@
                                         </span>
                                         <asp:TextBox runat="server" ID="txt_contraseña" class="form-control Password" Width="150px" TextMode="Password" Font-Size="11px" ></asp:TextBox>
                                     </div>
-
-                                    <div class="clear padding10"></div>
-                                    
-                                    <div class="input-group">
-                                        <asp:label runat="server" ID="lbl_Asocia" class="col-md-1 control-label" Width="86px"></asp:label>
-                                        <span class="input-group-addon">
-                                            <i class="glyphicon glyphicon-user" ></i>
-                                        </span>
-                                        <asp:DropDownList runat="server" ID="ddl_Usuarios" CssClass="form-control" Width="150px"></asp:DropDownList>
-                                    </div>
                                 
                             </div>
                             
@@ -397,7 +379,6 @@
                     </ContentTemplate>
                 </asp:UpdatePanel>
             </div>
-       <%-- </div>--%>
     </div>
 
     <div id="EsperaModal" style="width:150px; height:95px"  class="modalWait">
@@ -407,7 +388,6 @@
 
      <!-- Modal -->
     <div id="MensajeModal" style="width:400px; height:185px"  class="modalAutoriza">
-         <%-- <div class="modal-content">--%>
                <div class="modal-header" style="height:40px">
                     <button type="button" class="close"  data-dismiss="modal">&times;</button>
                      <h4 class="modal-title">
@@ -426,7 +406,6 @@
                        </ContentTemplate>
                     </asp:UpdatePanel>
               </div>
-          <%--</div>--%>
     </div>
 </asp:Content>
 
