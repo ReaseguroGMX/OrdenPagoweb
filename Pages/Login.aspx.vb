@@ -24,7 +24,12 @@ Partial Class Pages_Login
                     If ConsultaBD.ConsultaUsuario(usuarioNT) <> "" Then
                         ConsultaBD.InsertaBitacora(usuarioNT, Master.HostName, "Inicio de Sesión", "Inicio Exitoso (Ordenes de Pago)")
                         Master.VisibleBtnCerrar = False
-                        ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "Redirect", "Redireccionar('Inicio.aspx');", True)
+                        If Session("Origen") = 1 Then
+                            ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "Redirect", "Redireccionar('FirmasElectronicas.aspx');", True)
+                        Else
+                            ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "Redirect", "Redireccionar('Inicio.aspx');", True)
+                        End If
+
                     Else
                         Mensaje("Login", "No cuenta con acceso a SII")
                         ConsultaBD.InsertaBitacora(usuarioNT, Master.HostName, "Inicio Erroneo", "No cuenta con acceso a SII (Ordenes de Pago)")
@@ -54,6 +59,14 @@ Partial Class Pages_Login
             'hid_usuario.Value = System.Environment.UserName
             Master.VisibleBtnCerrar = False
             Master.HostName = Session("HostName")
+
+            Session.Add("Origen", 0)
+            Session.Add("NumOrds", "")
+
+            If Request.QueryString("Origen") = "1" Then
+                Session("Origen") = 1
+                Session("NumOrds") = Request.QueryString("NumOrds")
+            End If
 
             'Dim usuario() = Split(System.Security.Principal.WindowsIdentity.GetCurrent().Name.ToString(), "\")
 
