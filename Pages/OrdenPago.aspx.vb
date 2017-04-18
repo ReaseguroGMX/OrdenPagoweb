@@ -627,6 +627,8 @@ Partial Class Pages_OrdenPago
                 Dim div_comision As HtmlGenericControl = TryCast(e.Row.FindControl("div_comision"), HtmlGenericControl)
                 Dim btn_Detalle As ImageButton = TryCast(e.Row.FindControl("btn_Detalle"), ImageButton)
                 Dim btn_GeneraOP As Button = TryCast(e.Row.FindControl("btn_GeneraOP"), Button)
+                Dim btn_DetalleCuotas As Button = TryCast(e.Row.FindControl("btn_DetalleCuotas"), Button)
+
 
                 Dim lbl_SaldoCob As Label = TryCast(e.Row.FindControl("lbl_SaldoCob"), Label)
 
@@ -697,6 +699,7 @@ Partial Class Pages_OrdenPago
                     lbl_MntPCRecuperada.BackColor = Drawing.Color.LightBlue
 
                     btn_GeneraOP.Visible = True
+                    btn_DetalleCuotas.Visible = True
 
                     If Val(lbl_SaldoCob.Text) < 0 Then
                         lbl_SaldoCob.ForeColor = Drawing.Color.Red
@@ -1308,18 +1311,18 @@ Partial Class Pages_OrdenPago
                         nro_op = Split(Datos, "|")(1)
 
                         'Valida si se repite el Id_imputacion------------------------------------------------------------------------
-                        If EvaluaImputacion(id_imputacion) > 1 Then
+                        'If EvaluaImputacion(id_imputacion) > 1 Then
 
-                            Dim ConsultaBD As ConsultaBD
-                            ConsultaBD = New ConsultaBD
-                            ConsultaBD.InsertaBitacora(Master.cod_usuario, Master.HostName, "Correción de Imputación (Orden de Pago)", nro_op & " --> " & id_imputacion)
+                        '    Dim ConsultaBD As ConsultaBD
+                        '    ConsultaBD = New ConsultaBD
+                        '    ConsultaBD.InsertaBitacora(Master.cod_usuario, Master.HostName, "Correción de Imputación (Orden de Pago)", nro_op & " --> " & id_imputacion)
 
-                            id_imputacion = CorrigeImputacion(nro_op, 1)
+                        '    id_imputacion = CorrigeImputacion(nro_op, 1)
 
-                            InsertaMovimientos(id_imputacion, strMontos, strMontosReas, strMontosISR, nro_op)
+                        '    InsertaMovimientos(id_imputacion, strMontos, strMontosReas, strMontosISR, nro_op)
 
-                            InsertaMovimientosResp(nro_op, id_imputacion, strMontos, strMontosReas, strMontosISR)
-                        End If
+                        '    InsertaMovimientosResp(nro_op, id_imputacion, strMontos, strMontosReas, strMontosISR)
+                        'End If
 
                         'Actuliza movimientos Contables
                         Actualiza_Mov_Contable(id_imputacion, nro_op)
@@ -1428,20 +1431,16 @@ Partial Class Pages_OrdenPago
         trOP = conn.BeginTransaction()
 
         Try
-            'Comando = New SqlClient.SqlCommand("spS_CatalogosOP 'Imp'", conn)
-            'Comando.Transaction = trOP
-            'id_imputacion = Convert.ToInt32(Comando.ExecuteScalar())
 
-            ''ANTES DE GUARDAR
-            ''Valida id_imputacion repetida antes de guardar la OP--------------------------------------------------------
-            'If EvaluaImputacion(id_imputacion) > 0 Then
-            '    Comando = New SqlClient.SqlCommand("spS_CatalogosOP 'Imp'", conn)
-            '    Comando.Transaction = trOP
-            '    id_imputacion = Convert.ToInt32(Comando.ExecuteScalar())
-            'End If
-            ''------------------------------------------------------------------------------------------------------------
             nro_op = 0
             id_imputacion = 0
+
+            sSel = "DECLARE @nro_imputacion int " &
+                   "EXEC spiu_tvarias_ult_nro -1,'tmp_imputacion', @ult_nro = @nro_imputacion output"
+            Comando = New SqlClient.SqlCommand(sSel, conn)
+            Comando.Transaction = trOP
+            id_imputacion = Convert.ToInt32(Comando.ExecuteScalar())
+
 
             ' 8 es modulo reaseguro
             ' 13 es Reaseguradora
@@ -1467,20 +1466,6 @@ Partial Class Pages_OrdenPago
 
         '--------------------------------------------------------------------MOVIMIENTOS-----------------------------------------------------
         If nro_op > 0 Then
-            id_imputacion = ConsultaImputacion(nro_op)
-
-            'Valida si se repite el Id_imputacion------------------------------------------------------------------------
-            If EvaluaImputacion(id_imputacion) > 1 Then
-                Dim id_imputacionAnt As Integer = id_imputacion
-
-                id_imputacion = CorrigeImputacion(nro_op, 1)
-
-                Dim ConsultaBD As ConsultaBD
-                ConsultaBD = New ConsultaBD
-                ConsultaBD.InsertaBitacora(Master.cod_usuario, Master.HostName, "Correción de Imputación (Orden de Pago)", id_imputacionAnt & " --> " & id_imputacion)
-            End If
-
-            EliminaImputacion(id_imputacion)
 
             If InsertaMovimientos(id_imputacion, MontosGen, MontosReas, MontosISR, nro_op) = False Then
                 Return ""
@@ -1495,22 +1480,22 @@ Partial Class Pages_OrdenPago
 
     End Function
 
-    Private Function ConsultaImputacion(ByVal nro_op As Integer) As Double
-        Dim sCnn As String = ""
-        Dim sSel As String
-        Dim da As SqlDataAdapter
-        Dim dtRes As DataTable
+    'Private Function ConsultaImputacion(ByVal nro_op As Integer) As Double
+    '    Dim sCnn As String = ""
+    '    Dim sSel As String
+    '    Dim da As SqlDataAdapter
+    '    Dim dtRes As DataTable
 
-        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+    '    sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
 
-        sSel = "SELECT id_imputacion FROM mop WHERE nro_op = " & nro_op
+    '    sSel = "SELECT id_imputacion FROM mop WHERE nro_op = " & nro_op
 
-        dtRes = New DataTable
-        da = New SqlDataAdapter(sSel, sCnn)
-        da.Fill(dtRes)
+    '    dtRes = New DataTable
+    '    da = New SqlDataAdapter(sSel, sCnn)
+    '    da.Fill(dtRes)
 
-        Return dtRes(0)("id_imputacion")
-    End Function
+    '    Return dtRes(0)("id_imputacion")
+    'End Function
 
     Private Function DeshacerOrdenPago(ByVal nro_op As Integer) As Boolean
         Dim sCnn As String = ""
@@ -1529,22 +1514,22 @@ Partial Class Pages_OrdenPago
         Return True
     End Function
 
-    Private Function EvaluaImputacion(ByVal id_imputacion As Integer) As Integer
-        Dim sCnn As String = ""
-        Dim sSel As String
-        Dim da As SqlDataAdapter
-        Dim dtRes As DataTable
+    'Private Function EvaluaImputacion(ByVal id_imputacion As Integer) As Integer
+    '    Dim sCnn As String = ""
+    '    Dim sSel As String
+    '    Dim da As SqlDataAdapter
+    '    Dim dtRes As DataTable
 
-        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+    '    sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
 
-        sSel = "spS_EvaluaImputacion " & id_imputacion
+    '    sSel = "spS_EvaluaImputacion " & id_imputacion
 
-        dtRes = New DataTable
-        da = New SqlDataAdapter(sSel, sCnn)
-        da.Fill(dtRes)
+    '    dtRes = New DataTable
+    '    da = New SqlDataAdapter(sSel, sCnn)
+    '    da.Fill(dtRes)
 
-        Return CInt(dtRes.Rows(0)("Repetidos"))
-    End Function
+    '    Return CInt(dtRes.Rows(0)("Repetidos"))
+    'End Function
 
     Private Function CorrigeImputacion(ByVal nro_op As Integer, ByVal sn_BorraMov As Integer) As Integer
         Dim sCnn As String = ""
@@ -1691,31 +1676,6 @@ Partial Class Pages_OrdenPago
 
         Return dtRes.Rows(0)("Resultado")
     End Function
-
-    Private Function ObtieneNoImputacion() As Double
-        clCatalogo = New Catalogo
-        Return clCatalogo.ObtieneCatalogo("Imp").Rows(0)("id_imputacion")
-    End Function
-
-
-    Private Sub EliminaImputacion(ByVal id_imputacion As Double)
-        Dim sCnn As String
-        Dim dtImputacion As DataTable
-
-        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
-
-        Dim sSel As String = "spD_imputacion " & id_imputacion
-
-        Dim da As SqlDataAdapter
-
-        dtImputacion = New DataTable
-
-        da = New SqlDataAdapter(sSel, sCnn)
-
-        da.Fill(dtImputacion)
-
-    End Sub
-
 
     Private Sub btn_OkPoliza_Click(sender As Object, e As EventArgs) Handles btn_OkPoliza.Click
         Try
@@ -1894,6 +1854,13 @@ Partial Class Pages_OrdenPago
 
                 hid_Moneda.Value = gvd_Reaseguro.DataKeys(Index)("cod_moneda")
                 ddl_MonedaEnd.SelectedValue = gvd_Reaseguro.DataKeys(Index)("cod_moneda")
+
+            ElseIf e.CommandName.Equals("DetalleCob") Then
+
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+
+                DetalleCobranzas(gvd_Reaseguro.DataKeys(Index)("id_pv"), gvd_Reaseguro.DataKeys(Index)("Poliza"))
+
             End If
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-: ROWCOMMAND Póliza", ex.Message)
@@ -4219,6 +4186,103 @@ Partial Class Pages_OrdenPago
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-:  ", ex.Message)
             LogError("(chk_NoPago_CheckedChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub gvd_Pagadores_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvd_Pagadores.RowCommand
+        Try
+            If e.CommandName.Equals("DetallePagador") Then
+                Dim ConsultaBD As ConsultaBD
+                ConsultaBD = New ConsultaBD
+
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+                Dim id_pv As Integer = gvd_Pagadores.DataKeys(Index)("id_pv")
+                Dim cod_aseg As Integer = gvd_Pagadores.DataKeys(Index)("cod_aseg")
+                Dim ind_pagador As Integer = gvd_Pagadores.DataKeys(Index)("cod_ind_pagador")
+
+                lbl_DetPagador.Text = "Cuotas Pagador >> " & cod_aseg
+                gvd_PagadorCuota.DataSource = ConsultaBD.ConsultaDetallePagador(id_pv, cod_aseg, ind_pagador)
+                gvd_PagadorCuota.DataBind()
+
+                Dim nro_cuota As Integer = gvd_PagadorCuota.DataKeys(0)("nro_cuota")
+
+                lbl_DetCuota.Text = "Pagos Cuota >> " & nro_cuota
+                gvd_DetCuotaPagador.DataSource = ConsultaBD.ConsultaDetalleCuota(id_pv, cod_aseg, ind_pagador, nro_cuota)
+                gvd_DetCuotaPagador.DataBind()
+
+            End If
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(gvd_Pagadores_RowCommand)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub gvd_PagadorCuota_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvd_PagadorCuota.RowCommand
+        Try
+            If e.CommandName.Equals("DetalleCuotaPagador") Then
+                Dim ConsultaBD As ConsultaBD
+                ConsultaBD = New ConsultaBD
+
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+
+                Dim id_pv As Integer = gvd_PagadorCuota.DataKeys(Index)("id_pv")
+                Dim cod_aseg As Integer = gvd_PagadorCuota.DataKeys(Index)("cod_aseg")
+                Dim ind_pagador As Integer = gvd_PagadorCuota.DataKeys(Index)("cod_ind_pagador")
+                Dim nro_cuota As Integer = gvd_PagadorCuota.DataKeys(Index)("nro_cuota")
+
+                lbl_DetCuota.Text = "Pagos Cuota >> " & nro_cuota
+                gvd_DetCuotaPagador.DataSource = ConsultaBD.ConsultaDetalleCuota(id_pv, cod_aseg, ind_pagador, nro_cuota)
+                gvd_DetCuotaPagador.DataBind()
+            End If
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(gvd_PagadorCuota_RowCommand)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub DetalleCobranzas(ByVal id_pv As Integer, ByVal Poliza As String)
+        Dim ConsultaBD As ConsultaBD
+        ConsultaBD = New ConsultaBD
+
+        lbl_PolizaCobranzas.Text = "Detalle Cobranzas >> " & Poliza
+
+        gvd_Pagadores.DataSource = ConsultaBD.ConsultaPagador(id_pv)
+        gvd_Pagadores.DataBind()
+
+        Dim cod_aseg As Integer = gvd_Pagadores.DataKeys(0)("cod_aseg")
+        Dim ind_pagador As Integer = gvd_Pagadores.DataKeys(0)("cod_ind_pagador")
+
+        lbl_DetPagador.Text = "Cuotas Pagador >> " & cod_aseg
+        gvd_PagadorCuota.DataSource = ConsultaBD.ConsultaDetallePagador(id_pv, cod_aseg, ind_pagador)
+        gvd_PagadorCuota.DataBind()
+
+        Dim nro_cuota As Integer = gvd_PagadorCuota.DataKeys(0)("nro_cuota")
+
+        lbl_DetCuota.Text = "Pagos Cuota >> " & nro_cuota
+        gvd_DetCuotaPagador.DataSource = ConsultaBD.ConsultaDetalleCuota(id_pv, cod_aseg, ind_pagador, nro_cuota)
+        gvd_DetCuotaPagador.DataBind()
+
+        ScriptManager.RegisterStartupScript(Me, Me.GetType, "Open Modal", "OpenPopup('#CobranzasModal');", True)
+    End Sub
+
+    Private Sub gvd_GrupoPolizas_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvd_GrupoPolizas.RowCommand
+        Try
+            If e.CommandName.Equals("Cobranzas") Then
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+                Dim id_pv As Integer = gvd_GrupoPolizas.DataKeys(Index)("id_pv")
+
+                Dim cod_suc As Integer = gvd_GrupoPolizas.DataKeys(Index)("cod_suc")
+                Dim cod_ramo As Integer = gvd_GrupoPolizas.DataKeys(Index)("cod_ramo")
+                Dim nro_pol As Integer = gvd_GrupoPolizas.DataKeys(Index)("nro_pol")
+                Dim aaaa_endoso As Integer = gvd_GrupoPolizas.DataKeys(Index)("aaaa_endoso")
+                Dim nro_endoso As Integer = gvd_GrupoPolizas.DataKeys(Index)("nro_endoso")
+
+                DetalleCobranzas(id_pv, cod_suc & "-" & cod_ramo & "-" & nro_pol & "-" & aaaa_endoso & "-" & nro_endoso)
+            End If
+
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(gvd_GrupoPolizas_RowCommand)" & ex.Message)
         End Try
     End Sub
 

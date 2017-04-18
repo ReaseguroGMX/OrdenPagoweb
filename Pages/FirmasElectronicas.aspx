@@ -139,37 +139,34 @@
                                         </Columns>
                                         <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
                                         <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
-                                        <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+                                       <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
                                         <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
                                         <EditRowStyle BackColor="#999999" />
-                                        <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
-                                    </asp:GridView>
+                                        <AlternatingRowStyle BackColor="White" ForeColor="#284775" />                                    </asp:GridView>
                                 </asp:Panel>
                                 <div style="width:100%;  text-align:right">
                                     <button type="button" id="btn_AddEstatus" class="btn btn-success" data-toggle="modal" data-target="#EsperaModal"  >Añadir</button>
-                                </div>
+                               </div>
                             </ContentTemplate>
-                        </asp:UpdatePanel> 
+                       </asp:UpdatePanel> 
                         </div>
                     </div>
                 </div>
-        </div>
-                                    
+        </div>                                    
         <div class="row">
             <div class="col-md-12">
                     <div class="form-group">
-                        <div class="input-group">
-                            <asp:UpdatePanel runat="server" ID="upLstOP">
+                       <div class="input-group">
+                           <asp:UpdatePanel runat="server" ID="upLstOP">
                             <ContentTemplate>
                                 <div class="panel-heading">
                                     <strong>Órdenes de Pago</strong>
                                 </div>
-                                <div class="clear padding10"></div>
-                                <asp:Panel runat="server" ID="pnlOrdenP" Width="860px" Height="440px" ScrollBars="Vertical">
+                                <div class="clear padding10"></div>                                <asp:Panel runat="server" ID="pnlOrdenP" Width="860px" Height="440px" ScrollBars="Vertical">
                                     <asp:GridView runat="server" ID="gvd_LstOrdenPago" AutoGenerateColumns="false" ForeColor="#333333" 
                                                     GridLines="Horizontal"  ShowHeaderWhenEmpty="true" AllowPaging="true" PageSize="10" 
                                                     DataKeyNames="nro_op,id_imputacion,id_pv,cod_estatus_op,fec_baja,fec_autoriz_sector,fec_autoriz_contab,fec_pago">
-                                        <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+                                       <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
                                         <Columns>
                                             <asp:TemplateField HeaderText="" ItemStyle-HorizontalAlign="Center">
                                                 <ItemTemplate>
@@ -191,7 +188,8 @@
 
                                             <asp:TemplateField HeaderText="Solicitante" ItemStyle-HorizontalAlign="Center">
                                                 <ItemTemplate>
-                                                        <asp:CheckBox runat="server" Text="Firma" Width="90px" ID="chk_FirmaSol" Checked='<%# Eval("sn_Solicita") %>' Enabled='<%# Eval("GeneraOp_Solicitante") %>' OnCheckedChanged="chk_FirmaSol_CheckedChanged" AutoPostBack="true"/>
+   <asp:CheckBox runat="server" Text="Firma" Width="90px" ID="chk_FirmaSol" Checked='<%# Eval("sn_Solicita") %>' Enabled='<%# Eval("GeneraOp_Solicitante") %>' OnCheckedChanged="chk_FirmaSol_CheckedChanged" AutoPostBack="true"/>
+
                                                 </ItemTemplate>
                                             </asp:TemplateField >
 
