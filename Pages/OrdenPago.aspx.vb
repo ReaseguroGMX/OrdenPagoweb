@@ -169,8 +169,6 @@ Partial Class Pages_OrdenPago
         txtFecPagoDe.Enabled = False
         txtFecPagoA.Enabled = False
         opt_Cobranzas.Enabled = False
-        'txtClaveRamCont.Enabled = False
-        'txtSearchRamCont.Enabled = False
         opt_Estatus.Enabled = False
         gvd_LstOrdenPago.Enabled = False
         gvd_Usuario.Enabled = False
@@ -328,12 +326,6 @@ Partial Class Pages_OrdenPago
                 txtFecGeneraDe.Enabled = False
                 txtFecGeneraA.Enabled = False
 
-                'txtClaveRamCont.Enabled = False
-                'txtSearchRamCont.Enabled = False
-
-                'txtClaveRamTec.Enabled = False
-                'txtSearchRamTec.Enabled = False
-
                 gvd_RamoContable.Enabled = False
                 gvd_Producto.Enabled = False
 
@@ -418,12 +410,6 @@ Partial Class Pages_OrdenPago
             optAjuste.Enabled = True
             gvd_Poliza.Enabled = True
 
-            'txtClaveRamCont.Enabled = True
-            'txtSearchRamCont.Enabled = True
-
-            'txtClaveRamTec.Enabled = True
-            'txtSearchRamTec.Enabled = True
-
             gvd_RamoContable.Enabled = True
             gvd_Producto.Enabled = True
 
@@ -496,18 +482,6 @@ Partial Class Pages_OrdenPago
                         txtSearchRam.Text = Split(Datos(0), "~")(1)
                         Exit Sub
 
-                    'Case "RamC"
-                    '    Datos = Split(Seleccionados.Substring(0, Seleccionados.Length - 1), "|")
-                    '    txtClaveRamCont.Text = Split(Datos(0), "~")(0)
-                    '    txtSearchRamCont.Text = Split(Datos(0), "~")(1)
-                    '    Exit Sub
-
-                    'Case "RamT"
-                    '    Datos = Split(Seleccionados.Substring(0, Seleccionados.Length - 1), "|")
-                    '    txtClaveRamTec.Text = Split(Datos(0), "~")(0)
-                    '    txtSearchRamTec.Text = Split(Datos(0), "~")(1)
-                    '    Exit Sub
-
                     Case "Cto"
 
                         If Len(hid_Control.Value) > 0 Then
@@ -559,19 +533,24 @@ Partial Class Pages_OrdenPago
                         lbl_Banco.Text = "Banco: " & Complementos(1)
                         lbl_Cuenta.Text = "Cuenta: " & Complementos(0)
 
-                        Dim id_pv As Integer = gvd_OrdenPago.DataKeys(Indice - 1)("id_pv")
+                        Dim id_pv() As String = Split(gvd_OrdenPago.DataKeys(Indice - 1)("id_pv"), ",")
+
                         Dim cod_cia_reas_brok As Integer = gvd_OrdenPago.DataKeys(Indice - 1)("cod_cia_reas_brok")
                         Dim cod_moneda As Integer = gvd_OrdenPago.DataKeys(Indice - 1)("cod_moneda")
 
                         Dim dtTemporal As DataTable = Session("dtCuotas")
                         Dim myRow() As Data.DataRow
-                        myRow = dtTemporal.Select("id_pv ='" & id_pv & "' AND cod_cia_reas_brok = '" & cod_cia_reas_brok & "' AND cod_moneda = '" & cod_moneda & "'")
-                        For Each item In myRow
-                            item("id_Cuenta") = hid_id_cuenta.Value
-                            item("cod_banco") = Complementos(2)
-                            item("Cuenta") = Complementos(0)
-                            item("Banco") = Complementos(1)
+
+                        For Each element In id_pv
+                            myRow = dtTemporal.Select("id_pv ='" & element & "' AND cod_cia_reas_brok = '" & cod_cia_reas_brok & "' AND cod_moneda = '" & cod_moneda & "'")
+                            For Each item In myRow
+                                item("id_Cuenta") = hid_id_cuenta.Value
+                                item("cod_banco") = Complementos(2)
+                                item("Cuenta") = Complementos(0)
+                                item("Banco") = Complementos(1)
+                            Next
                         Next
+
 
                         Session("dtCuotas") = dtTemporal
 
@@ -1106,6 +1085,7 @@ Partial Class Pages_OrdenPago
         Dim strMontosISR(0) As String
         Dim pagina As Integer = 0
 
+        Dim nro_reas As Integer = 0
         Dim no_correlativo As Integer = 0
         Dim Resultado As String = ""
         Dim SumaPrima As Double
@@ -1152,6 +1132,7 @@ Partial Class Pages_OrdenPago
                 id_Cuenta = 0
                 cod_banco = 0
                 mop_texto = ""
+                nro_reas = 0
 
                 cod_broker = Split(arrayBroker(i), "|°|")(0)
                 Descripcion = Split(arrayBroker(i), "|°|")(1)
@@ -1166,6 +1147,11 @@ Partial Class Pages_OrdenPago
                 For Each Cuota As DataRow In Cuotas.Rows
                     'Valida que se trate del broker o compañia en turno
                     If cod_broker = Cuota("cod_cia_reas_brok") Or (cod_broker = Cuota("cod_cia_reas_cia") And Cuota("cod_cia_reas_brok") = 0) Then
+
+                        'nro_reas = IIf(optAjuste.SelectedValue = 1, Cuota("nro_reas"), 0)
+
+                        nro_reas = Cuota("nro_reas")
+
                         cod_moneda = Cuota("cod_moneda")
                         impCambio = Cuota("imp_cambio")
 
@@ -1210,7 +1196,7 @@ Partial Class Pages_OrdenPago
                                                         "11,1,''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," & -1 * Cuota("PrimaCedida") & "," &
                                                         Cuota("cod_suc") & "," & Cuota("cod_ramo") & "," & Cuota("nro_pol") & "," & Cuota("aaaa_endoso") & "," & Cuota("nro_endoso") & "," &
                                                         Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_pri") > 100, 100, Cuota("pje_pri")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
-                                                        "0,0,0,0," & Cuota("nro_layer") & "),"
+                                                        "0,0,0," & nro_reas & "," & Cuota("nro_layer") & "),"
 
 
                             no_correlativo = no_correlativo + 1
@@ -1278,7 +1264,7 @@ Partial Class Pages_OrdenPago
                                                             "11,1,''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," & Cuota("Comision") & "," &
                                                             Cuota("cod_suc") & "," & Cuota("cod_ramo") & "," & Cuota("nro_pol") & "," & Cuota("aaaa_endoso") & "," & Cuota("nro_endoso") & "," &
                                                             Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_com") > 100, 100, Cuota("pje_com")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
-                                                            "0,0,0,0," & Cuota("nro_layer") & "),"
+                                                            "0,0,0," & nro_reas & "," & Cuota("nro_layer") & "),"
                             no_correlativo = no_correlativo + 1
 
                             SumaComision = SumaComision + Cuota("Comision")
