@@ -12,6 +12,7 @@ Partial Class Pages_FirmasElectronicas
         JefeInmediato
         DirectorArea
         Contabilidad
+        Subdirector
     End Enum
 
     Private Sub Pages_FirmasElectronicas_Load(sender As Object, e As EventArgs) Handles Me.Load
@@ -332,12 +333,15 @@ Partial Class Pages_FirmasElectronicas
                     'UPDATE A FIRMAS
                     If Not arrNumOrds(0) = vbNullString Then ActualizaFirmas(arrNumOrds(0), 0, Master.cod_usuario) 'Solicitante
                     If Not arrNumOrds(1) = vbNullString Then ActualizaFirmas(arrNumOrds(1), 1, Master.cod_usuario) 'Jefe Inmediato
-                    If Not arrNumOrds(2) = vbNullString Then ActualizaFirmas(arrNumOrds(2), 2, Master.cod_usuario) 'Dir Area
-                    If Not arrNumOrds(3) = vbNullString Then ActualizaFirmas(arrNumOrds(3), 3, Master.cod_usuario) 'Conta
+                    If Not arrNumOrds(2) = vbNullString Then ActualizaFirmas(arrNumOrds(2), 4, Master.cod_usuario) 'Subdirector
+                    If Not arrNumOrds(3) = vbNullString Then ActualizaFirmas(arrNumOrds(3), 2, Master.cod_usuario) 'Dir Area
+                    If Not arrNumOrds(4) = vbNullString Then ActualizaFirmas(arrNumOrds(4), 3, Master.cod_usuario) 'Conta
+
                     'ENVIO DE MAILS
                     If Not arrNumOrds(0) = vbNullString Then EnviaMail(1, Master.cod_usuario, arrNumOrds(0)) 'Solicitante
                     If Not arrNumOrds(1) = vbNullString Then EnviaMail(2, Master.cod_usuario, arrNumOrds(1)) 'Jefe Inmediato
-                    If Not arrNumOrds(2) = vbNullString Then EnviaMail(3, Master.cod_usuario, arrNumOrds(2)) 'Dir Area
+                    If Not arrNumOrds(2) = vbNullString Then EnviaMail(3, Master.cod_usuario, arrNumOrds(2)) 'Subdirector
+                    If Not arrNumOrds(3) = vbNullString Then EnviaMail(4, Master.cod_usuario, arrNumOrds(3)) 'Dir Area
 
                     Mensaje("FIRMA ELECTRONICA", "Se autorizo correctamente")
                     DesHabilitaChecksFirma()
@@ -597,6 +601,26 @@ Partial Class Pages_FirmasElectronicas
         Dim strDestinatarios As String = ""
         Try
             ListaResultado = wsGmx.ObtieneUsuarioFirmaE(tPersona)
+            ddl_Destinatario.DataSource = ListaResultado
+            ddl_Destinatario.DataTextField = "descripcion"
+            ddl_Destinatario.DataValueField = "clave"
+            ddl_Destinatario.DataBind()
+            'For Each item In ListaResultado
+            '    strDestinatarios += item.mail & ","
+            'Next
+            'strDestinatarios = Left(strDestinatarios, Len(strDestinatarios) - 1)
+        Catch ex As Exception
+            Return vbNullString
+        End Try
+        Return strDestinatarios
+    End Function
+
+    Private Function ObtieneUsuarios(tPersona As Integer, Optional _Default As Integer = 0) As String
+        Dim wsGmx As New GMXServices.GeneralesClient
+        Dim ListaResultado As IList = Nothing
+        Dim strDestinatarios As String = ""
+        Try
+            ListaResultado = wsGmx.ObtieneUsuarioFirmaE(tPersona)
             For Each item In ListaResultado
                 strDestinatarios += item.mail & ","
             Next
@@ -620,8 +644,12 @@ Partial Class Pages_FirmasElectronicas
     Protected Sub chk_FirmaCon_CheckedChanged(sender As Object, e As EventArgs)
         SelectRow(sender, "chk_FirmaCon")
     End Sub
+    Protected Sub chk_SubDir_CheckedChanged(sender As Object, e As EventArgs)
+        SelectRow(sender, "chk_SubDir")
+    End Sub
 
     Private Function CategorizaOPs() As String
+        Dim strOPSubDir As String = ""
         Dim strOPConta As String = ""
         Dim strOPJefe As String = ""
         Dim strOPDirArea As String = ""
@@ -629,12 +657,14 @@ Partial Class Pages_FirmasElectronicas
         Dim strFinal As String = ""
 
         For Each row In gvd_LstOrdenPago.Rows
+            Dim chkSubDir = DirectCast(row.FindControl("chk_SubDir"), CheckBox)
             Dim chkConta = DirectCast(row.FindControl("chk_FirmaCon"), CheckBox)
             Dim chkDirArea = DirectCast(row.FindControl("chk_FirmaDir"), CheckBox)
             Dim chkJefe = DirectCast(row.FindControl("chk_FirmaJefe"), CheckBox)
             Dim chkSol = DirectCast(row.FindControl("chk_FirmaSol"), CheckBox)
             Dim lbl_OrdenPago = DirectCast(row.FindControl("lbl_OrdenPago"), LinkButton)
 
+            If chkSubDir.Checked And chkSubDir.Enabled Then strOPSubDir += Trim(lbl_OrdenPago.Text) & ","
             If chkConta.Checked And chkConta.Enabled Then strOPConta += Trim(lbl_OrdenPago.Text) & ","
             If chkDirArea.Checked And chkDirArea.Enabled Then strOPDirArea += Trim(lbl_OrdenPago.Text) & ","
             If chkJefe.Checked And chkJefe.Enabled Then strOPJefe += Trim(lbl_OrdenPago.Text) & ","
@@ -645,8 +675,9 @@ Partial Class Pages_FirmasElectronicas
         If Len(strOPJefe) > 0 Then strOPJefe = Left(strOPJefe, Len(strOPJefe) - 1)
         If Len(strOPDirArea) > 0 Then strOPDirArea = Left(strOPDirArea, Len(strOPDirArea) - 1)
         If Len(strOPConta) > 0 Then strOPConta = Left(strOPConta, Len(strOPConta) - 1)
+        If Len(strOPSubDir) > 0 Then strOPSubDir = Left(strOPSubDir, Len(strOPSubDir) - 1)
 
-        strFinal = strOPSol & "|" & strOPJefe & "|" & strOPDirArea & "|" & strOPConta
+        strFinal = strOPSol & "|" & strOPJefe & "|" & strOPSubDir & "|" & strOPDirArea & "|" & strOPConta
 
         Return strFinal
 
@@ -654,11 +685,12 @@ Partial Class Pages_FirmasElectronicas
 
     Private Sub SelectRow(sender As Object, CrtlNombre As String)
         Dim CrtlPrevio As String = ""
-        Dim gr As GridViewRow = DirectCast(DirectCast(DirectCast(sender, CheckBox).Parent, DataControlFieldCell).Parent, GridViewRow)
+        Dim gr As GridViewRow = DirectCast(DirectCast(DirectCast(sender, CheckBox).Parent.Parent, DataControlFieldCell).Parent, GridViewRow)
         Dim chkCtrl As CheckBox = TryCast(gvd_LstOrdenPago.Rows(gr.RowIndex).FindControl(CrtlNombre), CheckBox)
         CrtlPrevio = ""
         If CrtlNombre = "chk_FirmaJefe" Then CrtlPrevio = "chk_FirmaSol"
-        If CrtlNombre = "chk_FirmaDir" Then CrtlPrevio = "chk_FirmaJefe"
+        If CrtlNombre = "chk_SubDir" Then CrtlPrevio = "chk_FirmaJefe"
+        If CrtlNombre = "chk_FirmaDir" Then CrtlPrevio = "chk_SubDir"
         If CrtlNombre = "chk_FirmaCon" Then CrtlPrevio = "chk_FirmaDir"
         Dim chkPrevio As CheckBox = TryCast(gvd_LstOrdenPago.Rows(gr.RowIndex).FindControl(CrtlPrevio), CheckBox)
         Dim chkSelRenglon As CheckBox = TryCast(gvd_LstOrdenPago.Rows(gr.RowIndex).FindControl("chk_SelOp"), CheckBox)
@@ -688,11 +720,13 @@ Partial Class Pages_FirmasElectronicas
         For Each row In gvd_LstOrdenPago.Rows
             Dim chkSol = DirectCast(row.FindControl("chk_FirmaSol"), CheckBox)
             Dim chkJefe = DirectCast(row.FindControl("chk_FirmaJefe"), CheckBox)
+            Dim chkSubDir = DirectCast(row.FindControl("chk_SubDir"), CheckBox)
             Dim chkDir = DirectCast(row.FindControl("chk_FirmaDir"), CheckBox)
             Dim chkCon = DirectCast(row.FindControl("chk_FirmaCon"), CheckBox)
 
             If chkSol.Checked = True Then chkSol.Enabled = False
             If chkJefe.Checked = True Then chkJefe.Enabled = False
+            If chkSubDir.Checked = True Then chkSubDir.Enabled = False
             If chkDir.Checked = True Then chkDir.Enabled = False
             If chkCon.Checked = True Then chkCon.Enabled = False
         Next
@@ -701,8 +735,9 @@ Partial Class Pages_FirmasElectronicas
     Private Function FormatoCorreo(strNumOrds As String, UsuSol As String, TipoPer As Integer) As String
         Dim strTipoPersona As String = ""
         If TipoPer = 1 Then strTipoPersona = "Jefe Inmediato"
-        If TipoPer = 2 Then strTipoPersona = "Director de Área"
-        If TipoPer = 3 Then strTipoPersona = "Contabilidad"
+        If TipoPer = 2 Then strTipoPersona = "SubDirector"
+        If TipoPer = 3 Then strTipoPersona = "Director de Área"
+        If TipoPer = 4 Then strTipoPersona = "Contabilidad"
 
         Dim strBody As String = ""
         strBody = "<table style = 'margin: 0px; border: medium; border-image: none; border-collapse: collapse;' border='1' cellspacing='0' cellpadding='0'>"
@@ -743,4 +778,7 @@ Partial Class Pages_FirmasElectronicas
 
     End Function
 
+    Protected Sub lnk_SelJefe_Click(sender As Object, e As EventArgs)
+        ObtieneUsuarioMail(1)
+    End Sub
 End Class
