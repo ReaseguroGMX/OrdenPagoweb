@@ -369,7 +369,7 @@ $("body").on("click", "[id*=btn_CerrarExhibiciones]", function () {
 
 //Botón Cuentas Bancarias
 $("body").on("click", "[id*=gvd_OrdenPago] .Cuentas", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     $('[data-toggle="popover"]').popover();
 });
 
@@ -379,7 +379,7 @@ $("body").on("click", "[id*=btn_ConfirmarOP]", function () {
 });
 
 $("body").on("click", "[id*=gvd_Cuotas] .Link", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     var row = $(this).closest("tr");
     var Control = row.find('.Link');
     var nro_cuota = row.find('.nro_cuota_ori');
@@ -400,7 +400,7 @@ $("body").on("click", "[id*=gvd_Cuotas] .Link", function () {
 });
 
 $("body").on("click", "[id*=gvd_LstOrdenPago] .Link", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     var row = $(this).closest("tr");
     var Control = row.find('.Link');
     if (Control[0].text != '0') {
@@ -412,67 +412,67 @@ $("body").on("click", "[id*=gvd_LstOrdenPago] .Link", function () {
 
 
 $("body").on("click", "#coVentana0", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     CambiaEstado("0", "1");
 });
 
 $("body").on("click", "#exVentana0", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     CambiaEstado("0", "0");
 });
 
 $("body").on("click", "#coVentana1", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     CambiaEstado("1", "1");
 });
 
 $("body").on("click", "#exVentana1", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     CambiaEstado("1", "0");
 });
 
 $("body").on("click", "#coVentana2", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     CambiaEstado("2", "1");
 });
 
 $("body").on("click", "#exVentana2", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     CambiaEstado("2", "0");
 });
 
 $("body").on("click", "#coVentana3", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     CambiaEstado("3", "1");
 });
 
 $("body").on("click", "#exVentana3", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     CambiaEstado("3", "0");
 });
 
 //$("body").on("click", "#coVentana4", function () {
-//    event.preventDefault();
+//    event.preventDefault ? event.preventDefault() : event.returnValue = false;
 //    CambiaEstado("4", "1");
 //});
 
 //$("body").on("click", "#exVentana4", function () {
-//    event.preventDefault();
+//    event.preventDefault ? event.preventDefault() : event.returnValue = false;
 //    CambiaEstado("4", "0");
 //});
 
 //$("body").on("click", "#coVentana5", function () {
-//    event.preventDefault();
+//    event.preventDefault ? event.preventDefault() : event.returnValue = false;
 //    CambiaEstado("5", "1");
 //});
 
 //$("body").on("click", "#exVentana5", function () {
-//    event.preventDefault();
+//    event.preventDefault ? event.preventDefault() : event.returnValue = false;
 //    CambiaEstado("5", "0");
 //});
 
 $("body").on("click", "[id*=gvd_CiasXBroker] .BotonCierra", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     var row = $(this).closest("tr");
     var MarcoExhibiciones = row.find('.MarcoExhibiciones')
     $(MarcoExhibiciones).hide();
@@ -492,7 +492,7 @@ $("body").on("click", "[id*=gvd_CiasXBroker] .BotonCierra", function () {
 });
 
 $("body").on("click", "[id*=gvd_CiasXBroker] .BotonAbre", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     var row = $(this).closest("tr");
     var MarcoExhibiciones = row.find('.MarcoExhibiciones')
     $(MarcoExhibiciones).show();
@@ -667,7 +667,7 @@ $("body").on("dblclick", "[id*=gvd_OrdenPago] .Cuenta", function () {
 });
 
 $("body").on("click", "[id*=gvd_GrupoPolizas] .MuestraAclaracion", function () {
-    event.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     var row = $(this).closest("tr");
     
     var id_pv = row.find('.id_pv');

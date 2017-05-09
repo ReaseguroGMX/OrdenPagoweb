@@ -467,5 +467,64 @@ Public Class ConsultaBD
         BorraPolNoPago = True
     End Function
 
+    Public Function ConsultaPagador(ByVal id_pv As Integer) As DataTable
+        Dim sCnn As String = ""
+        Dim sSel As String
 
+        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+
+        sSel = "spS_Pagador " & id_pv
+
+        Dim da As SqlDataAdapter
+        Dim dtRes As DataTable
+        dtRes = New DataTable
+
+        da = New SqlDataAdapter(sSel, sCnn)
+
+        da.Fill(dtRes)
+
+        Return dtRes
+
+    End Function
+
+    Public Function ConsultaDetallePagador(ByVal id_pv As Integer, ByVal cod_aseg As Integer, ByVal ind_pag As Integer) As DataTable
+        Dim sCnn As String = ""
+        Dim sSel As String
+
+        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+
+        sSel = "spS_PagadorCuotas " & id_pv & "," & ind_pag & "," & cod_aseg
+
+        Dim da As SqlDataAdapter
+        Dim dtRes As DataTable
+        dtRes = New DataTable
+
+        da = New SqlDataAdapter(sSel, sCnn)
+
+        da.Fill(dtRes)
+
+        Return dtRes
+
+    End Function
+
+
+    Public Function ConsultaDetalleCuota(ByVal id_pv As Integer, ByVal cod_aseg As Integer, ByVal ind_pag As Integer, ByVal nro_cuota As Integer) As DataTable
+        Dim sCnn As String = ""
+        Dim sSel As String
+
+        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+
+        sSel = "spS_DetallePagosCob " & id_pv & "," & cod_aseg & "," & ind_pag & "," & nro_cuota
+
+        Dim da As SqlDataAdapter
+        Dim dtRes As DataTable
+        dtRes = New DataTable
+
+        da = New SqlDataAdapter(sSel, sCnn)
+
+        da.Fill(dtRes)
+
+        Return dtRes
+
+    End Function
 End Class
