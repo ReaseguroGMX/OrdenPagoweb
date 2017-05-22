@@ -78,6 +78,11 @@ $("body").on("click", ".CierraAutoriza", function () {
     $('.Password').val('');
 });
 
+$("body").on("click", ".CierraFirma", function () {
+    event.preventDefault();
+    ClosePopup('#FirmasModal');
+});
+
 //Delete event handler.
 $("body").on("click", "[id*=gvd_Usuario] .Delete", function () {
     var row = $(this).closest("tr");
