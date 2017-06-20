@@ -3,6 +3,20 @@
     javascript: window.history.forward(1);
 });
 
+$("body").on("click", ".btnSelCuenta", function (e) {
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
+    
+    var persona = $("input[id$='hid_persona']")[0].value.split('|')
+    var adicional = $("input[id$='hid_adicional']")[0].value.split('|')
+
+    $("input[id$='hid_Control']")[0].value = -1;
+    $("input[id$='hid_Catalogo']")[0].value = 'Cta';
+    $("#lblCatalogo")[0].innerText = 'CUENTAS BANCARIAS';
+    var Condicion = ' WHERE id_persona = ' + persona[0] + ' AND cod_moneda = ' + adicional[0]
+    load_Data("spS_CatalogosOP ==Cta==" + ",==" + Condicion + "==", "Unica");
+
+});
+
 function ImprimirOrden(Server,strOrden) {
     var nro_op = strOrden.split(",");
     for (i = 0 ; i < nro_op.length; i++) {
@@ -250,7 +264,7 @@ $("body").on("click", "#btn_AddCtr", function () {
 });
 
 $("body").on("click", "[id*=gvd_OrdenPago] .btnCuenta", function (e) {
-    e.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     var row = $(this).closest("tr");
     var Moneda = row.find('.Moneda');
     var Persona = row.find('.Persona');
@@ -1751,7 +1765,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtSearchRam']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
 
@@ -1764,7 +1778,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtClaveRam']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
     $("input[id$='txtClaveRam']").focusout(function () {
@@ -1798,7 +1812,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtSearchRamCont']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
 
@@ -1811,7 +1825,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtClaveRamCont']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
     $("input[id$='txtClaveRamCont']").focusout(function () {
@@ -1846,7 +1860,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtSearchRamTec']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
 
@@ -1859,7 +1873,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtClaveRamTec']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
     $("input[id$='txtClaveRamTec']").focusout(function () {

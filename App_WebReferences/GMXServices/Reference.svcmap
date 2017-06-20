@@ -19,14 +19,15 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://172.16.40.33:1180/Service1.svc" Protocol="http" SourceId="1" />
+    <MetadataSource Address="http://siigmxapp02/GMXServices/Service1.svc" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="GMXServices.wsdl" MetadataType="Wsdl" ID="4998d57e-1d44-460a-9351-2226e7e27d06" SourceId="1" SourceUrl="http://172.16.40.33:1180/Service1.svc?wsdl" />
-    <MetadataFile FileName="Service1.xsd" MetadataType="Schema" ID="55b1124a-c67d-440d-aff0-1918d835301b" SourceId="1" SourceUrl="http://172.16.40.33:1180/Service1.svc?xsd=xsd0" />
-    <MetadataFile FileName="Service11.xsd" MetadataType="Schema" ID="94f5d4a8-1eb7-44ad-8bfe-f088574be11c" SourceId="1" SourceUrl="http://172.16.40.33:1180/Service1.svc?xsd=xsd1" />
-    <MetadataFile FileName="Service1.disco" MetadataType="Disco" ID="e5228e87-c8a6-4c1b-bec5-5afdf5b64c28" SourceId="1" SourceUrl="http://172.16.40.33:1180/Service1.svc?disco" />
-    <MetadataFile FileName="Service12.xsd" MetadataType="Schema" ID="a3254216-558d-45a6-9399-5ae056ae14d9" SourceId="1" SourceUrl="http://172.16.40.33:1180/Service1.svc?xsd=xsd2" />
+    <MetadataFile FileName="Service13.xsd" MetadataType="Schema" ID="cc8a7369-b246-41f5-98ce-5c1b5a648bed" SourceId="1" SourceUrl="http://siigmxapp02/GMXServices/Service1.svc?xsd=xsd1" />
+    <MetadataFile FileName="Service132.xsd" MetadataType="Schema" ID="99a55a4a-c668-4c2a-9238-535ec0192094" SourceId="1" SourceUrl="http://siigmxapp02/GMXServices/Service1.svc?xsd=xsd3" />
+    <MetadataFile FileName="Service11.disco" MetadataType="Disco" ID="ab374dc6-1270-4abb-a786-d4ce896f89b0" SourceId="1" SourceUrl="http://siigmxapp02/GMXServices/Service1.svc?disco" />
+    <MetadataFile FileName="Service133.xsd" MetadataType="Schema" ID="af335321-ba44-449b-8653-569b0d8e7b12" SourceId="1" SourceUrl="http://siigmxapp02/GMXServices/Service1.svc?xsd=xsd0" />
+    <MetadataFile FileName="Service134.xsd" MetadataType="Schema" ID="99aa3a71-f47c-43ba-8db4-4df747772091" SourceId="1" SourceUrl="http://siigmxapp02/GMXServices/Service1.svc?xsd=xsd2" />
+    <MetadataFile FileName="GMXServices1.wsdl" MetadataType="Wsdl" ID="f245c5b1-8512-4faa-b77a-c9834080961e" SourceId="1" SourceUrl="http://siigmxapp02/GMXServices/Service1.svc?wsdl" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

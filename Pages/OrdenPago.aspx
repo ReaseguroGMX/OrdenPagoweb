@@ -1247,7 +1247,7 @@
        </asp:UpdatePanel>
     </div>
        
-    <div id="ExhibicionesModal" style="width:920px; height:620px"  class="modalExhibiciones">
+    <div id="ExhibicionesModal" style="width:1160px; height:620px"  class="modalExhibiciones">
       <asp:UpdatePanel runat="server" ID="upExhibiciones">
          <ContentTemplate>
           <%--<div class="modal-content">--%>
@@ -1556,7 +1556,10 @@
                                         <div class="MarcoExhibiciones">
                                             <div  style="width:100%; ">
                                                 <asp:GridView runat="server" ID="gvd_Cuotas" GridLines="None" AutoGenerateColumns="false" CssClass="LetraDetalleGrid gvd_Cuotas" BorderStyle="None"  
-                                                                DataKeyNames="sn_Seleccion,PrimaCedidaCiaBrok,ComisionCiaBrok,PrimaCedida,Comision,cod_moneda,Moneda,nro_cuota_reas,nro_cuota,nro_subcuota,fecha,pje_pri,pje_com,blnPendiente,nro_op,cod_estatus_op,fec_pago,fec_baja,sn_Origen,cod_cptoPri,ConceptoPrima,cod_cptoCom,ConceptoComision,imp_cambio,sn_cambio,Version"
+                                                                DataKeyNames="sn_Seleccion,PrimaCedidaCiaBrok,ComisionCiaBrok,PrimaCedida,Comision,cod_moneda,Moneda,nro_cuota_reas,nro_cuota,nro_subcuota,
+                                                                              fecha,pje_pri,pje_com,blnPendiente,nro_op,cod_estatus_op,fec_pago,fec_baja,sn_Origen,cod_cptoPri,ConceptoPrima,cod_cptoCom,
+                                                                              ConceptoComision,imp_cambio,sn_cambio,Version,nro_recibo,fec_cob_pago,MontoISR,cod_broker,Broker,cod_cia,Compañia,id_persona,nro_nit,
+                                                                              cod_cta_cb,cod_deb_cred,banco,cuenta,id_cuenta,cod_banco,txt_swift"
                                                                 OnRowDataBound="gvd_Cuotas_RowDataBound" OnRowCommand="gvd_Cuotas_RowCommand">
                                                     <Columns>
                                                         <asp:TemplateField HeaderText="">
@@ -1608,7 +1611,7 @@
                                                             </ItemTemplate>
                                                         </asp:TemplateField>
 
-                                                         <asp:TemplateField HeaderText="T.C." ItemStyle-HorizontalAlign="Center" HeaderStyle-HorizontalAlign="Center">
+                                                        <asp:TemplateField HeaderText="T.C." ItemStyle-HorizontalAlign="Center" HeaderStyle-HorizontalAlign="Center">
                                                             <ItemTemplate>
                                                                 <asp:textbox runat="server" ID="lbl_TipoCambio"  Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_cambio")))  %>' Width="40px" Enabled="false" CssClass="form-control DetExh masterTooltip" title='<%# Eval("Moneda") %>' ></asp:textbox>
                                                             </ItemTemplate>
@@ -1626,11 +1629,37 @@
                                                             </ItemTemplate>
                                                         </asp:TemplateField>
 
-                                                         <asp:TemplateField ItemStyle-VerticalAlign="Middle" >
+                                                         <asp:TemplateField HeaderText="Fec Aplicado" ItemStyle-HorizontalAlign="Center" HeaderStyle-HorizontalAlign="Center">
                                                             <ItemTemplate>
-                                                               <asp:ImageButton runat="server" ID="btn_BorrarCuota" ImageUrl="~/Images/collapse.png" CommandName="QUitar" Height="22px" />
+                                                                <asp:textbox runat="server" ID="lbl_FecAplicado" Enabled="false"  Text='<%# Eval("fec_cob_pago")%>' Width="75px" CssClass="form-control DetExh"  ></asp:textbox>
                                                             </ItemTemplate>
                                                         </asp:TemplateField>
+
+                                                        <asp:TemplateField HeaderText="Transacción" ItemStyle-HorizontalAlign="Center" HeaderStyle-HorizontalAlign="Center">
+                                                            <ItemTemplate>
+                                                                <asp:textbox runat="server" ID="lbl_Transaccion" Enabled="false"   Text='<%# Eval("nro_recibo")%>' Width="70px" CssClass="form-control DetExh"  ></asp:textbox>
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+
+                                                        <asp:TemplateField HeaderText="ISR Retenido" ItemStyle-HorizontalAlign="Center" HeaderStyle-HorizontalAlign="Center">
+                                                            <ItemTemplate>
+                                                                <asp:textbox runat="server" ID="lbl_ISR" Enabled="false"   Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("MontoISR")))  %>' Width="80px" CssClass="form-control DetExh"  ></asp:textbox>
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+
+                                                        <asp:TemplateField ItemStyle-VerticalAlign="Middle" >
+                                                            <ItemTemplate>
+                                                               <asp:ImageButton runat="server" ID="btn_Impuesto" ImageUrl="~/Images/devolucion.png" CssClass="masterTooltip" title="Devolución de Impuesto" CommandName="Impuesto" data-toggle="modal" data-target="#ImpuestoModal" />
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+
+                                                         <asp:TemplateField ItemStyle-VerticalAlign="Middle" >
+                                                            <ItemTemplate>
+                                                               <asp:ImageButton runat="server" ID="btn_BorrarCuota" ImageUrl="~/Images/collapse.png" CommandName="QUitar" Height="23px" />
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+
+                                                        
 
                                                     </Columns>
                                                     <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
@@ -1819,7 +1848,7 @@
     </div>
 
      <!-- Modal -->
-    <div id="MensajeModal" style="width:400px; height:185px"  class="modalAutoriza">
+    <div id="MensajeModal" style="width:400px; height:185px; border-style:inset; border-width:1px; border-color:lightblue; "  class="modalMensaje">
          <%-- <div class="modal-content">--%>
                <div class="modal-header" style="height:40px">
                     <button type="button" class="close"  data-dismiss="modal">&times;</button>
@@ -2295,6 +2324,83 @@
                 </ContentTemplate>
             </asp:UpdatePanel>
         </div>
+    </div>
+
+     <!-- Modal -->
+    <div id="ImpuestoModal" style="width:500px; height:350px;"  class="modalAutoriza" >
+         <%-- <div class="modal-content">--%>
+               <div class="modal-header" style="height:40px">
+                    <button type="button" class="close"  data-dismiss="modal">&times;</button>
+                     <h4 class="modal-title">
+                         Devolución de Impuesto Retenido
+                     </h4>
+               </div>
+
+               <div class="modal-body" style="height:308px">
+                   <asp:UpdatePanel runat="server" ID="upImpuesto">
+                       <ContentTemplate>
+                            
+                            <div class="row">
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="130px">Nro. OP</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_nroOP" Enabled="false" CssClass="form-control" Width="80px" Height="26px" ></asp:TextBox>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                    <asp:HiddenField runat="server" ID="hid_broker" />
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="130px">Broker</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_broker"  Enabled="false" CssClass="form-control" Width="350px" Height="26px" ></asp:TextBox>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                    <asp:HiddenField runat="server" ID="hid_cia" />
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="130px">Reasegurador</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_Reasegurador"  Enabled="false" CssClass="form-control" Width="350px" Height="26px" ></asp:TextBox>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                <div class="input-group">
+                                     <asp:HiddenField runat="server" ID="hid_cta_cb" />
+                                     <asp:HiddenField runat="server" ID="hid_deb_cred" /> 
+                                     <asp:HiddenField runat="server" ID="hid_persona" /> 
+                                     <asp:HiddenField runat="server" ID="hid_cuenta" /> 
+                                     <asp:HiddenField runat="server" ID="hid_adicional" /> 
+                                     <asp:label runat="server" class="col-md-1 control-label" Width="130px">Monto Retenido</asp:label>
+                                     <asp:TextBox runat="server" ID="txt_ISR"  Enabled="false" CssClass="form-control" Width="80px" Height="26px" ></asp:TextBox>
+
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="130px">Fecha Retenido</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_FechaRet"  Enabled="false" CssClass="form-control" Width="107px" Height="26px" ></asp:TextBox>
+                                 </div>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                <div class="input-group">
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="130px">Fecha Pago</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_FechaPago"  CssClass="form-control FechaSB" Width="80px" Height="26px" ></asp:TextBox>
+
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="130px">Cuenta Banco</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_Cuenta"  Enabled="false" CssClass="form-control" Width="108px" Height="26px" ></asp:TextBox>
+                                    <asp:Button runat="server" ID="btn_Cuentas" Text=".." CssClass ="btn btn-primary btnSelCuenta" Height="25px"/>
+                                 </div>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="130px">Banco</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_Banco"  Enabled="false" CssClass="form-control" Width="350px" Height="26px" ></asp:TextBox>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                <asp:label runat="server" class="col-md-1 control-label" Width="130px">Detalle Pago</asp:label>
+                                <asp:TextBox runat="server" ID="txt_Detalle"  CssClass="form-control" Width="350px" Height="50px" TextMode ="MultiLine" ></asp:TextBox>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div style="width:100%; text-align:right;">
+                                 <asp:Button runat="server" id="btn_GenerarDev" class="btn btn-primary" Text="Generar"  style="height:30px; width:80px;" />
+                                 <button type="button" id="btn_CnlImpuesto" class="btn btn-danger" data-dismiss="modal" style="height:30px; width:80px;">Cerrar</button>
+                            </div>
+                       </ContentTemplate>
+                    </asp:UpdatePanel>
+              </div>
+          <%--</div>--%>
     </div>
 </asp:Content>
 
