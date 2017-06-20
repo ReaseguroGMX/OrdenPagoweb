@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "OrdenPagoWeb", ".", "{BB536110-E3A2-4AE0-988B-E880F509B140}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "OrdenPagoweb", ".", "{BB536110-E3A2-4AE0-988B-E880F509B140}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.2"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_57149"

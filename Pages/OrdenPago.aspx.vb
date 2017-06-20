@@ -447,6 +447,7 @@ Partial Class Pages_OrdenPago
 
             Dim dtGridView As DataTable
             Dim Datos() As String
+            Dim Complementos() As String
             dtGridView = New DataTable
             Dim Seleccionados As String = hid_Seleccion.Value
             If Len(Seleccionados) > 0 Then
@@ -513,46 +514,55 @@ Partial Class Pages_OrdenPago
                         hid_Control.Value = ""
                         Exit Sub
                     Case "Cta"
-                        Dim Complementos() As String
-                        Dim Indice As Integer = hid_Control.Value
-                        Dim lbl_Banco As TextBox = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("lbl_Banco"), TextBox)
-                        Dim lbl_Cuenta As TextBox = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("lbl_Cuenta"), TextBox)
+                        If hid_Control.Value = -1 Then
+                            Datos = Split(Seleccionados.Substring(0, Seleccionados.Length - 1), "|")
+                            Complementos = Split(Split(Datos(0), "~")(1), "-")
+                            hid_cuenta.Value = Split(Datos(0), "~")(0) & "|" & Complementos(2) & "|0"
+                            txt_Banco.Text = Complementos(1)
+                            txt_Cuenta.Text = Complementos(0)
+                        Else
 
-                        Dim hid_cod_banco As HiddenField = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("hid_cod_banco"), HiddenField)
-                        Dim hid_id_cuenta As HiddenField = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("hid_id_cuenta"), HiddenField)
-                        Dim hid_nro_cuenta As HiddenField = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("hid_nro_cuenta"), HiddenField)
+                            Dim Indice As Integer = hid_Control.Value
+                            Dim lbl_Banco As TextBox = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("lbl_Banco"), TextBox)
+                            Dim lbl_Cuenta As TextBox = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("lbl_Cuenta"), TextBox)
 
-                        Datos = Split(Seleccionados.Substring(0, Seleccionados.Length - 1), "|")
+                            Dim hid_cod_banco As HiddenField = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("hid_cod_banco"), HiddenField)
+                            Dim hid_id_cuenta As HiddenField = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("hid_id_cuenta"), HiddenField)
+                            Dim hid_nro_cuenta As HiddenField = CType(gvd_OrdenPago.Rows(Indice - 1).FindControl("hid_nro_cuenta"), HiddenField)
 
-                        hid_id_cuenta.Value = Split(Datos(0), "~")(0)
-                        Complementos = Split(Split(Datos(0), "~")(1), "-")
+                            Datos = Split(Seleccionados.Substring(0, Seleccionados.Length - 1), "|")
 
-                        hid_cod_banco.Value = Complementos(2)
-                        hid_nro_cuenta.Value = Complementos(0)
+                            hid_id_cuenta.Value = Split(Datos(0), "~")(0)
+                            Complementos = Split(Split(Datos(0), "~")(1), "-")
 
-                        lbl_Banco.Text = "Banco: " & Complementos(1)
-                        lbl_Cuenta.Text = "Cuenta: " & Complementos(0)
+                            hid_cod_banco.Value = Complementos(2)
+                            hid_nro_cuenta.Value = Complementos(0)
 
-                        Dim id_pv() As String = Split(gvd_OrdenPago.DataKeys(Indice - 1)("id_pv"), ",")
+                            lbl_Banco.Text = "Banco: " & Complementos(1)
+                            lbl_Cuenta.Text = "Cuenta: " & Complementos(0)
 
-                        Dim cod_cia_reas_brok As Integer = gvd_OrdenPago.DataKeys(Indice - 1)("cod_cia_reas_brok")
-                        Dim cod_moneda As Integer = gvd_OrdenPago.DataKeys(Indice - 1)("cod_moneda")
+                            Dim id_pv() As String = Split(gvd_OrdenPago.DataKeys(Indice - 1)("id_pv"), ",")
 
-                        Dim dtTemporal As DataTable = Session("dtCuotas")
-                        Dim myRow() As Data.DataRow
+                            Dim cod_cia_reas_brok As Integer = gvd_OrdenPago.DataKeys(Indice - 1)("cod_cia_reas_brok")
+                            Dim cod_moneda As Integer = gvd_OrdenPago.DataKeys(Indice - 1)("cod_moneda")
 
-                        For Each element In id_pv
-                            myRow = dtTemporal.Select("id_pv ='" & element & "' AND cod_cia_reas_brok = '" & cod_cia_reas_brok & "' AND cod_moneda = '" & cod_moneda & "'")
-                            For Each item In myRow
-                                item("id_Cuenta") = hid_id_cuenta.Value
-                                item("cod_banco") = Complementos(2)
-                                item("Cuenta") = Complementos(0)
-                                item("Banco") = Complementos(1)
+                            Dim dtTemporal As DataTable = Session("dtCuotas")
+                            Dim myRow() As Data.DataRow
+
+                            For Each element In id_pv
+                                myRow = dtTemporal.Select("id_pv ='" & element & "' AND cod_cia_reas_brok = '" & cod_cia_reas_brok & "' AND cod_moneda = '" & cod_moneda & "'")
+                                For Each item In myRow
+                                    item("id_Cuenta") = hid_id_cuenta.Value
+                                    item("cod_banco") = Complementos(2)
+                                    item("Cuenta") = Complementos(0)
+                                    item("Banco") = Complementos(1)
+                                Next
                             Next
-                        Next
 
 
-                        Session("dtCuotas") = dtTemporal
+                            Session("dtCuotas") = dtTemporal
+                        End If
+
 
                         Exit Sub
                 End Select
@@ -1076,13 +1086,102 @@ Partial Class Pages_OrdenPago
 
     End Sub
 
+    Private Sub GenerarDevolucion()
+        Dim strMontos(0) As String
+        Dim strMontosReas(0) As String
+        Dim strMontosISR(0) As String
+        Dim strMontosImputacion(0) As String
+        Dim Persona() As String = Split(hid_persona.Value, "|")
+        Dim cod_deb_cred As String = IIf(hid_deb_cred.Value = "C", "D", "C")
+        Dim Poliza() As String = Split(txt_Poliza.Text, "-")
+        Dim Cuenta() As String = Split(hid_cuenta.Value, "|")
+        Dim Adicional() As String = Split(hid_adicional.Value, "|")
+        Dim ConceptoISR As String
+        Dim Resultado As String = ""
+        Dim Datos As String
+        Dim id_imputacion As Double = 0
+        Dim nro_op As Double = 0
+
+        ConceptoISR = "DEVOLUCION ISR " & hid_cia.Value & "-" & txt_Reasegurador.Text
+
+        If Len(ConceptoISR) >= 55 Then
+            ConceptoISR = Mid(ConceptoISR, 1, 55)
+        End If
+
+        strMontos(0) = "(@strKey,8,0,NULL,''170101003002000'',''D''," & Adicional(0) & ",0,0," & IIf(Adicional(0) = 1, Adicional(7), 1) & ",''PRIMA NULA''),"
+
+        strMontos(0) = strMontos(0) & "(@strKey,4,1,NULL,''" & hid_cta_cb.Value & "'',''" & cod_deb_cred & "''," &
+                                                               Adicional(0) & "," & txt_ISR.Text & "," & CDbl(txt_ISR.Text) * Adicional(7) & "," &
+                                                               IIf(Adicional(0) = 1, Adicional(7), 1) & ",''" & ConceptoISR & "''),"
+
+        strMontos(0) = strMontos(0) & "(@strKey,8,2,NULL,''170101003002000'',''C''," & Adicional(0) & ",0,0," & IIf(Adicional(0) = 1, Adicional(7), 1) & ",''COMISION NULA''),"
+
+        strMontosReas(0) = strMontosReas(0) & "(@strKey,8,0," & Adicional(5) & "," & hid_broker.Value & "," & hid_cia.Value & "," &
+                                                "11,1,''" & txt_Contrato.Text & "''," & hid_nrotramo.Value & ",0," &
+                                                Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
+                                                Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Val(txt_Ramo.Text) & "," &
+                                                IIf(Adicional(3) > 100, 100, Adicional(3)) & "," & Adicional(1) & ",''" & FechaAIngles(Adicional(2)) & "''," &
+                                                "0,0,0,0" & "," & txt_Capa.Text & "),"
+
+
+        strMontosReas(0) = strMontosReas(0) & "(@strKey,8,2," & Adicional(6) & "," & hid_broker.Value & "," & hid_cia.Value & "," &
+                                                "11,1,''" & txt_Contrato.Text & "''," & hid_nrotramo.Value & ",0," &
+                                                Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
+                                                Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Val(txt_Ramo.Text) & "," &
+                                                IIf(Adicional(4) > 100, 100, Adicional(4)) & "," & Adicional(1) & ",''" & FechaAIngles(Adicional(2)) & "''," &
+                                                "0,0,0,0" & "," & txt_Capa.Text & "),"
+
+
+        strMontosISR(0) = "(@strKey,4,1," & Poliza(0) & ",303,null,1139,null,null,null,null,1139,null,null,null,null,null,null,null),"
+
+        strMontosImputacion(0) = "(@strKey,4,1," & hid_idPv.Value & "," & hid_nroreas.Value & "," &
+                                  txt_Capa.Text & ",''" & txt_Contrato.Text & "''," & hid_nrotramo.Value & "," &
+                                  Val(txt_Ramo.Text) & "," & hid_broker.Value & "," & hid_cia.Value & "," &
+                                  Adicional(1) & "," & Adicional(0) & ",''" & hid_cta_cb.Value & "'',''" & cod_deb_cred & "''," &
+                                  txt_ISR.Text & ",-1,''" & ConceptoISR & "''),"
+
+        'MONTOS IMPUTACION SOLO SE ALMACENA DEVOLUCION DE ISR
+        Datos = InsertaOrdenPago(0, txt_ISR.Text, Adicional(0), Adicional(7),
+                                 IIf(hid_broker.Value = 0, hid_cia.Value, hid_broker.Value),
+                                 IIf(hid_broker.Value = 0, txt_Reasegurador.Text, txt_broker.Text),
+                                 Poliza(0), Persona(0), Persona(1),
+                                 txt_Cuenta.Text, Cuenta(2), Cuenta(0), Cuenta(1), FechaAIngles(txt_FechaPago.Text), -1,
+                                 strMontos, strMontosReas, strMontosISR, strMontosImputacion)
+
+        'Si la inserción fue satisfactoria
+        If Len(Datos) > 0 Then
+            id_imputacion = Split(Datos, "|")(0)
+            nro_op = Split(Datos, "|")(1)
+
+            Actualiza_Mov_Contable(id_imputacion, nro_op)
+
+            'Guarda Texto de Observaciones
+            Resultado = GuardaTexto(nro_op, txt_Detalle.Text)
+            If Resultado <> "1" Then
+                Mensaje("ORDEN DE PAGO-: GUARDA TEXTO", Resultado)
+            End If
+
+            Mensaje("ORDEN DE PAGO-: GENERACIÓN", "Se generó la Orden de pago: " & nro_op)
+
+            Dim server As String = "http://siigmxapp02/ReportServer_SIIGMX02?%2fReportesGMX%2fOrdenPago&rs%3AFormat=PDF&rc:Parameters=false&nro_op=@nro_op"
+            ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "ImprimirOrden", "ImprimirOrden('" & server & "','" & nro_op & "');", True)
+
+            ScriptManager.RegisterStartupScript(Me, Me.GetType, "Close Modal Ordenes", "ClosePopup('#ImpuestoModal');", True)
+        End If
+
+    End Sub
+
     Private Sub GeneraOrdenPago(ByVal id_pv As Double, ByVal Cuotas As DataTable)
         Dim indMonto As Integer = 0
         Dim indMontoReas As Integer = 0
         Dim indMontoISR As Integer = 0
+        Dim indImputacion As Integer = 0
+
         Dim strMontos(0) As String
         Dim strMontosReas(0) As String
         Dim strMontosISR(0) As String
+        Dim strMontosImputacion(0) As String
+
         Dim pagina As Integer = 0
 
         Dim nro_reas As Integer = 0
@@ -1114,6 +1213,7 @@ Partial Class Pages_OrdenPago
         Dim strDatos As String = ""
         Dim PrimaCedida, Comision, Impuesto As Double
         Dim cod_deb_cred As String = ""
+        Dim ConceptoISR As String = ""
 
         'Solo si existen registros para almacenar
         If Cuotas.Rows.Count > 0 Then
@@ -1152,6 +1252,8 @@ Partial Class Pages_OrdenPago
 
                         nro_reas = Cuota("nro_reas")
 
+                        'nro_reas = 0
+
                         cod_moneda = Cuota("cod_moneda")
                         impCambio = Cuota("imp_cambio")
 
@@ -1185,6 +1287,14 @@ Partial Class Pages_OrdenPago
                                 strMontosReas(indMontoReas) = ""
                             End If
 
+                            'Consolidado de Montos Imputacion
+                            If Len(strMontosImputacion(indImputacion)) > 7500 Then
+                                indImputacion = indImputacion + 1
+                                ReDim Preserve strMontosImputacion(indImputacion)
+                                strMontosImputacion(indImputacion) = ""
+                            End If
+
+
                             PrimaCedida = IIf(Cuota("PrimaCedida") >= 0, Cuota("PrimaCedida"), -1 * Cuota("PrimaCedida"))
                             cod_deb_cred = IIf(Cuota("PrimaCedida") >= 0, "''D''", "''C''")
 
@@ -1197,6 +1307,13 @@ Partial Class Pages_OrdenPago
                                                         Cuota("cod_suc") & "," & Cuota("cod_ramo") & "," & Cuota("nro_pol") & "," & Cuota("aaaa_endoso") & "," & Cuota("nro_endoso") & "," &
                                                         Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_pri") > 100, 100, Cuota("pje_pri")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
                                                         "0,0,0," & nro_reas & "," & Cuota("nro_layer") & "),"
+
+
+                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & id_pv & "," & nro_reas & "," &
+                                                                                                       Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
+                                                                                                       Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
+                                                                                                       Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("Cta_CblePri") & "'',''" & cod_deb_cred & "''," &
+                                                                                                       PrimaCedida & ",0,''" & "PRIMA''),"
 
 
                             no_correlativo = no_correlativo + 1
@@ -1219,15 +1336,33 @@ Partial Class Pages_OrdenPago
                                     strMontosISR(indMontoISR) = ""
                                 End If
 
+                                'Consolidado de Montos Imputacion
+                                If Len(strMontosImputacion(indImputacion)) > 7500 Then
+                                    indImputacion = indImputacion + 1
+                                    ReDim Preserve strMontosImputacion(indImputacion)
+                                    strMontosImputacion(indImputacion) = ""
+                                End If
+
                                 Impuesto = IIf(Cuota("MontoISR") >= 0, Cuota("MontoISR"), -1 * Cuota("MontoISR"))
                                 cod_deb_cred = IIf(Cuota("MontoISR") >= 0, "''C''", "''D''")
+                                ConceptoISR = "ISR " & Cuota("cod_cia_reas_cia") & "-" & Cuota("Compañia")
+
+                                If Len(ConceptoISR) >= 55 Then
+                                    ConceptoISR = Mid(ConceptoISR, 1, 55)
+                                End If
 
                                 strMontos(indMonto) = strMontos(indMonto) & "(@strKey,4," & no_correlativo & ",NULL,''" & Cuota("cod_cta_cble") & "''," & cod_deb_cred & "," &
                                                                   Cuota("cod_moneda") & "," & Impuesto & "," & Impuesto * Cuota("imp_cambio") & "," &
-                                                                  IIf(Cuota("cod_moneda") = 1, Cuota("imp_cambio"), 1) & ",''ISR " & Cuota("Compañia") & "''),"
+                                                                  IIf(Cuota("cod_moneda") = 1, Cuota("imp_cambio"), 1) & ",''" & ConceptoISR & "''),"
 
                                 strMontosISR(indMontoISR) = strMontosISR(indMontoISR) & "(@strKey,4," & no_correlativo & "," & Cuota("cod_suc") & ",303,null,708," &
                                                                                           "null,null,null,null,708,null,null,null,null,null,null,null),"
+
+                                strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,4," & no_correlativo & "," & id_pv & "," & nro_reas & "," &
+                                                                                                           Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
+                                                                                                           Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
+                                                                                                           Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("cod_cta_cble") & "'',''" & cod_deb_cred & "''," &
+                                                                                                           Impuesto & ",0,''" & ConceptoISR & "''),"
 
                                 no_correlativo = no_correlativo + 1
 
@@ -1253,6 +1388,13 @@ Partial Class Pages_OrdenPago
                                 strMontosReas(indMontoReas) = ""
                             End If
 
+                            'Consolidado de Montos Imputacion
+                            If Len(strMontosImputacion(indImputacion)) > 7500 Then
+                                indImputacion = indImputacion + 1
+                                ReDim Preserve strMontosImputacion(indImputacion)
+                                strMontosImputacion(indImputacion) = ""
+                            End If
+
                             Comision = IIf(Cuota("Comision") >= 0, Cuota("Comision"), -1 * Cuota("Comision"))
                             cod_deb_cred = IIf(Cuota("Comision") >= 0, "''C''", "''D''")
 
@@ -1265,6 +1407,13 @@ Partial Class Pages_OrdenPago
                                                             Cuota("cod_suc") & "," & Cuota("cod_ramo") & "," & Cuota("nro_pol") & "," & Cuota("aaaa_endoso") & "," & Cuota("nro_endoso") & "," &
                                                             Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_com") > 100, 100, Cuota("pje_com")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
                                                             "0,0,0," & nro_reas & "," & Cuota("nro_layer") & "),"
+
+                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & id_pv & "," & nro_reas & "," &
+                                                                                                        Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
+                                                                                                        Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
+                                                                                                        Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("Cta_CbleCom") & "'',''" & cod_deb_cred & "''," &
+                                                                                                        Comision & ",0,''" & "COMISION''),"
+
                             no_correlativo = no_correlativo + 1
 
                             SumaComision = SumaComision + Cuota("Comision")
@@ -1289,26 +1438,12 @@ Partial Class Pages_OrdenPago
                     Datos = InsertaOrdenPago(id_imputacion, SumaPrima - SumaComision - SumaISR, cod_moneda, impCambio,
                                              cod_broker, Descripcion, cod_suc, id_persona, nro_nit,
                                              Cuenta, txt_swift, id_Cuenta, cod_banco, FechaPago, sn_transferencia,
-                                             strMontos, strMontosReas, strMontosISR)
+                                             strMontos, strMontosReas, strMontosISR, strMontosImputacion)
 
                     'Si la inserción fue satisfactoria
                     If Len(Datos) > 0 Then
                         id_imputacion = Split(Datos, "|")(0)
                         nro_op = Split(Datos, "|")(1)
-
-                        'Valida si se repite el Id_imputacion------------------------------------------------------------------------
-                        'If EvaluaImputacion(id_imputacion) > 1 Then
-
-                        '    Dim ConsultaBD As ConsultaBD
-                        '    ConsultaBD = New ConsultaBD
-                        '    ConsultaBD.InsertaBitacora(Master.cod_usuario, Master.HostName, "Correción de Imputación (Orden de Pago)", nro_op & " --> " & id_imputacion)
-
-                        '    id_imputacion = CorrigeImputacion(nro_op, 1)
-
-                        '    InsertaMovimientos(id_imputacion, strMontos, strMontosReas, strMontosISR, nro_op)
-
-                        '    InsertaMovimientosResp(nro_op, id_imputacion, strMontos, strMontosReas, strMontosISR)
-                        'End If
 
                         'Actuliza movimientos Contables
                         Actualiza_Mov_Contable(id_imputacion, nro_op)
@@ -1353,17 +1488,17 @@ Partial Class Pages_OrdenPago
                 ConsultaBD.InsertaBitacora(Master.cod_usuario, Master.HostName, "Generación", "Orden de Pago: " & strOrdenPago)
 
 
-                Mail.enviaMail("GMXQROSVRVMBX2.GMX.COM.MX",
-                               "25",
-                               "oscar.sandoval@gmx.com.mx",
-                               "2002351340Man",
-                               "oscar.sandoval@gmx.com.mx",
-                               "oscar.sandoval@gmx.com.mx",
-                               Nothing,
-                               Nothing,
-                               "Registro de Órden de Pago",
-                               "Cod Usuario: " & Master.cod_usuario & vbCrLf & "Usuario:" & Master.Usuario & vbCrLf & "Órden de Pago No: " & strOrdenPago,
-                               Nothing)
+                'Mail.enviaMail("GMXQROSVRVMBX2.GMX.COM.MX",
+                '               "25",
+                '               "oscar.sandoval@gmx.com.mx",
+                '               "2002351340Man",
+                '               "oscar.sandoval@gmx.com.mx",
+                '               "oscar.sandoval@gmx.com.mx",
+                '               Nothing,
+                '               Nothing,
+                '               "Registro de Órden de Pago",
+                '               "Cod Usuario: " & Master.cod_usuario & vbCrLf & "Usuario:" & Master.Usuario & vbCrLf & "Órden de Pago No: " & strOrdenPago,
+                '               Nothing)
 
                 Dim server As String = "http://siigmxapp02/ReportServer_SIIGMX02?%2fReportesGMX%2fOrdenPago&rs%3AFormat=PDF&rc:Parameters=false&nro_op=@nro_op"
                 ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "ImprimirOrden", "ImprimirOrden('" & server & "','" & strOrdenPago & "');", True)
@@ -1402,7 +1537,7 @@ Partial Class Pages_OrdenPago
                                       ByVal impCambio As Double, ByVal cod_broker As Integer, ByVal Broker As String, ByVal cod_suc As Integer,
                                       ByVal id_persona As Integer, ByVal nro_nit As String, ByVal Cuenta As String, ByVal Swift As String, ByVal id_Cuenta As Integer,
                                       ByVal cod_banco As Integer, ByVal FechaPago As String, ByVal sn_transferencia As Integer,
-                                      ByVal MontosGen() As String, ByVal MontosReas() As String, ByVal MontosISR() As String) As String
+                                      ByVal MontosGen() As String, ByVal MontosReas() As String, ByVal MontosISR() As String, ByVal MontosImputacion() As String) As String
         Dim sCnn As String = ""
         Dim sSel As String
         Dim nro_op As Integer
@@ -1453,7 +1588,7 @@ Partial Class Pages_OrdenPago
         '--------------------------------------------------------------------MOVIMIENTOS-----------------------------------------------------
         If nro_op > 0 Then
 
-            If InsertaMovimientos(id_imputacion, MontosGen, MontosReas, MontosISR, nro_op) = False Then
+            If InsertaMovimientos(nro_op, id_imputacion, MontosGen, MontosReas, MontosISR, MontosImputacion) = False Then
                 Return ""
             Else
                 InsertaMovimientosResp(nro_op, id_imputacion, MontosGen, MontosReas, MontosISR)
@@ -1549,7 +1684,8 @@ Partial Class Pages_OrdenPago
         Return CInt(dtRes.Rows(0)(0))
     End Function
 
-    Private Function InsertaMovimientos(ByVal id_imputacion As Integer, ByVal MontosGen() As String, ByVal MontosReas() As String, ByVal MontosISR() As String, Optional ByVal nro_op As Integer = 0) As Boolean
+    Private Function InsertaMovimientos(ByVal nro_op As Integer, ByVal id_imputacion As Integer, ByVal MontosGen() As String, ByVal MontosReas() As String,
+                                        ByVal MontosISR() As String, ByVal MontosImputacion() As String) As Boolean
         Dim sCnn As String = ""
         Dim Resultado As String
         Dim Comando As SqlClient.SqlCommand
@@ -1583,6 +1719,15 @@ Partial Class Pages_OrdenPago
                 If Len(MontosISR(pagina)) > 0 Then
                     DatosMontos = Mid(MontosISR(pagina), 1, Len(MontosISR(pagina)) - 1)
                     Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_contable','" & id_imputacion & "','" & DatosMontos & "'", conn)
+                    Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+                End If
+            Next
+
+            'MOVIMIENTOS IMPUTACION---------------------------------------------------------------------------------------------------------
+            For pagina = 0 To UBound(MontosImputacion)
+                If Len(MontosImputacion(pagina)) > 0 Then
+                    DatosMontos = Mid(MontosImputacion(pagina), 1, Len(MontosImputacion(pagina)) - 1)
+                    Comando = New SqlClient.SqlCommand("spI_OfGread 'mop_imputaciones','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
                     Resultado = Convert.ToInt32(Comando.ExecuteScalar())
                 End If
             Next
@@ -1916,11 +2061,29 @@ Partial Class Pages_OrdenPago
                                                         .cod_cptoCom = p("cod_cptoCom"),
                                                         .ConceptoComision = p("ConceptoComision"),
                                                         .imp_cambio = p("imp_cambio"),
-                                                        .Version = p("Version")
+                                                        .Version = p("Version"),
+                                                        .nro_recibo = p("nro_recibo"),
+                                                        .fec_cob_pago = p("fec_cob_pago"),
+                                                        .MontoISR = p("MontoISR"),
+                                                        .cod_broker = p("cod_cia_reas_brok"),
+                                                        .Broker = p("Broker"),
+                                                        .cod_cia = p("cod_cia_reas_cia"),
+                                                        .Compañia = p("Compañia"),
+                                                        .id_persona = p("id_persona"),
+                                                        .nro_nit = p("nro_nit"),
+                                                        .cod_cta_cb = p("cod_cta_cb"),
+                                                        .cod_deb_cred = p("cod_deb_cred"),
+                                                        .banco = p("banco"),
+                                                        .cuenta = p("cuenta"),
+                                                        .id_cuenta = p("id_cuenta"),
+                                                        .cod_banco = p("cod_banco"),
+                                                        .txt_swift = p("txt_swift")
                                            })
                             Select q.sn_Seleccion, q.PrimaCedida, q.Comision, q.PrimaCedidaCiaBrok, q.ComisionCiaBrok,
                                    q.cod_moneda, q.Moneda, q.nro_cuota_reas, q.nro_cuota, q.nro_subcuota, q.fecha, q.pje_pri, q.pje_com, q.nro_op, q.cod_estatus_op,
-                                   q.fec_pago, q.fec_baja, q.blnPendiente, q.sn_Origen, q.cod_cptoPri, q.ConceptoPrima, q.cod_cptoCom, q.ConceptoComision, q.imp_cambio, q.Version
+                                   q.fec_pago, q.fec_baja, q.blnPendiente, q.sn_Origen, q.cod_cptoPri, q.ConceptoPrima, q.cod_cptoCom, q.ConceptoComision, q.imp_cambio, q.Version,
+                                   q.nro_recibo, q.fec_cob_pago, q.MontoISR, q.cod_broker, q.Broker, q.cod_cia, q.Compañia, q.id_persona, q.nro_nit, q.cod_cta_cb, q.cod_deb_cred,
+                                   q.banco, q.cuenta, q.id_cuenta, q.cod_banco, q.txt_swift
 
 
 
@@ -1933,7 +2096,9 @@ Partial Class Pages_OrdenPago
                     dtCuotas.Rows.Add(Item.sn_Seleccion, Item.PrimaCedidaCiaBrok, Item.ComisionCiaBrok, Item.PrimaCedida, Item.Comision,
                                       Item.cod_moneda, Item.Moneda, Item.nro_cuota_reas, Item.nro_cuota, Item.nro_subcuota, Item.fecha, Item.pje_pri, Item.pje_com,
                                       Item.blnPendiente, Item.nro_op, Item.cod_estatus_op, Item.fec_pago, Item.fec_baja, Item.sn_Origen,
-                                      Item.cod_cptoPri, Item.ConceptoPrima, Item.cod_cptoCom, Item.ConceptoComision, Item.imp_cambio, 0, Item.Version)
+                                      Item.cod_cptoPri, Item.ConceptoPrima, Item.cod_cptoCom, Item.ConceptoComision, Item.imp_cambio, 0, Item.Version,
+                                      Item.nro_recibo, Item.fec_cob_pago, Item.MontoISR, Item.cod_broker, Item.Broker, Item.cod_cia, Item.Compañia, Item.id_persona, Item.nro_nit,
+                                      Item.cod_cta_cb, Item.cod_deb_cred, Item.banco, Item.cuenta, Item.id_cuenta, Item.cod_banco, Item.txt_swift)
                 Next
 
                 gvd_Cuotas.DataSource = dtCuotas
@@ -1964,10 +2129,14 @@ Partial Class Pages_OrdenPago
 
                 Dim chk_SelCuota As CheckBox = TryCast(e.Row.FindControl("chk_SelCuota"), CheckBox)
                 Dim btn_BorrarCuota As ImageButton = TryCast(e.Row.FindControl("btn_BorrarCuota"), ImageButton)
+                Dim btn_Impuesto As ImageButton = TryCast(e.Row.FindControl("btn_Impuesto"), ImageButton)
 
                 Dim lbl_prcPri As TextBox = TryCast(e.Row.FindControl("lbl_prcPri"), TextBox)
                 Dim lbl_prcCom As TextBox = TryCast(e.Row.FindControl("lbl_prcCom"), TextBox)
                 Dim lbl_Fecha As TextBox = TryCast(e.Row.FindControl("lbl_Fecha"), TextBox)
+                Dim lbl_FecAplicado As TextBox = TryCast(e.Row.FindControl("lbl_FecAplicado"), TextBox)
+
+                Dim lbl_ISR As TextBox = TryCast(e.Row.FindControl("lbl_ISR"), TextBox)
 
                 If blnPendiente = "1" Then
                     lbl_Cuota.BackColor = Drawing.Color.OrangeRed
@@ -1979,24 +2148,48 @@ Partial Class Pages_OrdenPago
                     lbl_Prima.ForeColor = Drawing.Color.White
                     lbl_Comision.ForeColor = Drawing.Color.White
                     txt_Cuota.Visible = False
+                    btn_Impuesto.Visible = False
                 Else
                     If lbl_OrdenPago.Text <> "0" Then
+
                         If cod_estatus_op = 1 Or cod_estatus_op = 2 Then
                             lbl_Cuota.BackColor = Drawing.Color.Yellow
                             lbl_Prima.BackColor = Drawing.Color.Yellow
                             lbl_Comision.BackColor = Drawing.Color.Yellow
                             lbl_OrdenPago.BackColor = Drawing.Color.Yellow
                         Else
-                            txt_Cuota.Enabled = IIf(cod_estatus_op = 7, False, True)
-                            lbl_Cuota.BackColor = IIf(cod_estatus_op = 7, Drawing.Color.LightGreen, Drawing.Color.Green)
-                            lbl_Prima.BackColor = IIf(cod_estatus_op = 7, Drawing.Color.LightGreen, Drawing.Color.Green)
-                            lbl_Comision.BackColor = IIf(cod_estatus_op = 7, Drawing.Color.LightGreen, Drawing.Color.Green)
-                            lbl_OrdenPago.BackColor = IIf(cod_estatus_op = 7, Drawing.Color.LightGreen, Drawing.Color.Green)
+                            If txt_Cuota.Text = "98" Then
+                                lbl_Cuota.BackColor = Drawing.Color.Red
+                                lbl_Prima.BackColor = Drawing.Color.Red
+                                lbl_Comision.BackColor = Drawing.Color.Red
+                                lbl_OrdenPago.BackColor = Drawing.Color.Red
 
-                            lbl_Cuota.ForeColor = IIf(cod_estatus_op = 7, Drawing.Color.DarkBlue, Drawing.Color.White)
-                            lbl_Prima.ForeColor = IIf(cod_estatus_op = 7, Drawing.Color.DarkBlue, Drawing.Color.White)
-                            lbl_Comision.ForeColor = IIf(cod_estatus_op = 7, Drawing.Color.DarkBlue, Drawing.Color.White)
-                            lbl_OrdenPago.ForeColor = IIf(cod_estatus_op = 7, Drawing.Color.DarkBlue, Drawing.Color.White)
+                                lbl_Cuota.ForeColor = Drawing.Color.White
+                                lbl_Prima.ForeColor = Drawing.Color.White
+                                lbl_Comision.ForeColor = Drawing.Color.White
+                                lbl_OrdenPago.ForeColor = Drawing.Color.White
+                            Else
+                                txt_Cuota.Enabled = IIf(cod_estatus_op = 7, False, True)
+                                lbl_Cuota.BackColor = IIf(cod_estatus_op = 7, Drawing.Color.LightGreen, Drawing.Color.Green)
+                                lbl_Prima.BackColor = IIf(cod_estatus_op = 7, Drawing.Color.LightGreen, Drawing.Color.Green)
+                                lbl_Comision.BackColor = IIf(cod_estatus_op = 7, Drawing.Color.LightGreen, Drawing.Color.Green)
+                                lbl_OrdenPago.BackColor = IIf(cod_estatus_op = 7, Drawing.Color.LightGreen, Drawing.Color.Green)
+
+                                lbl_Cuota.ForeColor = IIf(cod_estatus_op = 7, Drawing.Color.DarkBlue, Drawing.Color.White)
+                                lbl_Prima.ForeColor = IIf(cod_estatus_op = 7, Drawing.Color.DarkBlue, Drawing.Color.White)
+                                lbl_Comision.ForeColor = IIf(cod_estatus_op = 7, Drawing.Color.DarkBlue, Drawing.Color.White)
+                                lbl_OrdenPago.ForeColor = IIf(cod_estatus_op = 7, Drawing.Color.DarkBlue, Drawing.Color.White)
+                            End If
+                        End If
+
+                        If txt_Cuota.Text = "98" Then
+                            txt_Cuota.Enabled = False
+                        End If
+
+                        If lbl_ISR.Text > 0 And lbl_FecAplicado.Text <> "0" And Len(lbl_FecAplicado.Text) > 0 Then
+                            btn_Impuesto.Visible = True
+                        Else
+                            btn_Impuesto.Visible = False
                         End If
 
                         lbl_Cuota.Visible = False
@@ -2012,6 +2205,7 @@ Partial Class Pages_OrdenPago
                         lbl_Fecha.Enabled = False
                     Else
                         txt_Cuota.Visible = False
+                        btn_Impuesto.Visible = False
                     End If
                 End If
 
@@ -2180,6 +2374,22 @@ Partial Class Pages_OrdenPago
         dtCuotas.Columns.Add("imp_cambio")
         dtCuotas.Columns.Add("sn_cambio")
         dtCuotas.Columns.Add("Version")
+        dtCuotas.Columns.Add("nro_recibo")
+        dtCuotas.Columns.Add("fec_cob_pago")
+        dtCuotas.Columns.Add("MontoISR")
+        dtCuotas.Columns.Add("cod_broker")
+        dtCuotas.Columns.Add("Broker")
+        dtCuotas.Columns.Add("cod_cia")
+        dtCuotas.Columns.Add("Compañia")
+        dtCuotas.Columns.Add("id_persona")
+        dtCuotas.Columns.Add("nro_nit")
+        dtCuotas.Columns.Add("cod_cta_cb")
+        dtCuotas.Columns.Add("cod_deb_cred")
+        dtCuotas.Columns.Add("banco")
+        dtCuotas.Columns.Add("cuenta")
+        dtCuotas.Columns.Add("id_cuenta")
+        dtCuotas.Columns.Add("cod_banco")
+        dtCuotas.Columns.Add("txt_swift")
 
         Return dtCuotas
     End Function
@@ -2222,6 +2432,30 @@ Partial Class Pages_OrdenPago
         Dim imp_cambio As Double = 0
         Dim imp_cambio_actual = hid_TipoCambio.Value
         Dim Version As Integer = 1
+
+        Dim nro_recibo As Integer = 0
+        Dim fec_cob_pago As String = ""
+        Dim MontoISR As Double = 0
+
+        Dim cod_broker As Integer = 0
+        Dim Broker As String = ""
+
+        Dim cod_cia As Integer = 0
+        Dim Compañia As String = ""
+
+        Dim id_persona As Integer = 0
+        Dim nro_nit As String = ""
+
+        Dim cod_cta_cb As String = ""
+        Dim cod_deb_cred As String = ""
+
+        Dim banco As String = ""
+        Dim cuenta As String = ""
+        Dim id_cuenta As Integer = 0
+        Dim cod_banco As Integer = 0
+        Dim txt_swift As Integer = 0
+
+
 
         Dim dtCuotas As DataTable
         dtCuotas = New DataTable
@@ -2285,7 +2519,7 @@ Partial Class Pages_OrdenPago
                 dtCuotas.Rows.Add(False, hid_Prima.Text, hid_Comision.Text, Replace(lbl_Prima.Text, ",", ""), Replace(lbl_Comision.Text, ",", ""), cod_moneda, Moneda,
                                   nro_cuota, nro_CuotaAux, SubCuotaMaxima + 1, Now, Replace(lbl_prcPri.Text, ",", ""), Replace(lbl_prcCom.Text, ",", ""), False, "0", 0, "", "", "",
                                   hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value,
-                                  IIf(cod_moneda = 0, 1, imp_cambio_actual), 0, Version)
+                                  IIf(cod_moneda = 0, 1, imp_cambio_actual), 0, Version, 0, "", 0, 0, "", 0, "", 0, "", "", "", "", "", 0, 0, 0)
             End If
 
             nro_CuotaAux = hid_Cuota.Text
@@ -2317,7 +2551,28 @@ Partial Class Pages_OrdenPago
             fec_baja = GridView.DataKeys(Row.RowIndex)("fec_baja")
             sn_Origen = GridView.DataKeys(Row.RowIndex)("sn_Origen")
             imp_cambio = GridView.DataKeys(Row.RowIndex)("imp_cambio")
-            Version = GridView.DataKeys(Row.RowIndex)("imp_cambio")
+            Version = GridView.DataKeys(Row.RowIndex)("Version")
+
+            nro_recibo = GridView.DataKeys(Row.RowIndex)("nro_recibo")
+            fec_cob_pago = GridView.DataKeys(Row.RowIndex)("fec_cob_pago")
+            MontoISR = GridView.DataKeys(Row.RowIndex)("MontoISR")
+
+            cod_broker = GridView.DataKeys(Row.RowIndex)("cod_broker")
+            Broker = GridView.DataKeys(Row.RowIndex)("Broker")
+            cod_cia = GridView.DataKeys(Row.RowIndex)("cod_cia")
+            Compañia = GridView.DataKeys(Row.RowIndex)("Compañia")
+
+            id_persona = GridView.DataKeys(Row.RowIndex)("id_persona")
+            nro_nit = GridView.DataKeys(Row.RowIndex)("nro_nit")
+
+            cod_cta_cb = GridView.DataKeys(Row.RowIndex)("cod_cta_cb")
+            cod_deb_cred = GridView.DataKeys(Row.RowIndex)("cod_deb_cred")
+
+            banco = GridView.DataKeys(Row.RowIndex)("banco")
+            cuenta = GridView.DataKeys(Row.RowIndex)("cuenta")
+            id_cuenta = GridView.DataKeys(Row.RowIndex)("id_cuenta")
+            cod_banco = GridView.DataKeys(Row.RowIndex)("cod_banco")
+            txt_swift = GridView.DataKeys(Row.RowIndex)("txt_swift")
 
             'Divide la Cuota y la subcuota
             If nro_cuota = hid_Cuota.Text And nro_subcuota = hid_subcuota.Value And blnAdd = True Then
@@ -2330,7 +2585,9 @@ Partial Class Pages_OrdenPago
             dtCuotas.Rows.Add(chk_SelCuota.Checked, hid_Prima.Text, hid_Comision.Text, Replace(lbl_Prima.Text, ",", ""), Replace(lbl_Comision.Text, ",", ""),
                               cod_moneda, Moneda, lbl_Cuota.Text, hid_Cuota.Text, hid_subcuota.Value, lbl_Fecha.Text, Replace(lbl_prcPri.Text, ",", ""),
                               Replace(lbl_prcCom.Text, ",", ""), blnPendiente, lbl_OrdenPago.Text, cod_estatus_op, fec_pago, fec_baja, sn_Origen,
-                              hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value, imp_cambio, hid_Cambio.Text, Version)
+                              hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value, imp_cambio, hid_Cambio.Text, Version,
+                              nro_recibo, fec_cob_pago, MontoISR, cod_broker, Broker, cod_cia, Compañia, id_persona, nro_nit, cod_cta_cb, cod_deb_cred,
+                              banco, cuenta, id_cuenta, cod_banco, txt_swift)
         Next
 
         'Valida si se añade o se duplica
@@ -2339,14 +2596,14 @@ Partial Class Pages_OrdenPago
                 dtCuotas.Rows.Add(False, hid_Prima.Text, hid_Comision.Text, Replace(hid_Prima.Text, ",", "") * (PrcPri / 100), Replace(hid_Comision.Text, ",", "") * (PrcCom / 100), cod_moneda, Moneda,
                                   lbl_Cuota.Text + 1, hid_Cuota.Text + 1, 0, Now, PrcPri, PrcCom, False, "0", 0, "", "", "",
                                   hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value,
-                                  IIf(cod_moneda = 0, 1, imp_cambio_actual), 0, Version)
+                                  IIf(cod_moneda = 0, 1, imp_cambio_actual), 0, Version, 0, "", 0, 0, "", 0, "", 0, "", "", "", "", "", 0, 0, 0)
             Else
                 'Valida si la ultima cuota es la duplicada
                 If hid_Cuota.Text = nro_cuota And hid_subcuota.Value = nro_subcuota Then
                     dtCuotas.Rows.Add(False, hid_Prima.Text, hid_Comision.Text, Replace(lbl_Prima.Text, ",", ""), Replace(lbl_Comision.Text, ",", ""), cod_moneda, Moneda,
                                       lbl_Cuota.Text, hid_Cuota.Text, SubCuotaMaxima + 1, Now, Replace(lbl_prcPri.Text, ",", ""), Replace(lbl_prcCom.Text, ",", ""), False, "0", 0, "", "", "",
                                       hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value,
-                                      IIf(cod_moneda = 0, 1, imp_cambio_actual), 0, Version)
+                                      IIf(cod_moneda = 0, 1, imp_cambio_actual), 0, Version, 0, "", 0, 0, "", 0, "", 0, "", "", "", "", "", 0, 0, 0)
                 End If
             End If
         End If
@@ -2393,6 +2650,28 @@ Partial Class Pages_OrdenPago
         Dim imp_cambio As Double = 0
         Dim Version As Integer = 0
 
+        Dim nro_recibo As Integer = 0
+        Dim fec_cob_pago As String = ""
+        Dim MontoISR As Double = 0
+
+        Dim cod_broker As Integer = 0
+        Dim Broker As String = ""
+
+        Dim cod_cia As Integer = 0
+        Dim Compañia As String = ""
+
+        Dim id_persona As Integer = 0
+        Dim nro_nit As String = ""
+
+        Dim cod_cta_cb As String = ""
+        Dim cod_deb_cred As String = ""
+
+        Dim banco As String = ""
+        Dim cuenta As String = ""
+        Dim id_cuenta As Integer = 0
+        Dim cod_banco As Integer = 0
+        Dim txt_swift As Integer = 0
+
         Dim dtCuotas As DataTable
         dtCuotas = New DataTable
 
@@ -2432,17 +2711,42 @@ Partial Class Pages_OrdenPago
             imp_cambio = GridView.DataKeys(Row.RowIndex)("imp_cambio")
             Version = GridView.DataKeys(Row.RowIndex)("Version")
 
+            nro_recibo = GridView.DataKeys(Row.RowIndex)("nro_recibo")
+            fec_cob_pago = GridView.DataKeys(Row.RowIndex)("fec_cob_pago")
+            MontoISR = GridView.DataKeys(Row.RowIndex)("MontoISR")
+
+            cod_broker = GridView.DataKeys(Row.RowIndex)("cod_broker")
+            Broker = GridView.DataKeys(Row.RowIndex)("Broker")
+            cod_cia = GridView.DataKeys(Row.RowIndex)("cod_cia")
+            Compañia = GridView.DataKeys(Row.RowIndex)("Compañia")
+
+            id_persona = GridView.DataKeys(Row.RowIndex)("id_persona")
+            nro_nit = GridView.DataKeys(Row.RowIndex)("nro_nit")
+
+            cod_cta_cb = GridView.DataKeys(Row.RowIndex)("cod_cta_cb")
+            cod_deb_cred = GridView.DataKeys(Row.RowIndex)("cod_deb_cred")
+
+            banco = GridView.DataKeys(Row.RowIndex)("banco")
+            cuenta = GridView.DataKeys(Row.RowIndex)("cuenta")
+            id_cuenta = GridView.DataKeys(Row.RowIndex)("id_cuenta")
+            cod_banco = GridView.DataKeys(Row.RowIndex)("cod_banco")
+            txt_swift = GridView.DataKeys(Row.RowIndex)("txt_swift")
+
             If nro_CuotaAux <> nro_cuota Then
                 dtCuotas.Rows.Add(chk_SelCuota.Checked, hid_Prima.Text, hid_Comision.Text, lbl_Prima.Text, lbl_Comision.Text,
                                   cod_moneda, Moneda, lbl_Cuota.Text, hid_Cuota.Text, hid_subcuota.Value, lbl_Fecha.Text, lbl_prcPri.Text,
                                   lbl_prcCom.Text, blnPendiente, lbl_OrdenPago.Text, cod_estatus_op, fec_pago, fec_baja, sn_Origen,
-                                  hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value, imp_cambio, hid_Cambio.Text, Version)
+                                  hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value, imp_cambio,
+                                  hid_Cambio.Text, Version, nro_recibo, fec_cob_pago, MontoISR, cod_broker, Broker, cod_cia, Compañia, id_persona, nro_nit,
+                                  cod_cta_cb, cod_deb_cred, banco, cuenta, id_cuenta, cod_banco, txt_swift)
             Else
                 If hid_subcuota.Value <> nro_subcuota Then
                     dtCuotas.Rows.Add(chk_SelCuota.Checked, hid_Prima.Text, hid_Comision.Text, lbl_Prima.Text, lbl_Comision.Text,
                                   cod_moneda, Moneda, lbl_Cuota.Text, hid_Cuota.Text, hid_subcuota.Value, lbl_Fecha.Text, lbl_prcPri.Text,
                                   lbl_prcCom.Text, blnPendiente, lbl_OrdenPago.Text, cod_estatus_op, fec_pago, fec_baja, sn_Origen,
-                                  hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value, imp_cambio, hid_Cambio.Text, Version)
+                                  hid_codcptoPri.Value, hid_ConceptoPrima.Value, hid_codcptoCom.Value, hid_ConceptoComision.Value, imp_cambio,
+                                  hid_Cambio.Text, Version, nro_recibo, fec_cob_pago, MontoISR, cod_broker, Broker, cod_cia, Compañia, id_persona, nro_nit,
+                                  cod_cta_cb, cod_deb_cred, banco, cuenta, id_cuenta, cod_banco, txt_swift)
                 End If
             End If
 
@@ -2491,6 +2795,33 @@ Partial Class Pages_OrdenPago
                     QuitarCuota(sender, nro_Cuota, nro_subcuota)
                 End If
 
+            ElseIf e.CommandName.Equals("Impuesto") Then
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+                txt_nroOP.Text = sender.DataKeys(Index)("nro_op")
+                hid_broker.Value = sender.DataKeys(Index)("cod_broker")
+                txt_broker.Text = sender.DataKeys(Index)("Broker")
+                hid_cia.Value = sender.DataKeys(Index)("cod_cia")
+                txt_Reasegurador.Text = sender.DataKeys(Index)("Compañia")
+                txt_Cuenta.Text = sender.DataKeys(Index)("cuenta")
+                txt_Banco.Text = sender.DataKeys(Index)("banco")
+                hid_cta_cb.Value = sender.DataKeys(Index)("cod_cta_cb")
+                hid_deb_cred.Value = sender.DataKeys(Index)("cod_deb_cred")
+                txt_ISR.Text = sender.DataKeys(Index)("MontoISR")
+                txt_FechaRet.Text = sender.DataKeys(Index)("fec_cob_pago")
+                txt_Detalle.Text = "Devolución de ISR retenido en la Orden de Pago: " & txt_nroOP.Text & " Reasegurador: " & txt_Reasegurador.Text
+                hid_persona.Value = sender.DataKeys(Index)("id_persona") & "|" &
+                                    sender.DataKeys(Index)("nro_nit")
+                hid_cuenta.Value = sender.DataKeys(Index)("id_cuenta") & "|" &
+                                   sender.DataKeys(Index)("cod_banco") & "|" &
+                                   sender.DataKeys(Index)("txt_swift") & "|"
+                hid_adicional.Value = sender.DataKeys(Index)("cod_moneda") & "|" &
+                                      sender.DataKeys(Index)("nro_cuota_reas") & "|" &
+                                      String.Format("{0:dd/MM/yyyy}", CDate(sender.DataKeys(Index)("fecha"))) & "|" &
+                                      sender.DataKeys(Index)("pje_pri") & "|" &
+                                      sender.DataKeys(Index)("pje_com") & "|" &
+                                      sender.DataKeys(Index)("cod_cptoPri") & "|" &
+                                      sender.DataKeys(Index)("cod_cptoCom") & "|" &
+                                      sender.DataKeys(Index)("imp_cambio")
             End If
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-: ROWCOMMAND CUOTAS", ex.Message)
@@ -2816,9 +3147,9 @@ Partial Class Pages_OrdenPago
 
                 'Evalua si se trata de una exhibicion nueva, o de la corrección de una exhibicion.
                 sn_Origen = gvd_Cuotas.DataKeys(RowCuotas.RowIndex)("sn_Origen")
-                If ((sn_Origen = "" Or sn_Origen = "0") Or (sn_cambio = "1") Or (nro_cuota <> nro_cuota_reas) Or (Val(pje_pri) = 0 And Val(pje_com) = 0)) And nro_cuota <> 99 Then
+                If ((sn_Origen = "" Or sn_Origen = "0") Or (sn_cambio = "1") Or (nro_cuota <> nro_cuota_reas) Or (Val(pje_pri) = 0 And Val(pje_com) = 0)) And nro_cuota <> 98 And nro_cuota <> 99 Then
                     strExhibicionAdd = strExhibicionAdd & "(@strKey," & cod_cia_reas_brok & "," & cod_cia_reas_cia & "," &
-                                                                        nro_cuota & "," & nro_cuota_reas & "," & nro_subcuota & ",''" & fecha & "''," &
+                                                                        nro_cuota & "," & nro_cuota_reas & "," & IIf(Val(pje_pri) = 0 And Val(pje_com) = 0, -1, nro_subcuota) & ",''" & fecha & "''," &
                                                                         PrimaCedidaCiaBrok * (pje_pri / 100) & "," & pje_pri & "," & pje_com & "),"
                 End If
             Next
@@ -4269,6 +4600,23 @@ Partial Class Pages_OrdenPago
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-:  ", ex.Message)
             LogError("(gvd_GrupoPolizas_RowCommand)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub btn_GenerarDev_Click(sender As Object, e As EventArgs) Handles btn_GenerarDev.Click
+        Try
+            If IsDate(txt_FechaPago.Text) And Len(txt_Cuenta.Text) > 0 Then
+                GenerarDevolucion()
+
+                gvd_CiasXBroker.DataSource = ConsultaDetalle(hid_idPv.Value, txt_Capa.Text, Val(txt_Ramo.Text), txt_Contrato.Text, hid_nrotramo.Value, 0, 0, hid_nroreas.Value)
+                gvd_CiasXBroker.DataBind()
+            Else
+                Mensaje("ORDEN DE PAGO-:  ", "Se debe capturar la Fecha de Pago y seleccionar una Cuenta valida")
+            End If
+
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(btn_GenerarDev_Click)" & ex.Message)
         End Try
     End Sub
 

@@ -261,7 +261,7 @@
                                         <div class="row">
                                              <div class="col-md-3">
                                                         <div class="input-group">
-                                                            <asp:label runat="server" class="col-md-1 control-label" Width="80px">Solicita</asp:label>
+                                                            <asp:label runat="server" class="col-md-1 control-label" Width="80px">Reaseguro</asp:label>
                                                             <asp:TextBox runat="server" ID="txt_Solicita" Enabled="false"  CssClass="form-control LetraDetalle" Width="160px" Height="20px" ></asp:TextBox>
                                                             <div class="clear padding3"></div>
                                                             <asp:label runat="server" class="col-md-1 control-label" Width="80px">Tesoreria</asp:label>

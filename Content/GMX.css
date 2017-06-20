@@ -882,8 +882,14 @@ button.close {
     opacity: 0.95; filter: alpha(opacity=95); -moz-opacity: 0.8;
 }
 
+.modalMensaje{
+	border-radius: 11px; left: 50%; top: 10%; margin-left: -150px; position: fixed; z-index: 10000; background-color: rgb(255, 255, 255); 
+    -moz-border-radius: 11px; -webkit-border-radius: 11px; display:none;overflow:hidden;-webkit-overflow-scrolling:touch;outline:0;
+    opacity: 0.95; filter: alpha(opacity=95); -moz-opacity: 0.8;
+}
+
 .modalAutoriza{
-	border-radius: 11px; left: 50%; top: 10%; margin-left: -150px; position: fixed; z-index: 5; background-color: rgb(255, 255, 255); 
+	border-radius: 11px; left: 45%; top: 10%; margin-left: -150px; position: fixed; z-index: 5; background-color: rgb(255, 255, 255); 
     -moz-border-radius: 11px; -webkit-border-radius: 11px; display:none;overflow:hidden;-webkit-overflow-scrolling:touch;outline:0;
     opacity: 0.95; filter: alpha(opacity=95); -moz-opacity: 0.8;
 }
@@ -897,7 +903,7 @@ button.close {
 
 
 .modalExhibiciones{
-	border-radius: 11px; left: 30%; top: 0%; margin-left: -150px; position: fixed; z-index: 5; background-color: rgb(255, 255, 255); 
+	border-radius: 11px; left: 20%; top: 0%; margin-left: -150px; position: fixed; z-index: 5; background-color: rgb(255, 255, 255); 
     -moz-border-radius: 11px; -webkit-border-radius: 11px; display:none;overflow:hidden;-webkit-overflow-scrolling:touch;outline:0;
     opacity: 0.95; filter: alpha(opacity=95); -moz-opacity: 0.8;
 }
