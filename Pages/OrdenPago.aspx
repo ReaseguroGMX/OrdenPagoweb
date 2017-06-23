@@ -854,7 +854,10 @@
                                         </div>
                                         <asp:Label runat="server" ID="lbl_CancelaPoliza"  Text="" CssClass="form-control PieCentro"  Font-Bold="true" ForeColor="Red"  BackColor="LightBlue"  ></asp:Label>                                                                                            
                                         <asp:Label runat="server" ID="lbl_TitMonto"  Text="Monto a Generar:" CssClass="form-control PieCentro"  Font-Bold="true" ForeColor="Red"  BackColor="LightBlue"  ></asp:Label>                                                                                            
-                                        <asp:Textbox runat="server" ID="lbl_Total2" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Parcial")))  %>' CssClass="form-control PieTotal MontoGenerar"  Font-Bold="true" ForeColor="Red"  BackColor="LightBlue"  ></asp:Textbox>
+                                        <div class="input-group">
+                                            <asp:Textbox runat="server" ID="lbl_Total2" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Parcial")))  %>' Width="200px" CssClass="form-control PieTotal MontoGenerar"  Font-Bold="true" ForeColor="Red"  BackColor="LightBlue"  ></asp:Textbox>
+                                            <asp:Button runat="server" ID="btn_Resumen" Width="115px" CssClass="btn-primary PieCentro" Text="Resumen" CommandName="ResumenOP" Visible="false" />
+                                         </div>                               
                                     </ItemTemplate>
                                 </asp:TemplateField>        
 
@@ -2604,72 +2607,39 @@
    
 
     <!-- Modal -->
-    <div id="ResumenModal" style="width:920px; height:610px"  class="modalOrdenPago">
+    <div id="ResumenModal" style="width:1020px; height:610px"  class="modalOrdenPago">
             <div class="modal-header" style="height:40px">
                 <button type="button" class="close"  data-dismiss="modal">&times;</button>
                 <h4 class="modal-title"><label style="color:darkblue;">Resumen de Órden de Pago</label></h4>
             </div>
 
             <div class="modal-body" style="height:568px">
-                <asp:UpdatePanel runat="server" ID="UpdatePanel1">
+                <asp:UpdatePanel runat="server" ID="upResumen">
                     <ContentTemplate>
-                        <table>
-                            <tr>
-                                <td>
-                                    <asp:label ID="Label1" runat="server" class="col-md-1 control-label" Width="120px">Generar por: </asp:label>
-                                    <asp:DropDownList runat="server" ID="DropDownList1" CssClass="form-control" Font-Size="12px"  Width="140px" AutoPostBack="true"  Height="26px">
-                                        <asp:ListItem Text="Endoso" Value="EN" Selected="True" />
-                                        <asp:ListItem Text="Grupo de Endosos" Value="GE" />
-                                        <asp:ListItem Text="Grupo de Pólizas" Value="GP" />
-                                    </asp:DropDownList> 
-                                </td>
-                                <td>
-                                    <asp:label runat="server" ID="Label2" class="col-md-1 control-label" Width="90px" Visible="false">Cuotas</asp:label>
-                                    <asp:DropDownList runat="server" ID="DropDownList2" CssClass="form-control" Width="100px" Visible="false" Height="26px"></asp:DropDownList>
-                                </td>
-                                <td>
-                                    <asp:Button runat="server" ID="Button1" Text="Evaluar" CssClass="form-control btn-primary" Visible="false" Width="90px" Height="26px" />
-                                </td>
-                                <td>
-                                    <asp:label runat="server" ID="Label3" class="col-md-1 control-label" Width="100px">Monto = </asp:label>
-                                    <asp:label runat="server" ID="Label4" Text="" class="control-label" Font-Bold="true" ForeColor="DarkBlue" BackColor="LightBlue"/>
-                                </td>
-                                <td>
-                                    <asp:label runat="server" ID="Label5" class="col-md-1 control-label" Width="100px">Impuesto = </asp:label>
-                                    <asp:label runat="server" ID="Label6" Text="" class="control-label" Font-Bold="true" ForeColor="DarkBlue" BackColor="LightBlue"/>
-                                </td>
-                                 <td>
-                                    <asp:label runat="server" ID="Label7" class="col-md-1 control-label" Width="130px">Total a Pagar = </asp:label>
-                                    <asp:label runat="server" ID="Label8" Text="" class="control-label" Font-Bold="true" ForeColor="DarkBlue" BackColor="LightBlue"/>
-                                </td>
-                            </tr>
-                        </table>
-                      
-                        <div class="clear padding10"></div>
 
-                        <asp:Panel runat="server" ID="pnl_Resumen" Width="100%" Height="450px" ScrollBars="Vertical">
+                        <asp:Panel runat="server" ID="pnl_Resumen" Width="100%" Height="500px" ScrollBars="Vertical">
                             <asp:GridView runat="server" ID="gvd_Resumen" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true"
                                           DataKeyNames="id_pv,cod_ramo_contable,nro_tramo,cod_broker,cod_cia,cod_moneda"  >
                                 <RowStyle BackColor="#F7F6F3" ForeColor="#333333"  />
                                 <Columns>
                                     <asp:TemplateField HeaderText="Póliza">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Poliza" Text='<%# Eval("poliza") %>' Width="80px" Height="22px"  CssClass="form-control" Enabled="false" Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Poliza" Text='<%# Eval("poliza") %>' Width="100px" Height="22px"  CssClass="form-control" Enabled="false" Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Ajuste">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Ajuste" Text='<%# Eval("nro_reas") %>' Width="50px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Ajuste" Text='<%# Eval("nro_reas") %>' Width="40px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Capa">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Capa" Text='<%# Eval("nro_layer") %>' Width="50px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Capa" Text='<%# Eval("nro_layer") %>' Width="40px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Ramo Contable">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_ramo" Text='<%# Eval("ramo_contable") %>' Width="150px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_ramo" Text='<%# Eval("ramo_contable") %>' Width="120px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Contrato">
@@ -2679,12 +2649,12 @@
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Broker">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Broker" Text='<%# Eval("broker") %>' Width="200px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Broker" Text='<%# Eval("broker") %>' Width="120px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                      <asp:TemplateField HeaderText="Compañia">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Compañia" Text='<%# Eval("compañia") %>' Width="200px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Compañia" Text='<%# Eval("compañia") %>' Width="120px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Cuota">
@@ -2695,34 +2665,34 @@
                                     <asp:TemplateField HeaderText="%Pri">
                                         <ItemTemplate>
                                             <asp:textbox runat="server" ID="lbl_PrimaTotal" Text='<%# Eval("prima_total") %>' CssClass="NoDisplay" ></asp:textbox>
-                                            <asp:textbox runat="server" ID="lbl_porcPrima" Text='<%# Eval("pje_pri") %>' Width="50px" Height="22px" CssClass="form-control"  Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_porcPrima" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("pje_pri")))  %>' Width="50px" Height="22px" CssClass="form-control"  Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Prima">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Prima" Text='<%# Eval("prima") %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Prima" Enabled="false" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("prima")))  %>' Width="70px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="%Com">
                                         <ItemTemplate>
                                             <asp:textbox runat="server" ID="lbl_ComisionTotal" Text='<%# Eval("comision_total") %>' CssClass="NoDisplay" ></asp:textbox>
-                                            <asp:textbox runat="server" ID="lbl_porcCom" Text='<%# Eval("pje_com") %>' Width="50px" Height="22px" CssClass="form-control"  Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_porcCom" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("pje_com")))  %>' Width="50px" Height="22px" CssClass="form-control"  Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Comision">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Comision" Text='<%# Eval("comision") %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Comision" Enabled="false" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("comision")))  %>' Width="70px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Prima Neta">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_PrimaNeta" Text='<%# Eval("prima_neta") %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_PrimaNeta" Enabled="false" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("prima_neta")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Retención">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_pjeRet" Text='<%# Eval("pje_ret") %>' CssClass="NoDisplay" ></asp:textbox>
-                                            <asp:textbox runat="server" ID="lbl_MontoISR" Text='<%# Eval("monto_isr") %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_pjeRet" Text='<%# Eval("pje_ret") %>'  CssClass="NoDisplay" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_MontoISR" Enabled="false" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("monto_isr")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                 </Columns>
@@ -2734,7 +2704,7 @@
 
                         <div class="row">        
                             <div class="col-md-10" style="border:1px solid gray; border-width: 1px 0 0 0; padding: 5px 0 0 0">
-                                <asp:Button runat="server" ID="btn_GuardaResumen" Text="Guardar"  CssClass="btn btn-success" Width="140px" />
+                                <asp:Button runat="server" ID="btn_GuardaResumen" Visible="false" Text="Guardar"  CssClass="btn btn-success" Width="140px" />
                             </div>
                             <div class="col-md-2" style="border:1px solid gray; border-width: 1px 0 0 0; padding: 5px 0 0 0">
                                  <button type="button" class="btn btn-danger" data-dismiss="modal" style="width:140px;">Cerrar</button>

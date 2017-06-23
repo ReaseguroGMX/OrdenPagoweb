@@ -130,7 +130,7 @@ Partial Class Pages_OrdenPago
                 Master.HostName = Session("HostName")
                 hid_Url.Value = "VistaOrdenPago.aspx?cod_usuario=" & Master.cod_usuario & "&Usuario=" & Master.Usuario & "&cod_suc=" & Master.cod_suc & "&cod_sector=" & Master.cod_sector
 
-                ' Verifica que se haya ingresado a partir de Login
+                'Verifica que se haya ingresado a partir de Login
                 If Master.cod_usuario = "" Then
                     ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "Redirect", "Redireccionar('Login.aspx');", True)
                 End If
@@ -647,6 +647,8 @@ Partial Class Pages_OrdenPago
                 Dim lbl_CancelaPoliza As Label = TryCast(e.Row.FindControl("lbl_CancelaPoliza"), Label)
                 Dim lbl_Total2 As TextBox = TryCast(e.Row.FindControl("lbl_Total2"), TextBox)
                 Dim lbl_TitMonto As Label = TryCast(e.Row.FindControl("lbl_TitMonto"), Label)
+                Dim btn_Resumen As Button = TryCast(e.Row.FindControl("btn_Resumen"), Button)
+
 
 
                 Dim img_Check As Image = TryCast(e.Row.FindControl("img_Check"), Image)
@@ -706,7 +708,10 @@ Partial Class Pages_OrdenPago
                         btn_GeneraOP.Enabled = False
                         lbl_CancelaPoliza.Text = "MOVIMIENTO CANCELADO"
                         lbl_Total2.Enabled = False
+                        btn_Resumen.Enabled = False
                     End If
+
+                    btn_Resumen.Visible = True
                 Else
                     'chk_DescartaPago.Visible = False
 
@@ -1195,7 +1200,7 @@ Partial Class Pages_OrdenPago
         '                          txt_ISR.Text & ",-1,''" & ConceptoISR & "''),"
 
         'MONTOS IMPUTACION SOLO SE ALMACENA DEVOLUCION DE ISR
-        Datos = InsertaOrdenPago(0, txt_ISR.Text, Adicional(0), Adicional(7),
+        Datos = InsertaOrdenPago(0, txt_ISR.Text, hid_Moneda.Value, hid_TipoCambio.Value,
                                  IIf(hid_broker.Value = 0, hid_cia.Value, hid_broker.Value),
                                  IIf(hid_broker.Value = 0, txt_Reasegurador.Text, txt_broker.Text),
                                  Split(txt_Poliza.Text, "-")(0), Persona(0), Persona(1),
@@ -2045,6 +2050,17 @@ Partial Class Pages_OrdenPago
                 Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
 
                 DetalleCobranzas(gvd_Reaseguro.DataKeys(Index)("id_pv"), gvd_Reaseguro.DataKeys(Index)("Poliza"))
+
+            ElseIf e.CommandName.Equals("ResumenOP") Then
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+                gvd_Resumen.DataSource = ConsultaResumen(gvd_Reaseguro.DataKeys(Index)("id_pv"))
+                gvd_Resumen.DataBind()
+
+                If gvd_Resumen.Rows.Count > 0 Then
+                    ScriptManager.RegisterStartupScript(Me, Me.GetType, "Open Modal Ordenes", "OpenPopup('#ResumenModal');", True)
+                Else
+                    Mensaje("ORDEN DE PAGO-:", "No hay datos temporales almacenados")
+                End If
 
             End If
         Catch ex As Exception
@@ -4787,6 +4803,29 @@ Partial Class Pages_OrdenPago
         If gvd_Retenciones.Rows.Count > 0 Then
             ConsultaRetenciones = True
         End If
+    End Function
+
+    Private Function ConsultaResumen(ByVal id_pv As Integer, Optional ByVal cod_ramo_contable As Integer = -1,
+                                     Optional ByVal id_contrato As String = "", Optional ByVal cod_broker As Integer = -1,
+                                     Optional ByVal cod_cia As Integer = -1) As DataTable
+        Dim sCnn As String
+
+        Dim dtResumen As DataTable
+        dtResumen = New DataTable
+
+        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+
+        Dim sSel As String = "spS_Resumen '" & id_pv & "'," & cod_ramo_contable & ",'" & id_contrato & "'," & cod_broker & "," & cod_cia
+        Dim da As SqlDataAdapter
+
+        dtResumen = New DataTable
+
+        da = New SqlDataAdapter(sSel, sCnn)
+
+        da.Fill(dtResumen)
+
+        Return dtResumen
+
     End Function
 
     Private Sub btn_Retenciones_Click(sender As Object, e As EventArgs) Handles btn_Retenciones.Click
