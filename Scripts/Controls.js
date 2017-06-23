@@ -51,6 +51,7 @@ $("body").on("click", ".modalExhibiciones", function () {
     $('#MensajeModal').modal('hide');
 });
 
+
 //Funciones de Consulta--------------------------------------------------------------------------------------------------------------------------------
 function load_Data(Consulta, Tipo) {
     $.ajax({
