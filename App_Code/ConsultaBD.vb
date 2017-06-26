@@ -467,6 +467,26 @@ Public Class ConsultaBD
         BorraPolNoPago = True
     End Function
 
+    Public Function ConsultaEndosos(ByVal Poliza As String) As DataTable
+        Dim sCnn As String = ""
+        Dim sSel As String
+
+        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+
+        sSel = "spS_ListaEndoso '''" & Poliza & "'''"
+
+        Dim da As SqlDataAdapter
+        Dim dtRes As DataTable
+        dtRes = New DataTable
+
+        da = New SqlDataAdapter(sSel, sCnn)
+
+        da.Fill(dtRes)
+
+        Return dtRes
+
+    End Function
+
     Public Function ConsultaPagador(ByVal id_pv As Integer) As DataTable
         Dim sCnn As String = ""
         Dim sSel As String
