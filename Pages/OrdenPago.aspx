@@ -2025,18 +2025,29 @@
    
     <div id="CobranzasModal" style="width:1300px; height:650px"  class="modalPoliza">
         <button type="button" class="close"  data-dismiss="modal">&times;</button>
-        <div class="modal-header" style="height:40px">
+        <div class="modal-header" style="height:45px">
              <asp:UpdatePanel runat="server" ID="upTitulo">
                 <ContentTemplate>
-                <h4 class="modal-title"><asp:Label runat="server" ID="lbl_PolizaCobranzas" Font-Bold="true" ForeColor="DarkBlue"></asp:Label></h4>
+                    <table>
+                        <tr>
+                            <td>
+                                <asp:HiddenField runat="server" ID="hid_Poliza" />
+                                <h4 class="modal-title"><asp:Label runat="server" ID="lbl_PolizaCobranzas" Font-Bold="true" ForeColor="DarkBlue"></asp:Label></h4>
+                            </td>
+                            <td>
+                                <asp:DropDownList runat="server" ID="ddl_Endoso" AutoPostBack="true" CssClass="form-control" Width="60px" Height="26px" Font-Size="14px" Font-Bold="true" ForeColor="DarkBlue"></asp:DropDownList>
+                            </td>
+                        </tr>
+                    </table>
                 </ContentTemplate>
             </asp:UpdatePanel>
         </div>
-
+       
 
         <div class="modal-body" style="height:598px">
             <asp:UpdatePanel runat="server" ID="upCobranzas">
                 <ContentTemplate>
+
                     <asp:Label runat="server" Text="Pagadores:" Font-Bold="true" Font-Size ="12px" ForeColor="DarkBlue"></asp:Label>
                     <asp:Panel runat="server" ID="pnlPagadores" Width="100%" Height="120px" ScrollBars="Both">
                         <asp:GridView runat="server" ID="gvd_Pagadores" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true" DataKeyNames="id_pv,cod_aseg,cod_ind_pagador" >

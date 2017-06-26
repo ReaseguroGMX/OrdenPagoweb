@@ -2049,7 +2049,13 @@ Partial Class Pages_OrdenPago
 
                 Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
 
-                DetalleCobranzas(gvd_Reaseguro.DataKeys(Index)("id_pv"), gvd_Reaseguro.DataKeys(Index)("Poliza"))
+                Dim cod_suc As Integer = gvd_Reaseguro.DataKeys(Index)("cod_suc")
+                Dim cod_ramo As Integer = gvd_Reaseguro.DataKeys(Index)("cod_ramo")
+                Dim nro_pol As Integer = gvd_Reaseguro.DataKeys(Index)("nro_pol")
+                Dim aaaa_endoso As Integer = gvd_Reaseguro.DataKeys(Index)("aaaa_endoso")
+                Dim nro_endoso As Integer = gvd_Reaseguro.DataKeys(Index)("nro_endoso")
+
+                DetalleCobranzas(gvd_Reaseguro.DataKeys(Index)("id_pv"), cod_suc & "-" & cod_ramo & "-" & nro_pol & "-" & aaaa_endoso, nro_endoso)
 
             ElseIf e.CommandName.Equals("ResumenOP") Then
                 Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
@@ -4679,11 +4685,20 @@ Partial Class Pages_OrdenPago
         End Try
     End Sub
 
-    Private Sub DetalleCobranzas(ByVal id_pv As Integer, ByVal Poliza As String)
+    Private Sub DetalleCobranzas(ByVal id_pv As Integer, ByVal Poliza As String, ByVal nro_endoso As Integer)
         Dim ConsultaBD As ConsultaBD
         ConsultaBD = New ConsultaBD
 
-        lbl_PolizaCobranzas.Text = "Detalle Cobranzas >> " & Poliza
+        hid_Poliza.Value = Poliza
+
+        lbl_PolizaCobranzas.Text = "Detalle Cobranzas >> " & Poliza & "-"
+
+        ddl_Endoso.DataValueField = "id_pv"
+        ddl_Endoso.DataTextField = "nro_endoso"
+
+        ddl_Endoso.DataSource = ConsultaBD.ConsultaEndosos(Poliza)
+        ddl_Endoso.DataBind()
+        ddl_Endoso.SelectedValue = id_pv
 
         gvd_Pagadores.DataSource = ConsultaBD.ConsultaPagador(id_pv)
         gvd_Pagadores.DataBind()
@@ -4716,7 +4731,7 @@ Partial Class Pages_OrdenPago
                 Dim aaaa_endoso As Integer = gvd_GrupoPolizas.DataKeys(Index)("aaaa_endoso")
                 Dim nro_endoso As Integer = gvd_GrupoPolizas.DataKeys(Index)("nro_endoso")
 
-                DetalleCobranzas(id_pv, cod_suc & "-" & cod_ramo & "-" & nro_pol & "-" & aaaa_endoso & "-" & nro_endoso)
+                DetalleCobranzas(id_pv, cod_suc & "-" & cod_ramo & "-" & nro_pol & "-" & aaaa_endoso, nro_endoso)
             End If
 
         Catch ex As Exception
@@ -5142,6 +5157,15 @@ Partial Class Pages_OrdenPago
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-:  ", ex.Message)
             LogError("(gvd_Acumulados_RowDataBound)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub ddl_Endoso_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddl_Endoso.SelectedIndexChanged
+        Try
+            DetalleCobranzas(ddl_Endoso.SelectedValue, hid_Poliza.Value, ddl_Endoso.Text)
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(ddl_Endoso_SelectedIndexChanged)" & ex.Message)
         End Try
     End Sub
 
