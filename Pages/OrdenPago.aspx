@@ -678,7 +678,7 @@
                                                     </asp:TemplateField>
                                                     <asp:TemplateField HeaderText="Monto">
                                                         <ItemTemplate>
-                                                            <asp:Label runat="server" ID="lbl_Monto" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Monto")))  %>' Width="90px" Font-Size="10px"  ></asp:Label>
+                                                            <asp:Label runat="server" ID="lbl_Monto" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Monto")))  %>' Width="90px" Font-Size="10px"  ></asp:Label>
                                                         </ItemTemplate>
                                                     </asp:TemplateField>
                                                     <asp:TemplateField HeaderText="Estatus">
@@ -800,17 +800,17 @@
                                         <asp:Label runat="server" ID="lbl_Cobranza" Text="Detalle Cobranza Prima Neta" CssClass="form-control Encabezado" Font-Bold="true"  ForeColor="white" BackColor="#284775"  ></asp:Label>
                                         <div id="div_primaCob" style="text-align:right;" runat="server" class="form-control Cobranza masterTooltip" title='<%# Eval("Asegurado") %>' >
                                                 <label style="width:75px">Emitida:</label>
-                                                <asp:Label runat="server" ID="lbl_PrimaTotal" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaTotal")))  %>' Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server" ID="lbl_PrimaTotal" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaTotal")))  %>' Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:75px">Aplicada:</label>
-                                                <asp:Label runat="server"  ID="lbl_PrimaCobrada" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaCobrada")))  %>' Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server"  ID="lbl_PrimaCobrada" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaCobrada")))  %>' Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:75px">Compensada:</label>
-                                                <asp:Label runat="server"  ID="lbl_PrimaCompensada" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaCompensada")))  %>' Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server"  ID="lbl_PrimaCompensada" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaCompensada")))  %>' Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:75px">en Deposito:</label>
-                                                <asp:Label runat="server"  ID="lbl_PrimaDeposito" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaDeposito")))  %>' Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server"  ID="lbl_PrimaDeposito" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaDeposito")))  %>' Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:75px">Saldo:</label>
-                                                <asp:Label runat="server"  ID="lbl_SaldoCob" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaTotal")) - (CDbl(Eval("PrimaCobrada")) + CDbl(Eval("PrimaCompensada"))))  %>' BorderColor="DarkBlue" Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server"  ID="lbl_SaldoCob" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaTotal")) - (CDbl(Eval("PrimaCobrada")) + CDbl(Eval("PrimaCompensada"))))  %>' BorderColor="DarkBlue" Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:75px">Recargo:</label>
-                                                <asp:Label runat="server"  ID="lbl_Recargo" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Recargo")))  %>' BorderColor="DarkBlue" Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server"  ID="lbl_Recargo" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Recargo")))  %>' BorderColor="DarkBlue" Width="85px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                         </div>   
                                         <asp:Button runat="server" ID="btn_DetalleCuotas" CommandName="DetalleCob" Text="Detalle Cuotas" CssClass="form-control btn-success" Visible="false" Height="22px" />   
                                         <asp:Button runat="server" ID="btn_GeneraOP" CommandName="GeneraOP" Text="Generar Órden de Pago" CssClass="form-control btn-primary" Visible="false" Height="22px" />   
@@ -855,7 +855,7 @@
                                         <asp:Label runat="server" ID="lbl_CancelaPoliza"  Text="" CssClass="form-control PieCentro"  Font-Bold="true" ForeColor="Red"  BackColor="LightBlue"  ></asp:Label>                                                                                            
                                         <asp:Label runat="server" ID="lbl_TitMonto"  Text="Monto a Generar:" CssClass="form-control PieCentro"  Font-Bold="true" ForeColor="Red"  BackColor="LightBlue"  ></asp:Label>                                                                                            
                                         <div class="input-group">
-                                            <asp:Textbox runat="server" ID="lbl_Total2" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Parcial")))  %>' Width="200px" CssClass="form-control PieTotal MontoGenerar"  Font-Bold="true" ForeColor="Red"  BackColor="LightBlue"  ></asp:Textbox>
+                                            <asp:Textbox runat="server" ID="lbl_Total2" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Parcial")))  %>' Width="200px" CssClass="form-control PieTotal MontoGenerar"  Font-Bold="true" ForeColor="Red"  BackColor="LightBlue"  ></asp:Textbox>
                                             <asp:Button runat="server" ID="btn_Resumen" Width="115px" CssClass="btn-primary PieCentro" Text="Resumen" CommandName="ResumenOP" Visible="false" />
                                          </div>                               
                                     </ItemTemplate>
@@ -867,11 +867,11 @@
                                         <asp:Label runat="server" ID="lbl_DetPrima" Text="Detalle Prima" CssClass="form-control DetPrimaCom" Font-Bold="true"  ForeColor="White" BackColor="#284775"  ></asp:Label>                                                  
                                         <div id="div_prima" runat="server" style="text-align:right;" class="form-control Cantidad" >
                                                 <label style="width:40px">Cedida:</label>
-                                                <asp:Label runat="server" ID="lbl_PrimaCedida" BackColor="" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaCedida")))  %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server" ID="lbl_PrimaCedida" BackColor="" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaCedida")))  %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:40px">Pagada:</label>
-                                                <asp:Label runat="server"  ID="lbl_PrimaPagada" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaPagada")))  %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server"  ID="lbl_PrimaPagada" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaPagada")))  %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:150px">------------------------------</label>
-                                                <asp:Label runat="server" ID="lbl_SaldoPrima" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("SaldoPrima")))   %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server" ID="lbl_SaldoPrima" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("SaldoPrima")))   %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                         </div>   
                                                               
                                         <asp:Label runat="server" ID="lbl_PCTotal" Text="Prima Neta de Reaseguro=" CssClass="form-control PieTotal" Font-Bold="true" ForeColor="DarkBlue"   ></asp:Label>       
@@ -889,17 +889,17 @@
                                         <asp:Label runat="server" ID="lbl_DetComision" Text="Detalle Comisión" CssClass="form-control DetPrimaCom" Font-Bold="true"  ForeColor="White" BackColor="#284775"  ></asp:Label>                                                                                
                                         <div id="div_comision" runat="server"  style="text-align:right;" class="form-control Cantidad">
                                                 <label style="width:40px">Comisión:</label>
-                                                <asp:Label runat="server" ID="lbl_ComCed" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Comision")))   %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server" ID="lbl_ComCed" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Comision")))   %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:40px">Aplicada:</label>
-                                                <asp:Label runat="server" ID="lbl_ComAplicada" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("ComPagada")))  %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server" ID="lbl_ComAplicada" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("ComPagada")))  %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                                 <label style="width:150px">------------------------------</label>
-                                                <asp:Label runat="server" ID="lbl_SaldoCom" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("SaldoComision")))   %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
+                                                <asp:Label runat="server" ID="lbl_SaldoCom" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("SaldoComision")))   %>' Width="100px" Font-Bold="true" ForeColor="DarkBlue" CssClass="Monto"></asp:Label>
                                         </div>   
                                                                
-                                        <asp:Label runat="server" ID="lbl_MntPCTotal" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaCedida")) - CDbl(Eval("Comision")))  %>' CssClass="form-control PieTotal" Font-Bold="true" ForeColor="Black" BackColor="White" ></asp:Label>  
-                                        <asp:Label runat="server" ID="lbl_MntPCGenerada" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaPagada")) - CDbl(Eval("ComPagada")))  %>' CssClass="form-control PieTotal" Font-Bold="true" ForeColor="Green" BackColor="White" ></asp:Label> 
-                                        <asp:Label runat="server" ID="lbl_MntPCRecuperada" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaRecuperada")))  %>' CssClass="form-control PieTotal" Font-Bold="true" ForeColor="Green" BackColor="White" ></asp:Label>      
-                                        <asp:Label runat="server" ID="lbl_MntPCRestante" Text='<%# String.Format("{0:#,#0.00}", (CDbl(Eval("PrimaCedida")) - CDbl(Eval("Comision"))) - (CDbl(Eval("PrimaPagada")) - CDbl(Eval("ComPagada"))) + CDbl(Eval("PrimaRecuperada")))  %>' CssClass="form-control PieTotal MontoLimite" Font-Bold="true" ForeColor="Red" BackColor="White" BorderColor="Red" ></asp:Label>   
+                                        <asp:Label runat="server" ID="lbl_MntPCTotal" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaCedida")) - CDbl(Eval("Comision")))  %>' CssClass="form-control PieTotal" Font-Bold="true" ForeColor="Black" BackColor="White" ></asp:Label>  
+                                        <asp:Label runat="server" ID="lbl_MntPCGenerada" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaPagada")) - CDbl(Eval("ComPagada")))  %>' CssClass="form-control PieTotal" Font-Bold="true" ForeColor="Green" BackColor="White" ></asp:Label> 
+                                        <asp:Label runat="server" ID="lbl_MntPCRecuperada" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaRecuperada")))  %>' CssClass="form-control PieTotal" Font-Bold="true" ForeColor="Green" BackColor="White" ></asp:Label>      
+                                        <asp:Label runat="server" ID="lbl_MntPCRestante" Text='<%# String.Format("{0:#,#0.0000}", (CDbl(Eval("PrimaCedida")) - CDbl(Eval("Comision"))) - (CDbl(Eval("PrimaPagada")) - CDbl(Eval("ComPagada"))) + CDbl(Eval("PrimaRecuperada")))  %>' CssClass="form-control PieTotal MontoLimite" Font-Bold="true" ForeColor="Red" BackColor="White" BorderColor="Red" ></asp:Label>   
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
@@ -1149,17 +1149,17 @@
                                        </asp:TemplateField>
                                        <asp:TemplateField HeaderText="(Emisión)">
                                            <ItemTemplate>
-                                               <asp:TextBox runat="server" ID="lbl_PrimaEmitida" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaEmitida")))  %>' Width="95px" Height="26px" Enabled="false" CssClass="form-control panelPoliza"></asp:TextBox>
+                                               <asp:TextBox runat="server" ID="lbl_PrimaEmitida" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaEmitida")))  %>' Width="95px" Height="26px" Enabled="false" CssClass="form-control panelPoliza"></asp:TextBox>
                                            </ItemTemplate>
                                        </asp:TemplateField>
                                        <asp:TemplateField HeaderText="(Cobranzas)">
                                            <ItemTemplate>
-                                               <asp:TextBox runat="server" ID="lbl_PrimaAplicada" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaAplicada")))  %>' Width="95px" Height="26px" Enabled="false" CssClass="form-control panelPoliza"></asp:TextBox>
+                                               <asp:TextBox runat="server" ID="lbl_PrimaAplicada" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaAplicada")))  %>' Width="95px" Height="26px" Enabled="false" CssClass="form-control panelPoliza"></asp:TextBox>
                                            </ItemTemplate>
                                        </asp:TemplateField>
                                        <asp:TemplateField HeaderText="(Reaseguro)">
                                            <ItemTemplate>
-                                               <asp:TextBox runat="server" ID="lbl_PrimaPagada" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaReaseguro")))  %>' Width="95px" Height="26px" Enabled="false" CssClass="form-control panelPoliza"></asp:TextBox>
+                                               <asp:TextBox runat="server" ID="lbl_PrimaPagada" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaReaseguro")))  %>' Width="95px" Height="26px" Enabled="false" CssClass="form-control panelPoliza"></asp:TextBox>
                                            </ItemTemplate>
                                        </asp:TemplateField>
                                        <asp:TemplateField HeaderText="Emisor">
@@ -1474,13 +1474,13 @@
                                        <div class="MarcoExhibiciones">
                                             <div class="form-control DescripcionMnt">
                                                 <label style="width:90px; font-weight:bold;">Prima Cedida:</label>
-                                                <%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaCedidaCiaBrok"))) %>
+                                                <%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaCedidaCiaBrok"))) %>
                                                 <asp:textbox runat="server" ID="hid_Prima" Text='<%# Eval("PrimaCedidaCiaBrok")  %>' CssClass="NoDisplay PrimaCedidaEmitida" ></asp:textbox>
                                             </div>
                                                     
                                             <div class="form-control DescripcionMnt">
                                                 <label style="width:90px; font-weight:bold;">Comisión:</label>
-                                                <%# String.Format("{0:#,#0.00}", CDbl(Eval("ComisionCiaBrok"))) %>
+                                                <%# String.Format("{0:#,#0.0000}", CDbl(Eval("ComisionCiaBrok"))) %>
                                                 <asp:textbox runat="server" ID="hid_Comision" Text='<%# Eval("ComisionCiaBrok")  %>' CssClass="NoDisplay ComisionCedidaEmitida" ></asp:textbox>
                                             </div>
 
@@ -1491,21 +1491,21 @@
                                             </div>
 
                                             <div class="form-control DescripcionReaMnt">
-                                                <asp:Label ID="lbl_RetISR" runat="server"  Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("ret_ISR"))) %>'  ></asp:Label>
+                                                <asp:Label ID="lbl_RetISR" runat="server"  Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("ret_ISR"))) %>'  ></asp:Label>
                                             </div>
 
                                             <div class="form-control DescripcionReaMnt">
-                                                <asp:Label ID="lbl_CompRF" runat="server" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("sn_Comp_RF"))) %>' ></asp:Label>
+                                                <asp:Label ID="lbl_CompRF" runat="server" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("sn_Comp_RF"))) %>' ></asp:Label>
                                             </div>
 
                                             <div class="form-control DescripcionReaMnt">
-                                                <asp:Label ID="lbl_MontoRet" runat="server" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaCedidaCiaBrok")) * (CDbl(Eval("ret_ISR")) / 100)) %>' ></asp:Label>
+                                                <asp:Label ID="lbl_MontoRet" runat="server" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaCedidaCiaBrok")) * (CDbl(Eval("ret_ISR")) / 100)) %>' ></asp:Label>
                                             </div>
 
                                            <div class="clear padding5"></div>
 
                                             <div class="form-control DescripcionReaMnt">
-                                                <asp:Label ID="lbl_PriReaseguro" runat="server" CssClass="PriReaTot" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaCedidaCiaBrok")) - CDbl(Eval("ComisionCiaBrok"))) %>' ></asp:Label>
+                                                <asp:Label ID="lbl_PriReaseguro" runat="server" CssClass="PriReaTot" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaCedidaCiaBrok")) - CDbl(Eval("ComisionCiaBrok"))) %>' ></asp:Label>
                                             </div>
 
                                             <div class="form-control DescripcionReaMnt">
@@ -1592,7 +1592,7 @@
 
                                                         <asp:TemplateField HeaderText="Prima Cedida" ItemStyle-HorizontalAlign="Right" HeaderStyle-HorizontalAlign="Center">
                                                             <ItemTemplate>
-                                                                <asp:Textbox runat="server" ID="lbl_Prima" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("PrimaCedida")))  %>'  Width="90px" CssClass="form-control DetExh PagoPrima masterTooltip"  title='<%# Eval("ConceptoPrima") & vbCrLf & "(Doble Click para cambiar Concepto Prima)" %>' ></asp:Textbox>
+                                                                <asp:Textbox runat="server" ID="lbl_Prima" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("PrimaCedida")))  %>'  Width="90px" CssClass="form-control DetExh PagoPrima masterTooltip"  title='<%# Eval("ConceptoPrima") & vbCrLf & "(Doble Click para cambiar Concepto Prima)" %>' ></asp:Textbox>
                                                                 <asp:HiddenField runat="server" ID="hid_codcptoPri" Value='<%# Eval("cod_cptoPri")%>' />
                                                                 <asp:HiddenField runat="server" ID="hid_ConceptoPrima" Value='<%# Eval("ConceptoPrima")%>' />
                                                             </ItemTemplate>
@@ -1608,7 +1608,7 @@
 
                                                         <asp:TemplateField HeaderText="Comisión" ItemStyle-HorizontalAlign="Right" HeaderStyle-HorizontalAlign="Center">
                                                             <ItemTemplate>
-                                                                <asp:Textbox runat="server" ID="lbl_Comision" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Comision")))  %>'  Width="82px" CssClass="form-control DetExh PagoComision masterTooltip" title='<%# Eval("ConceptoComision") & vbCrLf & "(Doble Click para cambiar Concepto Comisión)" %>' ></asp:Textbox>
+                                                                <asp:Textbox runat="server" ID="lbl_Comision" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Comision")))  %>'  Width="82px" CssClass="form-control DetExh PagoComision masterTooltip" title='<%# Eval("ConceptoComision") & vbCrLf & "(Doble Click para cambiar Concepto Comisión)" %>' ></asp:Textbox>
                                                                 <asp:HiddenField runat="server" ID="hid_codcptoCom" Value='<%# Eval("cod_cptoCom")%>' />
                                                                 <asp:HiddenField runat="server" ID="hid_ConceptoComision" Value='<%# Eval("ConceptoComision")%>' />
                                                             </ItemTemplate>
@@ -1616,7 +1616,7 @@
 
                                                         <asp:TemplateField HeaderText="T.C." ItemStyle-HorizontalAlign="Center" HeaderStyle-HorizontalAlign="Center">
                                                             <ItemTemplate>
-                                                                <asp:textbox runat="server" ID="lbl_TipoCambio"  Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_cambio")))  %>' Width="40px" Enabled="false" CssClass="form-control DetExh masterTooltip" title='<%# Eval("Moneda") %>' ></asp:textbox>
+                                                                <asp:textbox runat="server" ID="lbl_TipoCambio"  Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_cambio")))  %>' Width="40px" Enabled="false" CssClass="form-control DetExh masterTooltip" title='<%# Eval("Moneda") %>' ></asp:textbox>
                                                             </ItemTemplate>
                                                         </asp:TemplateField>
 
@@ -1646,7 +1646,7 @@
 
                                                         <asp:TemplateField HeaderText="ISR Retenido" ItemStyle-HorizontalAlign="Center" HeaderStyle-HorizontalAlign="Center">
                                                             <ItemTemplate>
-                                                                <asp:textbox runat="server" ID="lbl_ISR" Enabled="false"   Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("MontoISR")))  %>' Width="80px" CssClass="form-control DetExh"  ></asp:textbox>
+                                                                <asp:textbox runat="server" ID="lbl_ISR" Enabled="false"   Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("MontoISR")))  %>' Width="80px" CssClass="form-control DetExh"  ></asp:textbox>
                                                             </ItemTemplate>
                                                         </asp:TemplateField>
 
@@ -1781,12 +1781,12 @@
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Monto">
                                         <ItemTemplate>
-                                            <asp:TextBox runat="server" ID="txt_Monto"  Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Parcial")))  %>' Width="80px" Height="80px" Enabled="false"  CssClass="form-control Derecha" Font-Size="11px" Font-Bold="true"></asp:TextBox>
+                                            <asp:TextBox runat="server" ID="txt_Monto"  Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Parcial")))  %>' Width="80px" Height="80px" Enabled="false"  CssClass="form-control Derecha" Font-Size="11px" Font-Bold="true"></asp:TextBox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Impuesto">
                                         <ItemTemplate>
-                                            <asp:TextBox runat="server" ID="txt_Impuesto" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("Impuesto")))  %>' Width="80px" Height="80px" Enabled="false"  CssClass="form-control Derecha" Font-Size="11px" Font-Bold="true"></asp:TextBox>
+                                            <asp:TextBox runat="server" ID="txt_Impuesto" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Impuesto")))  %>' Width="80px" Height="80px" Enabled="false"  CssClass="form-control Derecha" Font-Size="11px" Font-Bold="true"></asp:TextBox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Fec Pago">
@@ -2138,73 +2138,73 @@
 
                                     <asp:TemplateField HeaderText="Prima Neta">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_PrimaNeta" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_prima_me")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_PrimaNeta" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_prima_me")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Recargos">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Recargos" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_rec_fin_me")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Recargos" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_rec_fin_me")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Der. Emision">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_DerEmision" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_der_emi_me")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_DerEmision" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_der_emi_me")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="I.V.A.">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_IVA" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_iva_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_IVA" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_iva_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Prima Total">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_PrimaTotal" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_premio_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_PrimaTotal" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_premio_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Imp. Art. 41">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_ImpArt41" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_decreto_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_ImpArt41" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_decreto_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="IVA Art. 41">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_IvaArt41" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_dto_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_IvaArt41" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_dto_me")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Compensado">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Compensado" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_compensado")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Compensado" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_compensado")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Pagos">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Pagos" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_parcial")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Pagos" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_pago_parcial")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Cancelado">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Cancelado" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_cancelado")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Cancelado" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_pago_cancelado")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Devuelto">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Devuelto" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_devuelto")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Devuelto" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_pago_devuelto")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Pendiente">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Pendiente" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_pago_pendiente")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Pendiente" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_pago_pendiente")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -2262,31 +2262,31 @@
 
                                     <asp:TemplateField HeaderText="Prima Cobrada">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_PrimaCob" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_prima")))%>'  Width="120px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_PrimaCob" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_prima")))%>'  Width="120px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Der. Póliza">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_DerPoliza" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_gastos_emision")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_DerPoliza" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_gastos_emision")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Imp. IVA">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_ImpIVA" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_iva")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_ImpIVA" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_iva")))%>' Width="90px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Recargo Fin">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_Recargo" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_recargo")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_Recargo" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_recargo")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Prima Total">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_PrimaTotal" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_premio_bruto")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_PrimaTotal" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_premio_bruto")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -2298,13 +2298,13 @@
 
                                     <asp:TemplateField HeaderText="Comisión Desc.">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_ComDesc" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_comis_normal_descon")))%>' Width="120px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_ComDesc" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_comis_normal_descon")))%>' Width="120px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
                                     <asp:TemplateField HeaderText="Imp. Art. 41">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_ImpArt41" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_art41")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_ImpArt41" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_art41")))%>' Width="100px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -2316,7 +2316,7 @@
 
                                     <asp:TemplateField HeaderText="Imp. Cambio">
                                         <ItemTemplate>
-                                                <asp:label runat="server" ID="lbl_ImpCambio" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("imp_cambio")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
+                                                <asp:label runat="server" ID="lbl_ImpCambio" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("imp_cambio")))%>' Width="110px" CssClass="form-control" Font-Size="10px" Height="26px" ></asp:label>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -2676,34 +2676,34 @@
                                     <asp:TemplateField HeaderText="%Pri">
                                         <ItemTemplate>
                                             <asp:textbox runat="server" ID="lbl_PrimaTotal" Text='<%# Eval("prima_total") %>' CssClass="NoDisplay" ></asp:textbox>
-                                            <asp:textbox runat="server" ID="lbl_porcPrima" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("pje_pri")))  %>' Width="50px" Height="22px" CssClass="form-control"  Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_porcPrima" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("pje_pri")))  %>' Width="60px" Height="22px" CssClass="form-control"  Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Prima">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Prima" Enabled="false" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("prima")))  %>' Width="70px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Prima" Enabled="false" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("prima")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="%Com">
                                         <ItemTemplate>
                                             <asp:textbox runat="server" ID="lbl_ComisionTotal" Text='<%# Eval("comision_total") %>' CssClass="NoDisplay" ></asp:textbox>
-                                            <asp:textbox runat="server" ID="lbl_porcCom" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("pje_com")))  %>' Width="50px" Height="22px" CssClass="form-control"  Font-Size="10px"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_porcCom" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("pje_com")))  %>' Width="60px" Height="22px" CssClass="form-control"  Font-Size="10px"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Comision">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Comision" Enabled="false" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("comision")))  %>' Width="70px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Comision" Enabled="false" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("comision")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Prima Neta">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_PrimaNeta" Enabled="false" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("prima_neta")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_PrimaNeta" Enabled="false" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("prima_neta")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Retención">
                                         <ItemTemplate>
                                             <asp:textbox runat="server" ID="lbl_pjeRet" Text='<%# Eval("pje_ret") %>'  CssClass="NoDisplay" ></asp:textbox>
-                                            <asp:textbox runat="server" ID="lbl_MontoISR" Enabled="false" Text='<%# String.Format("{0:#,#0.00}", CDbl(Eval("monto_isr")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_MontoISR" Enabled="false" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("monto_isr")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                 </Columns>
