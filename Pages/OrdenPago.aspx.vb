@@ -131,9 +131,9 @@ Partial Class Pages_OrdenPago
                 hid_Url.Value = "VistaOrdenPago.aspx?cod_usuario=" & Master.cod_usuario & "&Usuario=" & Master.Usuario & "&cod_suc=" & Master.cod_suc & "&cod_sector=" & Master.cod_sector
 
                 'Verifica que se haya ingresado a partir de Login
-                If Master.cod_usuario = "" Then
-                    ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "Redirect", "Redireccionar('Login.aspx');", True)
-                End If
+                'If Master.cod_usuario = "" Then
+                '    ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "Redirect", "Redireccionar('Login.aspx');", True)
+                'End If
                 hid_CierraSesion.Value = 0
 
                 ScriptManager.RegisterStartupScript(Me, Me.GetType, "Menu", "openNav();", True)
