@@ -3,6 +3,20 @@
     javascript: window.history.forward(1);
 });
 
+$("body").on("click", ".btnSelCuenta", function (e) {
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
+    
+    var persona = $("input[id$='hid_persona']")[0].value.split('|')
+    var moneda = $("input[id$='hid_Moneda']")[0].value
+
+    $("input[id$='hid_Control']")[0].value = -1;
+    $("input[id$='hid_Catalogo']")[0].value = 'Cta';
+    $("#lblCatalogo")[0].innerText = 'CUENTAS BANCARIAS';
+    var Condicion = ' WHERE id_persona = ' + persona[0] + ' AND cod_moneda = ' + moneda
+    load_Data("spS_CatalogosOP ==Cta==" + ",==" + Condicion + "==", "Unica");
+
+});
+
 function ImprimirOrden(Server,strOrden) {
     var nro_op = strOrden.split(",");
     for (i = 0 ; i < nro_op.length; i++) {
@@ -36,6 +50,7 @@ $("body").on("click", ".CerrarSesion", function () {
 $("body").on("click", ".modalExhibiciones", function () {
     $('#MensajeModal').modal('hide');
 });
+
 
 //Funciones de Consulta--------------------------------------------------------------------------------------------------------------------------------
 function load_Data(Consulta, Tipo) {
@@ -250,7 +265,7 @@ $("body").on("click", "#btn_AddCtr", function () {
 });
 
 $("body").on("click", "[id*=gvd_OrdenPago] .btnCuenta", function (e) {
-    e.preventDefault();
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
     var row = $(this).closest("tr");
     var Moneda = row.find('.Moneda');
     var Persona = row.find('.Persona');
@@ -727,7 +742,7 @@ $("body").on("focus", "[id*=gvd_Reaseguro] .MontoGenerar", function () {
 
 $("body").on("focusout", ".Fraccionado", function () {
     var Valor = parseFloat($('[id*=txt_MontoFraccionado]')[0].value.replace(",","").replace(",",""))
-    $('[id*=txt_MontoFraccionado]')[0].value = Valor.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $('[id*=txt_MontoFraccionado]')[0].value = Valor.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 });
 
 $("body").on("focusout", "[id*=gvd_Cuotas] .PagoPrima", function () {
@@ -738,7 +753,7 @@ $("body").on("focusout", "[id*=gvd_Cuotas] .PagoPrima", function () {
         $(Control)[0].value = '0.00';
     }
     else {
-        $(Control)[0].value = PagoPrima.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+        $(Control)[0].value = PagoPrima.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
     }
 });
 
@@ -750,7 +765,7 @@ $("body").on("focusout", "[id*=gvd_Cuotas] .PagoComision", function () {
         $(Control)[0].value = '0.00';
     }
     else {
-        $(Control)[0].value = PagoComision.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+        $(Control)[0].value = PagoComision.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
     }
 });
 
@@ -807,7 +822,7 @@ $("body").on("focusout", "[id*=gvd_Reaseguro] .MontoGenerar", function () {
         $(Control)[0].value = '0.00';
     }
     else {
-        $(Control)[0].value = MontoGenerar.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+        $(Control)[0].value = MontoGenerar.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
     }
 });
 
@@ -969,7 +984,7 @@ function CambioPrcPrima(row){
     Prima = Prima.replace(",", "").replace(",", "");
     var resultado = Prima * (Prc / 100);
 
-    $(Pago)[0].value = resultado.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(Pago)[0].value = resultado.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 
     //Replica el valor en Comisión----------------------------------------------------------
     var PrcCom = row.find('.PrcCom')
@@ -981,7 +996,7 @@ function CambioPrcPrima(row){
     Comision = Comision.replace(",", "").replace(",", "");
     var resultadoCom = Comision * (Prc / 100);
 
-    $(PagoCom)[0].value = resultadoCom.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PagoCom)[0].value = resultadoCom.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
     //--------------------------------------------------------------------------------------
 
     EvaluaMontos();
@@ -1017,7 +1032,7 @@ function CambioPrcCom(row){
     Comision = Comision.replace(",", "").replace(",", "");
     var resultado = Comision * (Prc / 100);
 
-    $(Pago)[0].value = resultado.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(Pago)[0].value = resultado.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 
     EvaluaMontos();
 
@@ -1395,7 +1410,7 @@ function SumasParticipantes() {
             }
         }
     });
-    $('[id*=txt_MontoTotal]')[0].value = SumaGenerar.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $('[id*=txt_MontoTotal]')[0].value = SumaGenerar.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 }
 
 function SumasTotales(row) {
@@ -1478,25 +1493,25 @@ function SumasTotales(row) {
         }
     });
 
-    $(PriReaPag)[0].textContent = (SumaPrimaGen - SumaComGen).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(PriReaSaldo)[0].textContent = (parseFloat($(PriReaTot)[0].textContent.replace(",", "").replace(",", "").replace(",", "")) - (SumaPrimaGen - SumaComGen)).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PriReaPag)[0].textContent = (SumaPrimaGen - SumaComGen).toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PriReaSaldo)[0].textContent = (parseFloat($(PriReaTot)[0].textContent.replace(",", "").replace(",", "").replace(",", "")) - (SumaPrimaGen - SumaComGen)).toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 
-    $(PrcPriGen)[0].value = SumaPrcPriGen.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(PrimaGen)[0].value = SumaPrimaGen.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(PrcComGen)[0].value = SumaPrcComGen.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(ComGen)[0].value = SumaComGen.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrcPriGen)[0].value = SumaPrcPriGen.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrimaGen)[0].value = SumaPrimaGen.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrcComGen)[0].value = SumaPrcComGen.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(ComGen)[0].value = SumaComGen.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 
-    $(PrcPriPend)[0].value = SumaPrcPriPend.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(PrimaPend)[0].value = SumaPrimaPend.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(PrcComPend)[0].value = SumaPrcComPend.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(ComPend)[0].value = SumaComPend.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrcPriPend)[0].value = SumaPrcPriPend.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrimaPend)[0].value = SumaPrimaPend.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrcComPend)[0].value = SumaPrcComPend.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(ComPend)[0].value = SumaComPend.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 
-    $(PrcPriTotal)[0].value = (SumaPrcPriGen + SumaPrcPriPend).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(PrimaTotal)[0].value = (SumaPrimaGen + SumaPrimaPend).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(PrcComTotal)[0].value = (SumaPrcComGen + SumaPrcComPend).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-    $(ComTotal)[0].value = (SumaComGen + SumaComPend).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrcPriTotal)[0].value = (SumaPrcPriGen + SumaPrcPriPend).toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrimaTotal)[0].value = (SumaPrimaGen + SumaPrimaPend).toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(PrcComTotal)[0].value = (SumaPrcComGen + SumaPrcComPend).toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(ComTotal)[0].value = (SumaComGen + SumaComPend).toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 
-    $(MntGenerar)[0].textContent = SumaPriTemp.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    $(MntGenerar)[0].textContent = SumaPriTemp.toFixed(4).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 
     SumasParticipantes();
 }
@@ -1751,7 +1766,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtSearchRam']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
 
@@ -1764,7 +1779,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtClaveRam']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
     $("input[id$='txtClaveRam']").focusout(function () {
@@ -1798,7 +1813,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtSearchRamCont']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
 
@@ -1811,7 +1826,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtClaveRamCont']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
     $("input[id$='txtClaveRamCont']").focusout(function () {
@@ -1846,7 +1861,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtSearchRamTec']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
 
@@ -1859,7 +1874,7 @@ function PageLoad() {
     });
 
     $("input[id$='txtClaveRamTec']").bind("cut copy paste", function (e) {
-        e.preventDefault();
+        event.preventDefault ? event.preventDefault() : event.returnValue = false;
     });
 
     $("input[id$='txtClaveRamTec']").focusout(function () {
