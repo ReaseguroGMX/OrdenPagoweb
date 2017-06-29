@@ -1092,6 +1092,10 @@ Partial Class Pages_OrdenPago
     End Sub
 
     Private Sub GenerarDevolucion()
+        Dim indMonto As Integer = 0
+        Dim indMontoReas As Integer = 0
+        Dim indMontoISR As Integer = 0
+        Dim indImputacion As Integer = 0
         Dim strMontos(0) As String
         Dim strMontosReas(0) As String
         Dim strMontosISR(0) As String
@@ -1109,8 +1113,50 @@ Partial Class Pages_OrdenPago
         Dim nro_correlativo As Integer = 0
         Dim MontoISR As String = 0
 
+        indMonto = 0
+        ReDim Preserve strMontos(indMonto)
+        strMontos(indMonto) = ""
+
+        indMontoReas = 0
+        ReDim Preserve strMontosReas(indMontoReas)
+        strMontosReas(indMontoReas) = ""
+
+        indMontoISR = 0
+        ReDim Preserve strMontosISR(indMontoISR)
+        strMontosISR(indMontoISR) = ""
+
+        indImputacion = 0
+        ReDim Preserve strMontosImputacion(indImputacion)
+        strMontosImputacion(indImputacion) = ""
 
         For Each row In gvd_Acumulados.Rows
+
+            If Len(strMontos(indMonto)) > 7500 Then
+                indMonto = indMonto + 1
+                ReDim Preserve strMontos(indMonto)
+                strMontos(indMonto) = ""
+            End If
+
+
+            If Len(strMontosReas(indMontoReas)) > 7500 Then
+                indMontoReas = indMontoReas + 1
+                ReDim Preserve strMontosReas(indMontoReas)
+                strMontosReas(indMontoReas) = ""
+            End If
+
+            If Len(strMontosISR(indMontoISR)) > 7500 Then
+                indMontoISR = indMontoISR + 1
+                ReDim Preserve strMontosISR(indMontoISR)
+                strMontosISR(indMontoISR) = ""
+            End If
+
+            'Consolidado de Montos Imputacion
+            If Len(strMontosImputacion(indImputacion)) > 7500 Then
+                indImputacion = indImputacion + 1
+                ReDim Preserve strMontosImputacion(indImputacion)
+                strMontosImputacion(indImputacion) = ""
+            End If
+
             Poliza = Split(gvd_Acumulados.DataKeys(row.RowIndex)("Poliza"), "-")
             cod_deb_cred = IIf(gvd_Acumulados.DataKeys(row.RowIndex)("cod_deb_cred") = "C", "D", "C")
             ConceptoISR = "DEVOLUCION ISR " & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "-" & gvd_Acumulados.DataKeys(row.RowIndex)("compañia")
@@ -1121,9 +1167,9 @@ Partial Class Pages_OrdenPago
             End If
 
             'MOVIMIENTOS DE PRIMA NULA
-            strMontos(0) = strMontos(0) & "(@strKey,8," & nro_correlativo & ",NULL,''170101003002000'',''D''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''PRIMA NULA''),"
+            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & nro_correlativo & ",NULL,''170101003002000'',''D''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''PRIMA NULA''),"
 
-            strMontosReas(0) = strMontosReas(0) & "(@strKey,8," & nro_correlativo & "," & Adicional(3) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
+            strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & nro_correlativo & "," & Adicional(3) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
                                                                  "11,1,''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & ",0," &
                                                                  Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
                                                                  Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," &
@@ -1134,15 +1180,15 @@ Partial Class Pages_OrdenPago
             nro_correlativo = nro_correlativo + 1
 
             'MOVIMIENTOS DE IMPUESTO
-            strMontos(0) = strMontos(0) & "(@strKey,4," & nro_correlativo & ",NULL,''" & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb") & "'',''" & cod_deb_cred & "''," &
+            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,4," & nro_correlativo & ",NULL,''" & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb") & "'',''" & cod_deb_cred & "''," &
                                                           hid_Moneda.Value & "," & MontoISR & "," & CDbl(MontoISR) * hid_TipoCambio.Value & "," &
                                                           IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''" & ConceptoISR & "''),"
 
-            strMontosISR(0) = strMontosISR(0) & "(@strKey,4," & nro_correlativo & "," & Poliza(0) & ",303,null,1139,null,null,null,null,1139,null,null,null,null,null,null,null),"
+            strMontosISR(indMontoISR) = strMontosISR(indMontoISR) & "(@strKey,4," & nro_correlativo & "," & Poliza(0) & ",303,null,1139,null,null,null,null,1139,null,null,null,null,null,null,null),"
 
 
             'MOVIMIENTO DE IMPUTACION EN RESPALDO
-            strMontosImputacion(0) = strMontosImputacion(0) & "(@strKey,4," & nro_correlativo & "," & gvd_Acumulados.DataKeys(row.RowIndex)("id_pv") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_reas") & "," &
+            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,4," & nro_correlativo & "," & gvd_Acumulados.DataKeys(row.RowIndex)("id_pv") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_reas") & "," &
                                                                               gvd_Acumulados.DataKeys(row.RowIndex)("nro_layer") & ",''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & "," &
                                                                               gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
                                                                               gvd_Acumulados.DataKeys(row.RowIndex)("nro_cuota") & "," & hid_Moneda.Value & ",''" & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb") & "'',''" & cod_deb_cred & "''," &
@@ -1152,9 +1198,9 @@ Partial Class Pages_OrdenPago
             nro_correlativo = nro_correlativo + 1
 
             'MOVIMIENTOS DE COMISION NULA
-            strMontos(0) = strMontos(0) & "(@strKey,8," & nro_correlativo & ",NULL,''170101003002000'',''C''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''COMISION NULA''),"
+            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & nro_correlativo & ",NULL,''170101003002000'',''C''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''COMISION NULA''),"
 
-            strMontosReas(0) = strMontosReas(0) & "(@strKey,8," & nro_correlativo & "," & Adicional(4) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
+            strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & nro_correlativo & "," & Adicional(4) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
                                                                   "11,1,''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & ",0," &
                                                                   Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
                                                                   Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," &
