@@ -1411,7 +1411,7 @@ Partial Class Pages_OrdenPago
                                                         "11,1,''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," & -1 * Cuota("PrimaCedida") & "," &
                                                         Cuota("cod_suc") & "," & Cuota("cod_ramo") & "," & Cuota("nro_pol") & "," & Cuota("aaaa_endoso") & "," & Cuota("nro_endoso") & "," &
                                                         Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_pri") > 100, 100, Cuota("pje_pri")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
-                                                        "0,0,0," & nro_reas & "," & Cuota("nro_layer") & "),"
+                                                        "0,0,0,0" & "," & Cuota("nro_layer") & "),"
 
 
                             strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & id_pv & "," & nro_reas & "," &
@@ -1511,7 +1511,7 @@ Partial Class Pages_OrdenPago
                                                             "11,1,''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," & Cuota("Comision") & "," &
                                                             Cuota("cod_suc") & "," & Cuota("cod_ramo") & "," & Cuota("nro_pol") & "," & Cuota("aaaa_endoso") & "," & Cuota("nro_endoso") & "," &
                                                             Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_com") > 100, 100, Cuota("pje_com")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
-                                                            "0,0,0," & nro_reas & "," & Cuota("nro_layer") & "),"
+                                                            "0,0,0,0" & "," & Cuota("nro_layer") & "),"
 
                             strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & id_pv & "," & nro_reas & "," &
                                                                                                         Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
@@ -4803,7 +4803,7 @@ Partial Class Pages_OrdenPago
         End Try
     End Sub
 
-    Private Function ConsultaRetenciones() As Boolean
+    Private Function ConsultaRetenciones(Optional ByVal blnReasegurador As Boolean = False) As Boolean
         Dim sCnn As String
         Dim dtRetencion As DataTable
         Dim nro_op As Integer = -1
@@ -4837,6 +4837,10 @@ Partial Class Pages_OrdenPago
 
         If chk_Reasegurador.Checked = True Then
             cod_cia = hid_cia.Value
+        Else
+            If blnReasegurador = True Then
+                cod_cia = ddl_Reasegurador.SelectedValue
+            End If
         End If
 
         For Each row In gvd_Acumulados.Rows
@@ -4863,6 +4867,32 @@ Partial Class Pages_OrdenPago
 
         If gvd_Retenciones.Rows.Count > 0 Then
             ConsultaRetenciones = True
+        End If
+
+        If blnReasegurador = False Then
+            Dim dtReasegurador As New DataTable
+            dtReasegurador.Columns.Add("cod_cia")
+            dtReasegurador.Columns.Add("Compañia")
+
+            Dim query = From row In dtRetencion.AsEnumerable()
+                        Group row By cia = row("cod_cia"),
+                                     Compañia = row("Compañia")
+                        Into Cias = Group
+                        Select New With {
+                                            Key cia,
+                                            Key Compañia
+                                        }
+
+            ddl_Reasegurador.Items.Clear()
+
+            dtReasegurador.Rows.Add(-1, "")
+            For Each Item In query
+                dtReasegurador.Rows.Add(Item.cia, Item.Compañia)
+            Next
+            ddl_Reasegurador.DataValueField = "cod_cia"
+            ddl_Reasegurador.DataTextField = "Compañia"
+            ddl_Reasegurador.DataSource = dtReasegurador
+            ddl_Reasegurador.DataBind()
         End If
     End Function
 
@@ -4952,6 +4982,8 @@ Partial Class Pages_OrdenPago
 
     Private Sub chk_Reasegurador_CheckedChanged(sender As Object, e As EventArgs) Handles chk_Reasegurador.CheckedChanged
         Try
+            ddl_Reasegurador.Enabled = Not chk_Reasegurador.Checked
+
             If Not ConsultaRetenciones() Then
                 Mensaje("ORDEN DE PAGO-:  ", "No se encontraron registros")
             End If
@@ -5212,6 +5244,15 @@ Partial Class Pages_OrdenPago
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-:  ", ex.Message)
             LogError("(ddl_Endoso_SelectedIndexChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub ddl_Reasegurador_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddl_Reasegurador.SelectedIndexChanged
+        Try
+            ConsultaRetenciones(True)
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(ddl_Reasegurador_SelectedIndexChanged)" & ex.Message)
         End Try
     End Sub
 
