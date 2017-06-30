@@ -2423,7 +2423,7 @@
           <%--</div>--%>
     </div>
 
-    <div id="RetencionesModal" style="width:920px; height:450px;"  class="modalOrdenPago" >
+    <div id="RetencionesModal" style="width:1160px; height:620px"  class="modalExhibiciones" >
          <%-- <div class="modal-content">--%>
                <div class="modal-header" style="height:40px">
                     <button type="button" class="close"  data-dismiss="modal">&times;</button>
@@ -2441,23 +2441,26 @@
                                         <asp:CheckBox runat="server" ID="chk_Poliza" Text="Endoso"  AutoPostBack="true" />
                                      </div>
                                      <div class="col-md-2">
-                                        <asp:CheckBox runat="server" ID="chk_Orden" Text="Nro. OP" Checked="true" AutoPostBack="true" />
+                                        <asp:CheckBox runat="server" ID="chk_Orden" Text="Nro OP" Checked="true" AutoPostBack="true" />
                                      </div>
-                                     <div class="col-md-3">
+                                     <div class="col-md-2">
                                         <asp:CheckBox runat="server" ID="chk_ramo" Text="Ramo Contable"  AutoPostBack="true" />
                                      </div>
                                      <div class="col-md-2">
                                         <asp:CheckBox runat="server" ID="chk_contrato" Text="Contrato"  AutoPostBack="true" />
                                      </div>
-                                     <div class="col-md-3">
+                                     <div class="col-md-2">
                                         <asp:CheckBox runat="server" ID="chk_Reasegurador" Text="Reasegurador" Checked="true" AutoPostBack="true" />
                                      </div>
+                                    <div class="col-md-2">
+                                        <asp:DropDownList runat="server" ID="ddl_Reasegurador" Enabled="false" AutoPostBack="true" CssClass="form-control" Width="153px" Height="26px"></asp:DropDownList>
+                                    </div>
                                 </div>
                             </asp:Panel>
                             
                             <div class="clear padding5"></div>
                             <div class="row">
-                                   <asp:Panel runat="server" ID="pnl_Retenciones" Width="100%" Height="300px" ScrollBars="Vertical">
+                                   <asp:Panel runat="server" ID="pnl_Retenciones" Width="100%" Height="470px" ScrollBars="Vertical">
                                         <asp:GridView runat="server" ID="gvd_Retenciones" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true"
                                                       DataKeyNames="nro_op,Poliza,nro_recibo,fec_pago,id_pv,nro_reas,nro_layer,id_contrato,nro_tramo,cod_ramo_contable,ramo_contable,
                                                                     cod_broker,broker,cod_cia,compañia,nro_cuota,cod_cta_cb,cod_deb_cred,imp_mo,txt_desc"  >
@@ -2490,7 +2493,7 @@
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Ramo Contable">
                                                     <ItemTemplate>
-                                                        <asp:textbox runat="server" ID="lbl_ramo" Text='<%# Eval("ramo_contable") %>' Width="130px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                                        <asp:textbox runat="server" ID="lbl_ramo" Text='<%# Eval("ramo_contable") %>' Width="150px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Contrato">
@@ -2500,12 +2503,12 @@
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Broker">
                                                     <ItemTemplate>
-                                                        <asp:textbox runat="server" ID="lbl_Broker" Text='<%# Eval("broker") %>' Width="130px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                                        <asp:textbox runat="server" ID="lbl_Broker" Text='<%# Eval("broker") %>' Width="230px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                  <asp:TemplateField HeaderText="Compañia">
                                                     <ItemTemplate>
-                                                        <asp:textbox runat="server" ID="lbl_Compañia" Text='<%# Eval("compañia") %>' Width="130px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                                        <asp:textbox runat="server" ID="lbl_Compañia" Text='<%# Eval("compañia") %>' Width="230px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Cuota">
@@ -2515,7 +2518,7 @@
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="ISR">
                                                     <ItemTemplate>
-                                                        <asp:textbox runat="server" ID="lbl_MontoISR" Text='<%# Eval("imp_mo") %>' Width="80px" Enabled="false" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                                        <asp:textbox runat="server" ID="lbl_MontoISR" Text='<%# Eval("imp_mo") %>' Width="90px" Enabled="false" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Fecha">
@@ -2530,7 +2533,7 @@
                                         </asp:GridView>
                                     </asp:Panel>
 
-                                    <asp:Panel runat="server" ID="pnl_Acumulados" Width="100%" Height="300px" ScrollBars="Vertical">
+                                    <asp:Panel runat="server" ID="pnl_Acumulados" Width="100%" Height="470px" ScrollBars="Vertical">
                                         <asp:GridView runat="server" ID="gvd_Acumulados" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true"
                                                       DataKeyNames="nro_op,Poliza,nro_recibo,fec_pago,id_pv,nro_reas,nro_layer,id_contrato,nro_tramo,cod_ramo_contable,ramo_contable,
                                                                     cod_broker,broker,cod_cia,compañia,nro_cuota,cod_cta_cb,cod_deb_cred,imp_mo,txt_desc"  >
@@ -2563,7 +2566,7 @@
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Ramo Contable">
                                                     <ItemTemplate>
-                                                        <asp:textbox runat="server" ID="lbl_ramo" Text='<%# Eval("ramo_contable") %>' Width="130px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                                        <asp:textbox runat="server" ID="lbl_ramo" Text='<%# Eval("ramo_contable") %>' Width="150px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Contrato">
@@ -2573,12 +2576,12 @@
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Broker">
                                                     <ItemTemplate>
-                                                        <asp:textbox runat="server" ID="lbl_Broker" Text='<%# Eval("broker") %>' Width="130px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                                        <asp:textbox runat="server" ID="lbl_Broker" Text='<%# Eval("broker") %>' Width="230px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                  <asp:TemplateField HeaderText="Compañia">
                                                     <ItemTemplate>
-                                                        <asp:textbox runat="server" ID="lbl_Compañia" Text='<%# Eval("compañia") %>' Width="130px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                                        <asp:textbox runat="server" ID="lbl_Compañia" Text='<%# Eval("compañia") %>' Width="230px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Cuota">
@@ -2588,7 +2591,7 @@
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="ISR">
                                                     <ItemTemplate>
-                                                        <asp:textbox runat="server" ID="lbl_MontoISR" Text='<%# Eval("imp_mo") %>' Width="80px" Enabled="false" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                                        <asp:textbox runat="server" ID="lbl_MontoISR" Text='<%# Eval("imp_mo") %>' Width="90px" Enabled="false" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Fecha">
