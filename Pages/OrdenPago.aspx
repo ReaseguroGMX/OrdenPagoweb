@@ -1760,7 +1760,7 @@
 
                         <asp:Panel runat="server" ID="pnlOrdenPago" Width="100%" Height="450px" ScrollBars="Vertical">
                             <asp:GridView runat="server" ID="gvd_OrdenPago" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true"
-                                          DataKeyNames="Banco,TipoDeCuenta,Cuenta,Moneda,id_Cuenta,cod_banco,cod_moneda,txt_swift,cod_tipo_banco,id_pv,cod_cia_reas_brok"  >
+                                          DataKeyNames="Banco,TipoDeCuenta,Cuenta,Moneda,id_Cuenta,cod_banco,cod_moneda,txt_swift,cod_tipo_banco,id_pv,cod_cia_reas_brok,Impuesto"  >
                                 <RowStyle BackColor="#F7F6F3" ForeColor="#333333"  />
                                 <Columns>
                                     <asp:TemplateField HeaderText="No.">
@@ -1786,7 +1786,7 @@
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Impuesto">
                                         <ItemTemplate>
-                                            <asp:TextBox runat="server" ID="txt_Impuesto" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Impuesto")))  %>' Width="80px" Height="80px" Enabled="false"  CssClass="form-control Derecha" Font-Size="11px" Font-Bold="true"></asp:TextBox>
+                                            <asp:LinkButton runat="server" ID="txt_Impuesto" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Impuesto")))  %>' Width="80px" CommandName="DetalleImpuesto"   CssClass="Derecha" Font-Size="11px" Font-Bold="true"></asp:LinkButton>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Fec Pago">
@@ -1843,6 +1843,67 @@
                 </asp:UpdatePanel>
             </div>
         <%--</div>--%>
+    </div>
+
+    <!-- Modal -->
+    <div id="DetReaseguradorModal" style="width:920px; height:610px"  class="modalOrdenPago">
+            <div class="modal-header" style="height:40px">
+                <button type="button" class="close"  data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><label style="color:darkblue;">Detalle ISR por Reasegurador</label></h4>
+            </div>
+
+            <div class="modal-body" style="height:568px">
+                <asp:UpdatePanel runat="server" ID="upReasegurador">
+                    <ContentTemplate>
+
+                        <asp:Panel runat="server" ID="pnlReasegurador" Width="100%" Height="500px" ScrollBars="Vertical">
+                            <asp:GridView runat="server" ID="gvd_Reasegurador" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true" >
+                                <RowStyle BackColor="#F7F6F3" ForeColor="#333333"  />
+                                <Columns>
+                                    <asp:TemplateField HeaderText="Póliza">
+                                        <ItemTemplate>
+                                            <asp:textbox runat="server" ID="lbl_Poliza" Text='<%# Eval("poliza") %>' Width="100px" Height="22px"  CssClass="form-control" Enabled="false" Font-Size="10px" ></asp:textbox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Broker">
+                                        <ItemTemplate>
+                                            <asp:textbox runat="server" ID="lbl_broker" Text='<%# Eval("broker") %>' Width="320px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="cod_cia">
+                                        <ItemTemplate>
+                                            <asp:textbox runat="server" ID="lbl_CodCia" Text='<%# Eval("cod_cia") %>' Width="50px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="Compañia">
+                                        <ItemTemplate>
+                                            <asp:textbox runat="server" ID="lbl_Compañia" Text='<%# Eval("compañia") %>' Width="320px" Height="22px" CssClass="form-control" Enabled="false" Font-Size="10px"></asp:textbox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                   
+                                    <asp:TemplateField HeaderText="Retención">
+                                        <ItemTemplate>
+                                            <asp:textbox runat="server" ID="lbl_MontoISR" Enabled="false" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("monto_isr")))  %>' Width="80px" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                                <FooterStyle BackColor="#5D7B9D" ForeColor="White" />
+                                <HeaderStyle BackColor="#5D7B9D" ForeColor="White" />
+                                <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+                            </asp:GridView>
+                        </asp:Panel>
+
+                        <div class="row">        
+                            <div class="col-md-2" style="border:1px solid gray; border-width: 1px 0 0 0; padding: 5px 0 0 0">
+                                 <button type="button" class="btn btn-danger" data-dismiss="modal" style="width:140px;">Cerrar</button>
+                            </div>
+                        </div>
+                    </ContentTemplate>
+                </asp:UpdatePanel>
+            </div>
     </div>
 
     <div id="EsperaModal" style="width:150px; height:95px"  class="modalWait">

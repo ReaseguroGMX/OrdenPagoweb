@@ -3057,7 +3057,7 @@ Partial Class Pages_OrdenPago
         End Try
     End Sub
 
-    Private Function ConsultaParcial(ByVal id_pv As String, Optional ByVal cod_broker As Integer = 0) As String
+    Private Function ConsultaParcial(ByVal id_pv As String, Optional ByVal cod_broker As Integer = -1) As String
         Dim sCnn As String
         Dim da As SqlDataAdapter
         Dim dtRes As DataTable
@@ -5253,6 +5253,41 @@ Partial Class Pages_OrdenPago
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-:  ", ex.Message)
             LogError("(ddl_Reasegurador_SelectedIndexChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub gvd_OrdenPago_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvd_OrdenPago.RowCommand
+        Try
+            If e.CommandName.Equals("DetalleImpuesto") Then
+                Dim sCnn As String
+                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
+
+                Dim id_pv As String = gvd_OrdenPago.DataKeys(Index)("id_pv")
+                Dim cod_broker As Integer = gvd_OrdenPago.DataKeys(Index)("cod_cia_reas_brok")
+                Dim impuesto As Double = gvd_OrdenPago.DataKeys(Index)("Impuesto")
+
+                If impuesto > 0 Then
+                    sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+
+                    Dim sSel As String = "spS_DetalleISR '" & id_pv & "'," & cod_broker
+                    Dim da As SqlDataAdapter
+
+                    Dim dtRasegurador As New DataTable
+
+                    da = New SqlDataAdapter(sSel, sCnn)
+
+                    da.Fill(dtRasegurador)
+
+                    gvd_Reasegurador.DataSource = dtRasegurador
+                    gvd_Reasegurador.DataBind()
+
+                    ScriptManager.RegisterStartupScript(Me, Me.GetType, "Detalle", "OpenPopup('#DetReaseguradorModal');", True)
+                End If
+
+            End If
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(gvd_OrdenPago_RowCommand)" & ex.Message)
         End Try
     End Sub
 
