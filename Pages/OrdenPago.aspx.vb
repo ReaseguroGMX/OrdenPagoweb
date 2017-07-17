@@ -1070,7 +1070,7 @@ Partial Class Pages_OrdenPago
                     End If
                 Next
 
-                Montos = Split(ConsultaParcial(Mid(strId_pv, 2, Len(strId_pv) - 1)), "|")
+                Montos = Split(ConsultaParcial(Mid(strId_pv, 2, Len(strId_pv) - 1), cod_broker), "|")
 
                 'If Len(txt_Ajustes.Text) > 0 Then
                 '    Texto = Texto & vbCrLf & "Ajuste: " & txt_Ajustes.Text
