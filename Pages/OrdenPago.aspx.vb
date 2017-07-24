@@ -1169,7 +1169,7 @@ Partial Class Pages_OrdenPago
             'MOVIMIENTOS DE PRIMA NULA
             strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & nro_correlativo & ",NULL,''170101003002000'',''D''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''PRIMA NULA''),"
 
-            strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & nro_correlativo & "," & Adicional(3) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
+            strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & nro_correlativo & "," & IIf(Adicional(3) = 0, 10, Adicional(3)) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
                                                                  "11,1,''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & ",0," &
                                                                  Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
                                                                  Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," &
@@ -1200,7 +1200,7 @@ Partial Class Pages_OrdenPago
             'MOVIMIENTOS DE COMISION NULA
             strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & nro_correlativo & ",NULL,''170101003002000'',''C''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''COMISION NULA''),"
 
-            strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & nro_correlativo & "," & Adicional(4) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
+            strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & nro_correlativo & "," & IIf(Adicional(4) = 0, 14, Adicional(4)) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
                                                                   "11,1,''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & ",0," &
                                                                   Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
                                                                   Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," &
@@ -1345,9 +1345,18 @@ Partial Class Pages_OrdenPago
                 indMonto = 0
                 ReDim Preserve strMontos(indMonto)
                 strMontos(indMonto) = ""
+
                 indMontoReas = 0
                 ReDim Preserve strMontosReas(indMontoReas)
                 strMontosReas(indMontoReas) = ""
+
+                indMontoISR = 0
+                ReDim Preserve strMontosISR(indMontoISR)
+                strMontosISR(indMontoISR) = ""
+
+                indImputacion = 0
+                ReDim Preserve strMontosImputacion(indImputacion)
+                strMontosImputacion(indImputacion) = ""
 
                 For Each Cuota As DataRow In Cuotas.Rows
                     'Valida que se trate del broker o compañia en turno
@@ -1414,7 +1423,7 @@ Partial Class Pages_OrdenPago
                                                         "0,0,0,0" & "," & Cuota("nro_layer") & "),"
 
 
-                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & id_pv & "," & nro_reas & "," &
+                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & Cuota("id_pv") & "," & nro_reas & "," &
                                                                                                        Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
                                                                                                        Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
                                                                                                        Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("Cta_CblePri") & "''," & cod_deb_cred & "," &
@@ -1463,7 +1472,7 @@ Partial Class Pages_OrdenPago
                                 strMontosISR(indMontoISR) = strMontosISR(indMontoISR) & "(@strKey,4," & no_correlativo & "," & Cuota("cod_suc") & ",303,null,708," &
                                                                                           "null,null,null,null,708,null,null,null,null,null,null,null),"
 
-                                strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,4," & no_correlativo & "," & id_pv & "," & nro_reas & "," &
+                                strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,4," & no_correlativo & "," & Cuota("id_pv") & "," & nro_reas & "," &
                                                                                                            Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
                                                                                                            Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
                                                                                                            Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("cod_cta_cble") & "''," & cod_deb_cred & "," &
@@ -1513,7 +1522,7 @@ Partial Class Pages_OrdenPago
                                                             Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_com") > 100, 100, Cuota("pje_com")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
                                                             "0,0,0,0" & "," & Cuota("nro_layer") & "),"
 
-                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & id_pv & "," & nro_reas & "," &
+                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & Cuota("id_pv") & "," & nro_reas & "," &
                                                                                                         Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
                                                                                                         Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
                                                                                                         Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("Cta_CbleCom") & "''," & cod_deb_cred & "," &
@@ -1971,9 +1980,9 @@ Partial Class Pages_OrdenPago
 
             If e.CommandName.Equals("Detalle") Then
 
-                'hid_TipoCambio.Value = ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1)  'Tipo de Cambio Dolares
+                hid_TipoCambio.Value = ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1)  'Tipo de Cambio Dolares
 
-                hid_TipoCambio.Value = 20  'Tipo de Cambio Dolares
+                'hid_TipoCambio.Value = 20  'Tipo de Cambio Dolares
 
                 Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
 
