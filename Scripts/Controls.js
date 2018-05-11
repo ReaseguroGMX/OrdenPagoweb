@@ -7,9 +7,23 @@ $("body").on("click", ".btnSelCuenta", function (e) {
     event.preventDefault ? event.preventDefault() : event.returnValue = false;
     
     var persona = $("input[id$='hid_persona']")[0].value.split('|')
-    var moneda = $("input[id$='hid_Moneda']")[0].value
+    var moneda = $("input[id$='hid_MonedaDev']")[0].value
 
     $("input[id$='hid_Control']")[0].value = -1;
+    $("input[id$='hid_Catalogo']")[0].value = 'Cta';
+    $("#lblCatalogo")[0].innerText = 'CUENTAS BANCARIAS';
+    var Condicion = ' WHERE id_persona = ' + persona[0] + ' AND cod_moneda = ' + moneda
+    load_Data("spS_CatalogosOP ==Cta==" + ",==" + Condicion + "==", "Unica");
+
+});
+
+$("body").on("click", ".btnSelCuentaDif", function (e) {
+    event.preventDefault ? event.preventDefault() : event.returnValue = false;
+
+    var persona = $("input[id$='hid_persona']")[0].value.split('|')
+    var moneda = $("input[id$='hid_Moneda']")[0].value
+
+    $("input[id$='hid_Control']")[0].value = -2;
     $("input[id$='hid_Catalogo']")[0].value = 'Cta';
     $("#lblCatalogo")[0].innerText = 'CUENTAS BANCARIAS';
     var Condicion = ' WHERE id_persona = ' + persona[0] + ' AND cod_moneda = ' + moneda

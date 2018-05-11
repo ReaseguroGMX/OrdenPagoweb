@@ -6,7 +6,7 @@
     <script src="../Scripts/jquery.maskedinput.js"></script>
     <script src="../Scripts/Controls.js"></script>
     <script src="../Scripts/jquery.numeric.js"></script>
-
+    
 
  <script type="text/javascript"> 
      Sys.WebForms.PageRequestManager.getInstance().add_endRequest(PageLoad);
@@ -739,6 +739,8 @@
                              </div>
                         </div>
                         <div class="clear padding2"></div>
+                        <asp:Button runat="server" ID="btn_Diferencias" CssClass="form-control btn-primary" Text="Pago Manual de Diferencias" Width="280px" />
+                        <div class="clear padding5"></div>
                         <asp:Button runat="server" ID="btn_Descartadas" CssClass="form-control btn-info" Text="Pólizas No Sujetas a Pago" Width="280px" />
                     </ContentTemplate>
                 </asp:UpdatePanel>
@@ -1742,15 +1744,19 @@
                                     <asp:Button runat="server" ID="btn_EvaluaOP" Text="Evaluar" CssClass="form-control btn-primary" Visible="false" Width="90px" Height="26px" />
                                 </td>
                                 <td>
-                                    <asp:label runat="server" ID="lbl_Parcial" class="col-md-1 control-label" Width="100px">Monto = </asp:label>
+                                    <asp:label runat="server" ID="lbl_Parcial" class="col-md-1 control-label" Width="55px">PNR= </asp:label>
                                     <asp:label runat="server" ID="lbl_MntParcial" Text="" class="control-label" Font-Bold="true" ForeColor="DarkBlue" BackColor="LightBlue"/>
                                 </td>
                                 <td>
-                                    <asp:label runat="server" ID="lbl_Impuesto" class="col-md-1 control-label" Width="100px">Impuesto = </asp:label>
+                                    <asp:label runat="server" ID="lbl_Impuesto" class="col-md-1 control-label" Width="50px">ISR= </asp:label>
                                     <asp:label runat="server" ID="lbl_MntImpuesto" Text="" class="control-label" Font-Bold="true" ForeColor="DarkBlue" BackColor="LightBlue"/>
                                 </td>
-                                 <td>
-                                    <asp:label runat="server" ID="lbl_Total" class="col-md-1 control-label" Width="130px">Total a Pagar = </asp:label>
+                                <td>
+                                    <asp:label runat="server" ID="lbl_Diferencia" class="col-md-1 control-label" Width="85px">Diferencia= </asp:label>
+                                    <asp:label runat="server" ID="lbl_MntDiferencia" Text="" class="control-label" Font-Bold="true" ForeColor="DarkBlue" BackColor="LightBlue"/>
+                                </td>
+                                <td>
+                                    <asp:label runat="server" ID="lbl_Total" class="col-md-1 control-label" Width="60px">Total= </asp:label>
                                     <asp:label runat="server" ID="lbl_MntTotal" Text="" class="control-label" Font-Bold="true" ForeColor="DarkBlue" BackColor="LightBlue"/>
                                 </td>
                             </tr>
@@ -1760,7 +1766,7 @@
 
                         <asp:Panel runat="server" ID="pnlOrdenPago" Width="100%" Height="450px" ScrollBars="Vertical">
                             <asp:GridView runat="server" ID="gvd_OrdenPago" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true"
-                                          DataKeyNames="Banco,TipoDeCuenta,Cuenta,Moneda,id_Cuenta,cod_banco,cod_moneda,txt_swift,cod_tipo_banco,id_pv,cod_cia_reas_brok,Impuesto"  >
+                                          DataKeyNames="Banco,TipoDeCuenta,Cuenta,Moneda,id_Cuenta,cod_banco,cod_moneda,txt_swift,cod_tipo_banco,id_pv,cod_cia_reas_brok,Parcial,Impuesto,imp_cambio"  >
                                 <RowStyle BackColor="#F7F6F3" ForeColor="#333333"  />
                                 <Columns>
                                     <asp:TemplateField HeaderText="No.">
@@ -1776,28 +1782,61 @@
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Broker">
                                         <ItemTemplate>
-                                            <asp:textbox runat="server" ID="lbl_Broker" Text='<%# Eval("Broker") %>' Width="200px" Height="80px" CssClass="form-control" Enabled="false" Font-Size="10px" TextMode="MultiLine"></asp:textbox>
+                                            <asp:textbox runat="server" ID="lbl_Broker" Text='<%# Eval("Broker") %>' Width="140px" Height="80px" CssClass="form-control" Enabled="false" Font-Size="10px" TextMode="MultiLine"></asp:textbox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
-                                    <asp:TemplateField HeaderText="Monto">
+                                    <asp:TemplateField HeaderText="Moneda">
                                         <ItemTemplate>
-                                            <asp:TextBox runat="server" ID="txt_Monto"  Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Parcial")))  %>' Width="80px" Height="80px" Enabled="false"  CssClass="form-control Derecha" Font-Size="11px" Font-Bold="true"></asp:TextBox>
+                                            <asp:DropDownList runat="server" ID="ddl_Moneda" Width="100px" AutoPostBack="true" OnSelectedIndexChanged="ddl_Moneda_SelectedIndexChanged" CssClass="form-control Moneda" Height="26px" >
+                                                <asp:ListItem Text="Nacional" Value="0"></asp:ListItem>
+                                                <asp:ListItem Text="Dolares" Value="1"></asp:ListItem>
+                                            </asp:DropDownList>
+
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <asp:Label runat="server" Text="T.C.:"  Font-Size="10px"></asp:Label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <asp:Label runat="server" ID="lbl_TipoCambio" Enabled="false" Text='<%# Eval("imp_cambio") %>' CssClass="form-control Derecha" Height="26px"  ></asp:Label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <asp:Label runat="server" Text="Pactado:" Font-Size="10px" ></asp:Label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <asp:TextBox runat="server" ID="txt_Pactado" Enabled="false" Text="" CssClass="form-control Derecha" AutoPostBack="true" OnTextChanged="txt_Pactado_TextChanged" Height="26px"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            
+                                            
                                         </ItemTemplate>
                                     </asp:TemplateField>
-                                    <asp:TemplateField HeaderText="Impuesto">
+                                    <asp:TemplateField HeaderText="Prima Neta">
+                                        <ItemTemplate>
+                                            <asp:TextBox runat="server" ID="txt_Monto"  Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Parcial")))  %>' Width="100px" Height="80px" Enabled="false"  CssClass="form-control Derecha" Font-Size="11px" Font-Bold="true"></asp:TextBox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="ISR">
                                         <ItemTemplate>
                                             <asp:LinkButton runat="server" ID="txt_Impuesto" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Impuesto")))  %>' Width="80px" CommandName="DetalleImpuesto"   CssClass="Derecha" Font-Size="11px" Font-Bold="true"></asp:LinkButton>
                                         </ItemTemplate>
                                     </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Diferencia">
+                                        <ItemTemplate>
+                                            <asp:TextBox runat="server" ID="txt_Diferencia" Text='<%# String.Format("{0:#,#0.0000}", CDbl(Eval("Diferencia")))  %>' Width="90px" Height="80px"  Enabled="false"  CssClass="form-control Derecha" Font-Size="11px" Font-Bold="true"></asp:TextBox>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Fec Pago">
                                         <ItemTemplate>
-                                            <asp:TextBox runat="server" ID="txt_FechaPago" Text='<%# String.Format("{0:dd/MM/yyyy}", CDate(Eval("FechaPago"))) %>' Width="80px" Height="80px"  CssClass="form-control FechaSB" Font-Size="11px"></asp:TextBox>
+                                            <asp:TextBox runat="server" ID="txt_FechaPago" Text='<%# String.Format("{0:dd/MM/yyyy}", CDate(Eval("FechaPago"))) %>' Width="70px" Height="80px"  CssClass="form-control FechaSB" Font-Size="11px"></asp:TextBox>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Tipo Pago" ItemStyle-HorizontalAlign="Center">
                                         <ItemTemplate>
                                             
-                                             <asp:textbox runat="server" ID="hid_Moneda" Text='<%# Eval("cod_moneda")  %>' CssClass="NoDisplay Moneda" ></asp:textbox>
+                                             <asp:textbox runat="server" ID="hid_Moneda" Text='<%# Eval("cod_moneda")  %>' CssClass="NoDisplay" ></asp:textbox>
                                              <asp:textbox runat="server" ID="hid_Persona" Text='<%# Eval("id_persona")  %>' CssClass="NoDisplay Persona" ></asp:textbox>
                                              <asp:HiddenField runat="server" ID="hid_cod_banco" Value='<%# Eval("cod_banco")  %>' />
                                              <asp:HiddenField runat="server" ID="hid_id_cuenta" Value='<%# Eval("id_Cuenta")  %>' />
@@ -2402,7 +2441,7 @@
     </div>
 
      <!-- Modal -->
-    <div id="ImpuestoModal" style="width:500px; height:350px;"  class="modalAutoriza">
+    <div id="ImpuestoModal" style="width:500px; height:380px;"  class="modalAutoriza">
          <%-- <div class="modal-content">--%>
                <div class="modal-header" style="height:40px">
                     <button type="button" class="close"  data-dismiss="modal">&times;</button>
@@ -2442,11 +2481,24 @@
                             <div class="clear padding5"></div>
                             <div class="row">
                                 <div class="input-group">
+                                     <asp:label runat="server" class="col-md-1 control-label" Width="130px">Moneda</asp:label>
+                                     <asp:DropDownList runat="server" ID="ddl_MonedaDev" AutoPostBack="true" CssClass="form-control" Width="80px" Height="26px" >
+                                     </asp:DropDownList>
+                                     <asp:HiddenField runat="server" ID="hid_MonedaDev" />
+
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="130px">Tipo Cambio</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_TipoCambioDev" AutoPostBack="true" Enabled="false" CssClass="form-control" Width="107px" Height="26px" ></asp:TextBox>
+                                 </div>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                <div class="input-group">
                                      <asp:HiddenField runat="server" ID="hid_persona" /> 
                                      <asp:HiddenField runat="server" ID="hid_cuenta" /> 
                                      <asp:HiddenField runat="server" ID="hid_adicional" /> 
                                      <asp:label runat="server" class="col-md-1 control-label" Width="130px">Monto Retenido</asp:label>
                                      <asp:TextBox runat="server" ID="txt_ISR"  Enabled="false" CssClass="form-control" Width="80px" Height="26px" ></asp:TextBox>
+                                     <asp:TextBox runat="server" ID="txt_ISRAux"  Visible="false"></asp:TextBox>
 
                                     <asp:label runat="server" class="col-md-1 control-label" Width="130px">Fecha Retenido</asp:label>
                                     <asp:TextBox runat="server" ID="txt_FechaRet"  Enabled="false" CssClass="form-control" Width="107px" Height="26px" ></asp:TextBox>
@@ -2597,7 +2649,7 @@
                                     <asp:Panel runat="server" ID="pnl_Acumulados" Width="100%" Height="470px" ScrollBars="Vertical">
                                         <asp:GridView runat="server" ID="gvd_Acumulados" AutoGenerateColumns="false" ForeColor="#333333" GridLines="Horizontal"  ShowHeaderWhenEmpty="true"
                                                       DataKeyNames="nro_op,Poliza,nro_recibo,fec_pago,id_pv,nro_reas,nro_layer,id_contrato,nro_tramo,cod_ramo_contable,ramo_contable,
-                                                                    cod_broker,broker,cod_cia,compañia,nro_cuota,cod_cta_cb,cod_deb_cred,imp_mo,txt_desc"  >
+                                                                    cod_broker,broker,cod_cia,compañia,nro_cuota,cod_cta_cb,cod_deb_cred,imp_mo,imp_eq,txt_desc"  >
                                             <RowStyle BackColor="#F7F6F3" ForeColor="#333333"  />
                                             <Columns>
                                                 <asp:TemplateField HeaderText="">
@@ -2653,6 +2705,11 @@
                                                 <asp:TemplateField HeaderText="ISR">
                                                     <ItemTemplate>
                                                         <asp:textbox runat="server" ID="lbl_MontoISR" Text='<%# Eval("imp_mo") %>' Width="90px" Enabled="false" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
+                                                    </ItemTemplate>
+                                                </asp:TemplateField>
+                                                 <asp:TemplateField HeaderText="ISR Eq">
+                                                    <ItemTemplate>
+                                                        <asp:textbox runat="server" ID="lbl_MontoISREq" Text='<%# Eval("imp_eq") %>' Width="90px" Enabled="false" Height="22px"  CssClass="form-control"  Font-Size="10px" ></asp:textbox>
                                                     </ItemTemplate>
                                                 </asp:TemplateField>
                                                 <asp:TemplateField HeaderText="Fecha">
@@ -2788,6 +2845,68 @@
                     </ContentTemplate>
                 </asp:UpdatePanel>
             </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="DiferenciasModal" style="width:500px; height:300px;" class="modalAutoriza">
+               <div class="modal-header" style="height:40px">
+                    <button type="button" class="close"  data-dismiss="modal">&times;</button>
+                     <h4 class="modal-title">
+                         Pago Manual de Diferencias Cambiarias
+                     </h4>
+               </div>
+
+               <div class="modal-body" style="height:308px">
+                   <asp:UpdatePanel runat="server" ID="upDiferencias">
+                       <ContentTemplate>
+                            <div class="row">
+                                <div class="input-group">
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="100px">Nro. OP</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_OPDif" AutoPostBack="true" CssClass="form-control" Width="90px" Height="26px" ></asp:TextBox>
+
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="100px">Moneda</asp:label>
+                                    <asp:DropDownList runat="server" ID="ddl_MonedaDif" AutoPostBack="true" CssClass="form-control" Width="190px" Height="26px"></asp:DropDownList>
+                                </div>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                <div class="input-group">
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="100px">Broker</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_BrokerDif"  Enabled="false" CssClass="form-control" Width="200px" Height="26px" ></asp:TextBox>
+
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="100px">Diferencia</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_MontoDif"  CssClass="form-control" Width="80px" Height="26px" ></asp:TextBox>
+                                </div>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                <div class="input-group">
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="100px">Fecha</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_FechaPagoDif"  CssClass="form-control FechaSB" Width="90px" Height="26px" ></asp:TextBox>
+
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="100px">Cuenta</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_CuentaDif"  Enabled="false" CssClass="form-control" Width="155px" Height="26px" ></asp:TextBox>
+                                    <asp:Button runat="server" ID="btn_CuentaDif" Text=".." CssClass ="btn btn-primary btnSelCuentaDif" Height="25px"/>
+                                 </div>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                    <asp:label runat="server" class="col-md-1 control-label" Width="100px">Banco</asp:label>
+                                    <asp:TextBox runat="server" ID="txt_BancoDif"  Enabled="false" CssClass="form-control" Width="380px" Height="26px" ></asp:TextBox>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div class="row">
+                                <asp:label runat="server" class="col-md-1 control-label" Width="100px">Detalle</asp:label>
+                                <asp:TextBox runat="server" ID="txt_DetalleDif"  CssClass="form-control" Width="380px" Height="50px" TextMode ="MultiLine" ></asp:TextBox>
+                            </div>
+                            <div class="clear padding5"></div>
+                            <div style="width:100%; text-align:right;">
+                                 <asp:Button runat="server" id="btn_GenerarDif" class="btn btn-primary" Text="Generar"  style="height:30px; width:80px;" />
+                                 <button type="button" id="btn_CnlFiferencia" class="btn btn-danger" data-dismiss="modal" style="height:30px; width:80px;">Cerrar</button>
+                            </div>
+                       </ContentTemplate>
+                    </asp:UpdatePanel>
+              </div>
     </div>
 </asp:Content>
 
