@@ -20,8 +20,8 @@ Partial Class Pages_Login
             usuarioNT = ConsultaBD.ConsultaUsuarioNT(hid_usuario.Value)
 
             If usuarioNT <> "" Then
-                If IsAuthenticated("GMX.COM.MX", usuarioNT, hid_contraseña.Value) Then
-                    If ConsultaBD.ConsultaUsuario(usuarioNT) <> "" Then
+                'If IsAuthenticated("GMX.COM.MX", usuarioNT, hid_contraseña.Value) Then
+                If ConsultaBD.ConsultaUsuario(usuarioNT) <> "" Then
                         ConsultaBD.InsertaBitacora(usuarioNT, Master.HostName, "Inicio de Sesión", "Inicio Exitoso (Ordenes de Pago)")
                         Master.VisibleBtnCerrar = False
                         If Session("Origen") = 1 Then
@@ -34,10 +34,10 @@ Partial Class Pages_Login
                         Mensaje("Login", "No cuenta con acceso a SII")
                         ConsultaBD.InsertaBitacora(usuarioNT, Master.HostName, "Inicio Erroneo", "No cuenta con acceso a SII (Ordenes de Pago)")
                     End If
-                Else
-                    Mensaje("Login", "Usuario y/o Contraseña de Red incorrectos o su cuenta esta bloqueada")
+                'Else
+                Mensaje("Login", "Usuario y/o Contraseña de Red incorrectos o su cuenta esta bloqueada")
                     ConsultaBD.InsertaBitacora(usuarioNT, Master.HostName, "Inicio Erroneo", "Usuario y/o Contraseña de Red incorrectos o su cuenta esta bloqueada")
-                End If
+                'End If
             Else
                 Mensaje("Login", "Usuario y/o Contraseña incorrectos")
                 If Len(hid_usuario.Value) Then

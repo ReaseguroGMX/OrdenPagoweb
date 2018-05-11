@@ -108,7 +108,6 @@ Partial Class Pages_OrdenPago
         Try
             If Not IsPostBack Then
 
-
                 Session.Timeout = 60000
 
                 Session.Add("blnExpiro", "1")
@@ -202,9 +201,21 @@ Partial Class Pages_OrdenPago
         ddl_MonedaEnd.DataSource = ddl_Moneda.DataSource
         ddl_MonedaEnd.DataBind()
 
+        ddl_MonedaDif.DataValueField = "Clave"
+        ddl_MonedaDif.DataTextField = "Descripcion"
+        ddl_MonedaDif.DataSource = ddl_Moneda.DataSource
+        ddl_MonedaDif.DataBind()
+
+        ddl_MonedaDev.DataValueField = "Clave"
+        ddl_MonedaDev.DataTextField = "Descripcion"
+        ddl_MonedaDev.DataSource = ddl_Moneda.DataSource
+        ddl_MonedaDev.DataBind()
+
         Dim lst As ListItem = New ListItem("...", "-1")
 
         ddl_Moneda.Items.Insert(0, lst)
+
+
     End Sub
 
     Public Sub gvd_Reaseguro_PreRender(sender As Object, e As EventArgs) Handles gvd_Reaseguro.PreRender
@@ -520,6 +531,12 @@ Partial Class Pages_OrdenPago
                             hid_cuenta.Value = Split(Datos(0), "~")(0) & "|" & Complementos(2) & "|0"
                             txt_Banco.Text = Complementos(1)
                             txt_Cuenta.Text = Complementos(0)
+                        ElseIf hid_Control.Value = -2 Then
+                            Datos = Split(Seleccionados.Substring(0, Seleccionados.Length - 1), "|")
+                            Complementos = Split(Split(Datos(0), "~")(1), "-")
+                            hid_cuenta.Value = Split(Datos(0), "~")(0) & "|" & Complementos(2) & "|0"
+                            txt_BancoDif.Text = Complementos(1)
+                            txt_CuentaDif.Text = Complementos(0)
                         Else
 
                             Dim Indice As Integer = hid_Control.Value
@@ -975,6 +992,7 @@ Partial Class Pages_OrdenPago
         Dim Polizas As String
         Dim strId_pv As String
         Dim Montos() As String
+        Dim imp_cambio As Double
 
         'Solo si existen registros para almacenar
         If Cuotas.Rows.Count > 0 Then
@@ -984,6 +1002,7 @@ Partial Class Pages_OrdenPago
             dtOrdenes.Columns.Add("Broker")
             dtOrdenes.Columns.Add("Parcial")
             dtOrdenes.Columns.Add("Impuesto")
+            dtOrdenes.Columns.Add("Diferencia")
             dtOrdenes.Columns.Add("FechaPago")
             dtOrdenes.Columns.Add("TipoPago")
             dtOrdenes.Columns.Add("Texto")
@@ -999,6 +1018,7 @@ Partial Class Pages_OrdenPago
             dtOrdenes.Columns.Add("cod_tipo_banco")
             dtOrdenes.Columns.Add("id_pv")
             dtOrdenes.Columns.Add("cod_cia_reas_brok")
+            dtOrdenes.Columns.Add("imp_cambio")
 
             For i = 0 To UBound(arrayBroker)
                 blnCuota = False
@@ -1066,6 +1086,7 @@ Partial Class Pages_OrdenPago
                             cod_moneda = Cuota("cod_moneda")
                             id_persona = Cuota("id_persona")
                             cod_tipo_banco = Cuota("cod_tipo_banco")
+                            imp_cambio = Cuota("imp_cambio")
                         End If
                     End If
                 Next
@@ -1077,11 +1098,11 @@ Partial Class Pages_OrdenPago
                 'End If
 
 
-                dtOrdenes.Rows.Add(i + 1, Polizas, Descripcion, CDbl(Montos(0)), CDbl(Montos(1)),
+                dtOrdenes.Rows.Add(i + 1, Polizas, Descripcion, CDbl(Montos(0)), CDbl(Montos(1)), 0,
                                    DateAdd(DateInterval.Day, 1, Now), "T", Texto,
                                    Banco, TipoDeCuenta, Cuenta, Moneda, id_Cuenta, cod_banco, cod_moneda,
                                    id_persona, txt_swift, cod_tipo_banco, Mid(strId_pv, 2, Len(strId_pv) - 1),
-                                   cod_cia_reas_brok)
+                                   cod_cia_reas_brok, imp_cambio)
             Next
 
             gvd_OrdenPago.DataSource = dtOrdenes
@@ -1112,6 +1133,23 @@ Partial Class Pages_OrdenPago
         Dim nro_op As Double = 0
         Dim nro_correlativo As Integer = 0
         Dim MontoISR As String = 0
+        Dim MontoISR_Eq As String = 0
+        Dim blnAsientoDiario As Boolean = False
+        Dim nro_asiento As Integer = 0
+        Dim nro_recibo As Integer = 0
+        Dim cta_deb_cred As String
+        Dim txt_desc As String
+
+        Dim strMontosCambio As String = vbNullString
+        Dim strMontosISRCambio As String = vbNullString
+        Dim strMontosImputacionCambio As String = vbNullString
+
+        Dim Diferencia As Double = 0
+
+        'Evalua si se trata de un aisento de diario
+        If hid_Moneda.Value <> ddl_MonedaDev.SelectedValue Then
+            blnAsientoDiario = True
+        End If
 
         indMonto = 0
         ReDim Preserve strMontos(indMonto)
@@ -1129,29 +1167,30 @@ Partial Class Pages_OrdenPago
         ReDim Preserve strMontosImputacion(indImputacion)
         strMontosImputacion(indImputacion) = ""
 
+        nro_correlativo = IIf(blnAsientoDiario = True, 1, 0)
+
         For Each row In gvd_Acumulados.Rows
 
-            If Len(strMontos(indMonto)) > 7500 Then
+            If Len(strMontos(indMonto)) > 7400 Then
                 indMonto = indMonto + 1
                 ReDim Preserve strMontos(indMonto)
                 strMontos(indMonto) = ""
             End If
 
-
-            If Len(strMontosReas(indMontoReas)) > 7500 Then
+            If Len(strMontosReas(indMontoReas)) > 7400 Then
                 indMontoReas = indMontoReas + 1
                 ReDim Preserve strMontosReas(indMontoReas)
                 strMontosReas(indMontoReas) = ""
             End If
 
-            If Len(strMontosISR(indMontoISR)) > 7500 Then
+            If Len(strMontosISR(indMontoISR)) > 7400 Then
                 indMontoISR = indMontoISR + 1
                 ReDim Preserve strMontosISR(indMontoISR)
                 strMontosISR(indMontoISR) = ""
             End If
 
             'Consolidado de Montos Imputacion
-            If Len(strMontosImputacion(indImputacion)) > 7500 Then
+            If Len(strMontosImputacion(indImputacion)) > 7400 Then
                 indImputacion = indImputacion + 1
                 ReDim Preserve strMontosImputacion(indImputacion)
                 strMontosImputacion(indImputacion) = ""
@@ -1159,108 +1198,157 @@ Partial Class Pages_OrdenPago
 
             Poliza = Split(gvd_Acumulados.DataKeys(row.RowIndex)("Poliza"), "-")
             cod_deb_cred = IIf(gvd_Acumulados.DataKeys(row.RowIndex)("cod_deb_cred") = "C", "D", "C")
+            cta_deb_cred = "''" & IIf(blnAsientoDiario = True, "0", "170101003002000") & "''"
+            txt_desc = IIf(blnAsientoDiario = True, "''PRIMA ASIENTO DIARIO''", "''PRIMA NULA''")
+
             ConceptoISR = "DEVOLUCION ISR " & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "-" & gvd_Acumulados.DataKeys(row.RowIndex)("compañia")
+
             MontoISR = Replace(gvd_Acumulados.DataKeys(row.RowIndex)("imp_mo"), "-", "")
+            MontoISR_Eq = Replace(gvd_Acumulados.DataKeys(row.RowIndex)("imp_eq"), "-", "")
 
             If Len(ConceptoISR) >= 55 Then
                 ConceptoISR = Mid(ConceptoISR, 1, 55)
             End If
 
             'MOVIMIENTOS DE PRIMA NULA
-            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & nro_correlativo & ",NULL,''170101003002000'',''D''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''PRIMA NULA''),"
+            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & nro_correlativo & ",NULL," & cta_deb_cred & ",''D''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & "," & txt_desc & "),"
 
             strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & nro_correlativo & "," & IIf(Adicional(3) = 0, 10, Adicional(3)) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
-                                                                 "11,1,''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & ",0," &
-                                                                 Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
-                                                                 Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," &
-                                                                 IIf(Adicional(1) > 100, 100, Adicional(1)) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_cuota") & ",''" & FechaAIngles(Adicional(0)) & "''," &
-                                                                 "0,0,0,0" & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_layer") & "),"
+                                                                        "11,1,''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & ",0," &
+                                                                        Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
+                                                                        Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," &
+                                                                        IIf(Adicional(1) > 100, 100, Adicional(1)) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_cuota") & ",''" & FechaAIngles(Adicional(0)) & "''," &
+                                                                        "0,0,0,0" & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_layer") & "),"
 
 
             nro_correlativo = nro_correlativo + 1
 
             'MOVIMIENTOS DE IMPUESTO
             strMontos(indMonto) = strMontos(indMonto) & "(@strKey,4," & nro_correlativo & ",NULL,''" & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb") & "'',''" & cod_deb_cred & "''," &
-                                                          hid_Moneda.Value & "," & MontoISR & "," & CDbl(MontoISR) * hid_TipoCambio.Value & "," &
+                                                          hid_Moneda.Value & "," & MontoISR & "," & CDbl(MontoISR) * IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & "," &
                                                           IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''" & ConceptoISR & "''),"
 
             strMontosISR(indMontoISR) = strMontosISR(indMontoISR) & "(@strKey,4," & nro_correlativo & "," & Poliza(0) & ",303,null,1139,null,null,null,null,1139,null,null,null,null,null,null,null),"
 
 
             'MOVIMIENTO DE IMPUTACION EN RESPALDO
-            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,4," & nro_correlativo & "," & gvd_Acumulados.DataKeys(row.RowIndex)("id_pv") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_reas") & "," &
-                                                                              gvd_Acumulados.DataKeys(row.RowIndex)("nro_layer") & ",''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & "," &
-                                                                              gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
-                                                                              gvd_Acumulados.DataKeys(row.RowIndex)("nro_cuota") & "," & hid_Moneda.Value & ",''" & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb") & "'',''" & cod_deb_cred & "''," &
-                                                                              MontoISR & ",-1,''" & ConceptoISR & "''),"
+            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,4," & nro_correlativo & ",NULL,NULL," & gvd_Acumulados.DataKeys(row.RowIndex)("id_pv") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_reas") & "," &
+                                                                                      gvd_Acumulados.DataKeys(row.RowIndex)("nro_layer") & ",''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & "," &
+                                                                                      gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
+                                                                                      gvd_Acumulados.DataKeys(row.RowIndex)("nro_cuota") & "," & hid_Moneda.Value & ",''" & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb") & "'',''" & cod_deb_cred & "''," &
+                                                                                      MontoISR & ",-1,''" & ConceptoISR & "''),"
 
 
             nro_correlativo = nro_correlativo + 1
 
             'MOVIMIENTOS DE COMISION NULA
-            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & nro_correlativo & ",NULL,''170101003002000'',''C''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''COMISION NULA''),"
+            cta_deb_cred = "''" & IIf(blnAsientoDiario = True, "0", "170101003002000") & "''"
+            txt_desc = IIf(blnAsientoDiario = True, "''COMISION ASIENTO DIARIO''", "''COMISION NULA''")
+
+            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & nro_correlativo & ",NULL," & cta_deb_cred & ",''C''," & hid_Moneda.Value & ",0,0," & IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & "," & txt_desc & "),"
 
             strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & nro_correlativo & "," & IIf(Adicional(4) = 0, 14, Adicional(4)) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker") & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia") & "," &
-                                                                  "11,1,''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & ",0," &
-                                                                  Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
-                                                                  Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," &
-                                                                  IIf(Adicional(2) > 100, 100, Adicional(2)) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_cuota") & ",''" & FechaAIngles(Adicional(0)) & "''," &
-                                                                  "0,0,0,0" & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_layer") & "),"
+                                                                        "11,1,''" & gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato") & "''," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo") & ",0," &
+                                                                        Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
+                                                                        Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable") & "," &
+                                                                        IIf(Adicional(2) > 100, 100, Adicional(2)) & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_cuota") & ",''" & FechaAIngles(Adicional(0)) & "''," &
+                                                                        "0,0,0,0" & "," & gvd_Acumulados.DataKeys(row.RowIndex)("nro_layer") & "),"
             nro_correlativo = nro_correlativo + 1
         Next
 
+        'Valida si genera asiento Diario
+        If blnAsientoDiario = True Then
+            If Len(strMontos(indMonto)) > 7400 Then
+                indMonto = indMonto + 1
+                ReDim Preserve strMontos(indMonto)
+                strMontos(indMonto) = ""
+            End If
+
+
+            If Len(strMontosISR(indMontoISR)) > 7400 Then
+                indMontoISR = indMontoISR + 1
+                ReDim Preserve strMontosISR(indMontoISR)
+                strMontosISR(indMontoISR) = ""
+            End If
+
+            cod_deb_cred = IIf(Val(txt_ISRAux.Text) >= 0, "''C''", "''D''")
+
+            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,4,0,NULL,''662102333001005''," & cod_deb_cred & "," &
+                                                         hid_Moneda.Value & "," & txt_ISRAux.Text & "," & CDbl(txt_ISRAux.Text) * IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & "," &
+                                                         IIf(hid_Moneda.Value = 1, hid_TipoCambio.Value, 1) & ",''PRIMA NETA DE REASEGURO''),"
+
+            strMontosISR(indMontoISR) = strMontosISR(indMontoISR) & "(@strKey,4,0," & Master.cod_suc & ",303,null,1145," &
+                                                                    "null,null,null,null,1145,null,null,null,null,null,null,null),"
+
+            cod_deb_cred = IIf(Val(txt_ISR.Text) >= 0, "''D''", "''C''")
+
+            strMontosCambio = "(@strKey,4,0,NULL,''662102333001005''," & cod_deb_cred & "," & ddl_MonedaDev.SelectedValue & "," & txt_ISR.Text & "," &
+                                CDbl(txt_ISR.Text) * IIf(ddl_MonedaDev.SelectedValue = 1, txt_TipoCambioDev.Text, 1) & "," &
+                                IIf(ddl_MonedaDev.SelectedValue = 1, txt_TipoCambioDev.Text, 1) & ",''ASIENTO DEVOLUCION ISR REASEGURO''),"
+
+            strMontosISRCambio = "(@strKey,4,0," & Master.cod_suc & ",303,null,1145," &
+                                 "null,null,null,null,1145,null,null,null,null,null,null,null),"
+
+
+            strMontosImputacionCambio = "(@strKey,4," & nro_correlativo & ",NULL,NULL,0,0,0,'''',0,0,0,0,0," &
+                                         ddl_MonedaDev.SelectedValue & ",''662102333001005''," & cod_deb_cred & "," &
+                                         txt_ISR.Text & ",0,''ASIENTO DEVOLUCION ISR REASEGURO''),"
 
 
 
 
-        'strMontos(0) = "(@strKey,8,0,NULL,''170101003002000'',''D''," & Adicional(0) & ",0,0," & IIf(Adicional(0) = 1, Adicional(7), 1) & ",''PRIMA NULA''),"
+            'Diferencia en tipos de Cambio
+            'If String.Format("{0:#,#0.000}", CDbl(txt_TipoCambioDev.Text)) <> String.Format("{0:#,#0.000}", CDbl(ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1))) Then
 
-        'strMontos(0) = strMontos(0) & "(@strKey,4,1,NULL,''" & hid_cta_cb.Value & "'',''" & cod_deb_cred & "''," &
-        '                                                       Adicional(0) & "," & txt_ISR.Text & "," & CDbl(txt_ISR.Text) * Adicional(7) & "," &
-        '                                                       IIf(Adicional(0) = 1, Adicional(7), 1) & ",''" & ConceptoISR & "''),"
+            '    If ddl_MonedaDev.SelectedValue = 1 Then
+            '        Diferencia = txt_ISR.Text - (txt_ISRAux.Text / ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1))
+            '    Else
+            '        Diferencia = txt_ISR.Text - (txt_ISRAux.Text * ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1))
+            '    End If
 
-        'strMontos(0) = strMontos(0) & "(@strKey,8,2,NULL,''170101003002000'',''C''," & Adicional(0) & ",0,0," & IIf(Adicional(0) = 1, Adicional(7), 1) & ",''COMISION NULA''),"
+            '    cod_deb_cred = IIf(Diferencia >= 0, "''D''", "''C''")
 
-        'strMontosReas(0) = strMontosReas(0) & "(@strKey,8,0," & Adicional(5) & "," & hid_broker.Value & "," & hid_cia.Value & "," &
-        '                                        "11,1,''" & txt_Contrato.Text & "''," & hid_nrotramo.Value & ",0," &
-        '                                        Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
-        '                                        Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Val(txt_Ramo.Text) & "," &
-        '                                        IIf(Adicional(3) > 100, 100, Adicional(3)) & "," & Adicional(1) & ",''" & FechaAIngles(Adicional(2)) & "''," &
-        '                                        "0,0,0,0" & "," & txt_Capa.Text & "),"
+            '    strMontosCambio = strMontosCambio & "(@strKey,4,1,NULL,''662102333001005''," & cod_deb_cred & "," &
+            '                                        ddl_MonedaDev.SelectedValue & "," & Diferencia & "," & Diferencia * IIf(ddl_MonedaDev.SelectedValue = 1, txt_TipoCambioDev.Text, 1) & "," &
+            '                                        IIf(ddl_MonedaDev.SelectedValue = 1, txt_TipoCambioDev.Text, 1) & ",''DIFERENCIA EN TIPOS DE CAMBIO''),"
 
-
-        'strMontosReas(0) = strMontosReas(0) & "(@strKey,8,2," & Adicional(6) & "," & hid_broker.Value & "," & hid_cia.Value & "," &
-        '                                        "11,1,''" & txt_Contrato.Text & "''," & hid_nrotramo.Value & ",0," &
-        '                                        Poliza(0) & "," & Poliza(1) & "," & Poliza(2) & "," & Poliza(3) & "," & Poliza(4) & "," &
-        '                                        Poliza(0) & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Val(txt_Ramo.Text) & "," &
-        '                                        IIf(Adicional(4) > 100, 100, Adicional(4)) & "," & Adicional(1) & ",''" & FechaAIngles(Adicional(2)) & "''," &
-        '                                        "0,0,0,0" & "," & txt_Capa.Text & "),"
+            '    strMontosISRCambio = strMontosISRCambio & "(@strKey,4,1," & Master.cod_suc & ",303,null,1145," &
+            '                                                          "null,null,null,null,1145,null,null,null,null,null,null,null),"
 
 
-        'strMontosISR(0) = "(@strKey,4,1," & Poliza(0) & ",303,null,1139,null,null,null,null,1139,null,null,null,null,null,null,null),"
+            '    strMontosImputacionCambio = strMontosImputacionCambio & "(@strKey,4," & nro_correlativo & ",NULL,NULL,0,0,0,'''',0,0,0,0,0," &
+            '                                                            ddl_MonedaDev.SelectedValue & ",''662102333001005''," & cod_deb_cred & "," &
+            '                                                            Diferencia & ",0,''DIFERENCIA EN TIPOS DE CAMBIO''),"
+            'End If
+        End If
 
-        'strMontosImputacion(0) = "(@strKey,4,1," & hid_idPv.Value & "," & hid_nroreas.Value & "," &
-        '                          txt_Capa.Text & ",''" & txt_Contrato.Text & "''," & hid_nrotramo.Value & "," &
-        '                          Val(txt_Ramo.Text) & "," & hid_broker.Value & "," & hid_cia.Value & "," &
-        '                          Adicional(1) & "," & Adicional(0) & ",''" & hid_cta_cb.Value & "'',''" & cod_deb_cred & "''," &
-        '                          txt_ISR.Text & ",-1,''" & ConceptoISR & "''),"
+
+
 
         'MONTOS IMPUTACION SOLO SE ALMACENA DEVOLUCION DE ISR
-        Datos = InsertaOrdenPago(0, txt_ISR.Text, hid_Moneda.Value, hid_TipoCambio.Value,
+        Datos = InsertaOrdenPago(0, txt_ISR.Text, ddl_MonedaDev.SelectedValue, txt_TipoCambioDev.Text,
                                  IIf(hid_broker.Value = 0, hid_cia.Value, hid_broker.Value),
                                  IIf(hid_broker.Value = 0, txt_Reasegurador.Text, txt_broker.Text),
                                  Split(txt_Poliza.Text, "-")(0), Persona(0), Persona(1),
                                  txt_Cuenta.Text, Cuenta(2), Cuenta(0), Cuenta(1), FechaAIngles(txt_FechaPago.Text), -1,
-                                 strMontos, strMontosReas, strMontosISR, strMontosImputacion)
+                                 strMontos, strMontosReas, strMontosISR, strMontosImputacion, blnAsientoDiario, strMontosCambio, strMontosISRCambio, strMontosImputacionCambio)
+
 
         'Si la inserción fue satisfactoria
         If Len(Datos) > 0 Then
             id_imputacion = Split(Datos, "|")(0)
             nro_op = Split(Datos, "|")(1)
+            nro_asiento = Split(Datos, "|")(2)
+            nro_recibo = Split(Datos, "|")(3)
 
             Actualiza_Mov_Contable(id_imputacion, nro_op)
 
             'Guarda Texto de Observaciones
+            If nro_recibo <> 0 And nro_asiento <> 0 Then
+                txt_Detalle.Text = "Asiento: " & nro_asiento & vbCrLf &
+                                   "Recibo: " & nro_recibo & vbCrLf & vbCrLf & txt_Detalle.Text
+            End If
+
             Resultado = GuardaTexto(nro_op, txt_Detalle.Text)
             If Resultado <> "1" Then
                 Mensaje("ORDEN DE PAGO-: GUARDA TEXTO", Resultado)
@@ -1276,6 +1364,8 @@ Partial Class Pages_OrdenPago
 
     End Sub
 
+
+
     Private Sub GeneraOrdenPago(ByVal id_pv As Double, ByVal Cuotas As DataTable)
         Dim indMonto As Integer = 0
         Dim indMontoReas As Integer = 0
@@ -1287,16 +1377,30 @@ Partial Class Pages_OrdenPago
         Dim strMontosISR(0) As String
         Dim strMontosImputacion(0) As String
 
+        Dim strMontosCambio As String = vbNullString
+        Dim strMontosISRCambio As String = vbNullString
+        Dim strMontosImputacionCambio As String = vbNullString
+
         Dim pagina As Integer = 0
 
         Dim nro_reas As Integer = 0
         Dim no_correlativo As Integer = 0
         Dim Resultado As String = ""
+
         Dim SumaPrima As Double
         Dim SumaComision As Double
         Dim SumaISR As Double
+
+        Dim SumaPrima2Decimales As Double
+        Dim SumaComision2Decimales As Double
+        Dim SumaISR2Decimales As Double
+
         Dim cod_moneda As Integer
         Dim impCambio As Double
+
+        Dim cod_moneda_cambio As Integer
+        Dim impCambio_pactado As String
+
         Dim cod_broker As Integer
         Dim Descripcion As String = ""
         Dim cod_suc As Integer
@@ -1312,6 +1416,11 @@ Partial Class Pages_OrdenPago
         Dim FechaPago As String = ""
         Dim sn_transferencia As Integer = 0
         Dim mop_texto As String
+
+        Dim blnAsientoDiario As Boolean = False
+        Dim nro_asiento As Integer = 0
+        Dim nro_recibo As Integer = 0
+
         Dim id_imputacion As Double = 0
         Dim nro_op As Double = 0
         Dim Datos As String
@@ -1320,23 +1429,59 @@ Partial Class Pages_OrdenPago
         Dim cod_deb_cred As String = ""
         Dim ConceptoISR As String = ""
 
+        Dim cta_deb_cred As String
+        Dim txt_desc As String
+
+        Dim MontoTotal As Double = 0
+
+        Dim Diferencia As Double = 0
+
+        Dim MontoTotal2Decimales As Double = 0
+
         'Solo si existen registros para almacenar
         If Cuotas.Rows.Count > 0 Then
 
             'Total de Brokers a pagar
             For i = 0 To UBound(arrayBroker)
 
+                blnAsientoDiario = False
+
+                If UBound(ArrayAdicional) >= 0 Then
+                    FechaPago = CDate(Split(ArrayAdicional(i), "|")(0)).ToString("yyyyMMdd")
+                    sn_transferencia = Split(ArrayAdicional(i), "|")(1)
+                    mop_texto = Split(ArrayAdicional(i), "|")(2)
+                    cod_moneda = Split(ArrayAdicional(i), "|")(3)
+                    cod_moneda_cambio = Split(ArrayAdicional(i), "|")(4)
+                    impCambio_pactado = Split(ArrayAdicional(i), "|")(5)
+                Else
+                    FechaPago = Now.ToString("yyyyMMdd")
+                    sn_transferencia = -1
+                    mop_texto = ""
+                    cod_moneda = 0
+                    cod_moneda_cambio = 0
+                    impCambio_pactado = ""
+                End If
+
+                'Evalua si se trata de un aisento de diario
+                If cod_moneda <> cod_moneda_cambio Then
+                    blnAsientoDiario = True
+                End If
+
                 blnMontos = False
-                no_correlativo = 0
+                no_correlativo = IIf(blnAsientoDiario = True, 1, 0)
                 SumaPrima = 0
                 SumaComision = 0
                 SumaISR = 0
+
+                SumaPrima2Decimales = 0
+                SumaComision2Decimales = 0
+                SumaISR2Decimales = 0
+
                 Cuenta = ""
                 txt_swift = ""
                 nro_nit = ""
                 id_Cuenta = 0
                 cod_banco = 0
-                mop_texto = ""
                 nro_reas = 0
 
                 cod_broker = Split(arrayBroker(i), "|°|")(0)
@@ -1368,7 +1513,8 @@ Partial Class Pages_OrdenPago
 
                         'nro_reas = 0
 
-                        cod_moneda = Cuota("cod_moneda")
+                        'cod_moneda = Cuota("cod_moneda")
+
                         impCambio = Cuota("imp_cambio")
 
                         cod_suc = Cuota("cod_suc")
@@ -1388,70 +1534,70 @@ Partial Class Pages_OrdenPago
 
                             blnMontos = True
 
-                            If Len(strMontos(indMonto)) > 7500 Then
+                            If Len(strMontos(indMonto)) > 7400 Then
                                 indMonto = indMonto + 1
                                 ReDim Preserve strMontos(indMonto)
                                 strMontos(indMonto) = ""
                             End If
 
-
-                            If Len(strMontosReas(indMontoReas)) > 7500 Then
+                            If Len(strMontosReas(indMontoReas)) > 7400 Then
                                 indMontoReas = indMontoReas + 1
                                 ReDim Preserve strMontosReas(indMontoReas)
                                 strMontosReas(indMontoReas) = ""
                             End If
 
                             'Consolidado de Montos Imputacion
-                            If Len(strMontosImputacion(indImputacion)) > 7500 Then
+                            If Len(strMontosImputacion(indImputacion)) > 7400 Then
                                 indImputacion = indImputacion + 1
                                 ReDim Preserve strMontosImputacion(indImputacion)
                                 strMontosImputacion(indImputacion) = ""
                             End If
 
-
                             PrimaCedida = IIf(Cuota("PrimaCedida") >= 0, Cuota("PrimaCedida"), -1 * Cuota("PrimaCedida"))
                             cod_deb_cred = IIf(Cuota("PrimaCedida") >= 0, "''D''", "''C''")
+                            cta_deb_cred = IIf(blnAsientoDiario = True, "0", Cuota("Cta_CblePri"))
+                            txt_desc = IIf(blnAsientoDiario = True, "PRIMA ASIENTO DIARIO", "PRIMA")
 
-                            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & no_correlativo & ",NULL,''" & Cuota("Cta_CblePri") & "''," & cod_deb_cred & "," &
-                                                                  Cuota("cod_moneda") & "," & PrimaCedida & "," & PrimaCedida * Cuota("imp_cambio") & "," &
-                                                                  IIf(Cuota("cod_moneda") = 1, Cuota("imp_cambio"), 1) & ",''" & "PRIMA''),"
+                            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & no_correlativo & ",NULL,''" & cta_deb_cred & "''," & cod_deb_cred & "," &
+                                                      Cuota("cod_moneda") & "," & PrimaCedida & "," & PrimaCedida * Cuota("imp_cambio") & "," &
+                                                      IIf(Cuota("cod_moneda") = 1, Cuota("imp_cambio"), 1) & ",''" & txt_desc & "''),"
 
                             strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & no_correlativo & "," & Cuota("cod_cptoPri") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
-                                                        "11,1,''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," & -1 * Cuota("PrimaCedida") & "," &
-                                                        Cuota("cod_suc") & "," & Cuota("cod_ramo") & "," & Cuota("nro_pol") & "," & Cuota("aaaa_endoso") & "," & Cuota("nro_endoso") & "," &
-                                                        Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_pri") > 100, 100, Cuota("pje_pri")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
-                                                        "0,0,0,0" & "," & Cuota("nro_layer") & "),"
+                                                            "11,1,''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," & -1 * Cuota("PrimaCedida") & "," &
+                                                            Cuota("cod_suc") & "," & Cuota("cod_ramo") & "," & Cuota("nro_pol") & "," & Cuota("aaaa_endoso") & "," & Cuota("nro_endoso") & "," &
+                                                            Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_pri") > 100, 100, Cuota("pje_pri")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
+                                                            "0,0,0,0" & "," & Cuota("nro_layer") & "),"
 
 
-                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & Cuota("id_pv") & "," & nro_reas & "," &
-                                                                                                       Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
-                                                                                                       Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
-                                                                                                       Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("Cta_CblePri") & "''," & cod_deb_cred & "," &
-                                                                                                       PrimaCedida & ",0,''" & "PRIMA''),"
-
+                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & ",NULL,NULL," & Cuota("id_pv") & "," & nro_reas & "," &
+                                                                                                        Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
+                                                                                                        Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
+                                                                                                        Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("Cta_CblePri") & "''," & cod_deb_cred & "," &
+                                                                                                        PrimaCedida & ",0,''" & txt_desc & "''),"
 
                             no_correlativo = no_correlativo + 1
 
                             SumaPrima = SumaPrima + Cuota("PrimaCedida")
-
+                            SumaPrima2Decimales = SumaPrima2Decimales + String.Format("{0:#,#0.00}", CDbl(Cuota("PrimaCedida")))
 
                             'Si existe impuesto por pagar--------------------------------------------------------------------------------------
                             If Cuota("ret_ISR") <> 0 Then
-                                If Len(strMontos(indMonto)) > 7500 Then
+
+                                If Len(strMontos(indMonto)) > 7400 Then
                                     indMonto = indMonto + 1
                                     ReDim Preserve strMontos(indMonto)
                                     strMontos(indMonto) = ""
                                 End If
 
 
-                                If Len(strMontosISR(indMontoISR)) > 7500 Then
+                                If Len(strMontosISR(indMontoISR)) > 7400 Then
                                     indMontoISR = indMontoISR + 1
                                     ReDim Preserve strMontosISR(indMontoISR)
                                     strMontosISR(indMontoISR) = ""
                                 End If
 
                                 'Consolidado de Montos Imputacion
-                                If Len(strMontosImputacion(indImputacion)) > 7500 Then
+                                If Len(strMontosImputacion(indImputacion)) > 7400 Then
                                     indImputacion = indImputacion + 1
                                     ReDim Preserve strMontosImputacion(indImputacion)
                                     strMontosImputacion(indImputacion) = ""
@@ -1472,15 +1618,16 @@ Partial Class Pages_OrdenPago
                                 strMontosISR(indMontoISR) = strMontosISR(indMontoISR) & "(@strKey,4," & no_correlativo & "," & Cuota("cod_suc") & ",303,null,708," &
                                                                                           "null,null,null,null,708,null,null,null,null,null,null,null),"
 
-                                strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,4," & no_correlativo & "," & Cuota("id_pv") & "," & nro_reas & "," &
-                                                                                                           Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
-                                                                                                           Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
-                                                                                                           Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("cod_cta_cble") & "''," & cod_deb_cred & "," &
-                                                                                                           Impuesto & ",0,''" & ConceptoISR & "''),"
+                                strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,4," & no_correlativo & ",NULL,NULL," & Cuota("id_pv") & "," & nro_reas & "," &
+                                                                                                            Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
+                                                                                                            Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
+                                                                                                            Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("cod_cta_cble") & "''," & cod_deb_cred & "," &
+                                                                                                            Impuesto & ",0,''" & ConceptoISR & "''),"
 
                                 no_correlativo = no_correlativo + 1
 
                                 SumaISR = SumaISR + Cuota("MontoISR")
+                                SumaISR2Decimales = SumaISR2Decimales + String.Format("{0:#,#0.00}", CDbl(Cuota("MontoISR")))
                             End If
                             '----------------------------------------------------------------------------------------------------------------------
 
@@ -1490,20 +1637,20 @@ Partial Class Pages_OrdenPago
 
                             blnMontos = True
 
-                            If Len(strMontos(indMonto)) > 7500 Then
+                            If Len(strMontos(indMonto)) > 7400 Then
                                 indMonto = indMonto + 1
                                 ReDim Preserve strMontos(indMonto)
                                 strMontos(indMonto) = ""
                             End If
 
-                            If Len(strMontosReas(indMontoReas)) > 7500 Then
+                            If Len(strMontosReas(indMontoReas)) > 7400 Then
                                 indMontoReas = indMontoReas + 1
                                 ReDim Preserve strMontosReas(indMontoReas)
                                 strMontosReas(indMontoReas) = ""
                             End If
 
                             'Consolidado de Montos Imputacion
-                            If Len(strMontosImputacion(indImputacion)) > 7500 Then
+                            If Len(strMontosImputacion(indImputacion)) > 7400 Then
                                 indImputacion = indImputacion + 1
                                 ReDim Preserve strMontosImputacion(indImputacion)
                                 strMontosImputacion(indImputacion) = ""
@@ -1511,10 +1658,12 @@ Partial Class Pages_OrdenPago
 
                             Comision = IIf(Cuota("Comision") >= 0, Cuota("Comision"), -1 * Cuota("Comision"))
                             cod_deb_cred = IIf(Cuota("Comision") >= 0, "''C''", "''D''")
+                            cta_deb_cred = IIf(blnAsientoDiario = True, "0", Cuota("Cta_CbleCom"))
+                            txt_desc = IIf(blnAsientoDiario = True, "COMISION ASIENTO DIARIO", "COMISION")
 
-                            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & no_correlativo & ",NULL,''" & Cuota("Cta_CbleCom") & "''," & cod_deb_cred & "," &
+                            strMontos(indMonto) = strMontos(indMonto) & "(@strKey,8," & no_correlativo & ",NULL,''" & cta_deb_cred & "''," & cod_deb_cred & "," &
                                                                   Cuota("cod_moneda") & "," & Comision & "," & Comision * Cuota("imp_cambio") & "," &
-                                                                  IIf(Cuota("cod_moneda") = 1, Cuota("imp_cambio"), 1) & ",''" & "COMISION''),"
+                                                                  IIf(Cuota("cod_moneda") = 1, Cuota("imp_cambio"), 1) & ",''" & txt_desc & "''),"
 
                             strMontosReas(indMontoReas) = strMontosReas(indMontoReas) & "(@strKey,8," & no_correlativo & "," & Cuota("cod_cptoCom") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
                                                             "11,1,''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," & Cuota("Comision") & "," &
@@ -1522,15 +1671,16 @@ Partial Class Pages_OrdenPago
                                                             Cuota("cod_suc") & ",1,NULL,NULL," & CStr(Now.ToString("yyyyMM")) & "," & Cuota("cod_ramo_contable") & "," & IIf(Cuota("pje_com") > 100, 100, Cuota("pje_com")) & "," & Cuota("nro_cuota") & ",''" & FechaAIngles(Cuota("fecha")) & "''," &
                                                             "0,0,0,0" & "," & Cuota("nro_layer") & "),"
 
-                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & "," & Cuota("id_pv") & "," & nro_reas & "," &
+                            strMontosImputacion(indImputacion) = strMontosImputacion(indImputacion) & "(@strKey,8," & no_correlativo & ",NULL,NULL," & Cuota("id_pv") & "," & nro_reas & "," &
                                                                                                         Cuota("nro_layer") & ",''" & Cuota("id_contrato") & "''," & Cuota("nro_tramo") & "," &
                                                                                                         Cuota("cod_ramo_contable") & "," & Cuota("cod_cia_reas_brok") & "," & Cuota("cod_cia_reas_cia") & "," &
                                                                                                         Cuota("nro_cuota") & "," & Cuota("cod_moneda") & ",''" & Cuota("Cta_CbleCom") & "''," & cod_deb_cred & "," &
-                                                                                                        Comision & ",0,''" & "COMISION''),"
+                                                                                                        Comision & ",0,''" & txt_desc & "''),"
 
                             no_correlativo = no_correlativo + 1
 
                             SumaComision = SumaComision + Cuota("Comision")
+                            SumaComision2Decimales = SumaComision2Decimales + String.Format("{0:#,#0.00}", CDbl(Cuota("Comision")))
                         End If
                     End If
                 Next
@@ -1539,30 +1689,119 @@ Partial Class Pages_OrdenPago
 
                 'INSERCION DE LA ORDEN DE PAGO------------------------------------------------------------------------------------------------
                 If blnMontos = True Then
-                    If UBound(ArrayAdicional) >= 0 Then
-                        FechaPago = CDate(Split(ArrayAdicional(i), "|")(0)).ToString("yyyyMMdd")
-                        sn_transferencia = Split(ArrayAdicional(i), "|")(1)
-                        mop_texto = Split(ArrayAdicional(i), "|")(2)
-                    Else
-                        FechaPago = Now.ToString("yyyyMMdd")
-                        sn_transferencia = -1
-                        mop_texto = ""
+
+                    MontoTotal = SumaPrima - SumaComision - SumaISR
+                    MontoTotal2Decimales = SumaPrima2Decimales - SumaComision2Decimales - SumaISR2Decimales
+
+                    'Validación de Diferencias de Centavos a 2 digitos
+                    Dim DiferenciaCentavos As Double = String.Format("{0:#,#0.00}", MontoTotal) - String.Format("{0:#,#0.00}", MontoTotal2Decimales)
+
+                    If Math.Abs(DiferenciaCentavos) > 0.9 Then
+                        Mensaje("ORDEN DE PAGO-: GENERACIÓN", "No se generó la Orden de Pago, existe una diferencia > 0.99 en sumatorias")
+                        Exit Sub
                     End If
 
-                    Datos = InsertaOrdenPago(id_imputacion, SumaPrima - SumaComision - SumaISR, cod_moneda, impCambio,
+                    MontoTotal = MontoTotal - String.Format("{0:#,#0.00}", DiferenciaCentavos)
+
+                    'Valida si genera asiento Diario
+                    If blnAsientoDiario = True Then
+
+                        If Len(strMontos(indMonto)) > 7400 Then
+                            indMonto = indMonto + 1
+                            ReDim Preserve strMontos(indMonto)
+                            strMontos(indMonto) = ""
+                        End If
+
+
+                        If Len(strMontosISR(indMontoISR)) > 7400 Then
+                            indMontoISR = indMontoISR + 1
+                            ReDim Preserve strMontosISR(indMontoISR)
+                            strMontosISR(indMontoISR) = ""
+                        End If
+
+                        cod_deb_cred = IIf(MontoTotal >= 0, "''C''", "''D''")
+
+                        strMontos(indMonto) = strMontos(indMonto) & "(@strKey,4,0,NULL,''662102333001005''," & cod_deb_cred & "," &
+                                                                    cod_moneda & "," & MontoTotal & "," & MontoTotal * impCambio & "," &
+                                                                    IIf(cod_moneda = 1, impCambio, 1) & ",''PRIMA NETA REASEGURO''),"
+
+                        strMontosISR(indMontoISR) = strMontosISR(indMontoISR) & "(@strKey,4,0," & Master.cod_suc & ",303,null,1145," &
+                                                                                  "null,null,null,null,1145,null,null,null,null,null,null,null),"
+
+
+                        If cod_moneda_cambio = 1 Then
+                            MontoTotal = MontoTotal / ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1)
+                        Else
+                            MontoTotal = MontoTotal * ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1)
+                        End If
+
+                        cod_deb_cred = IIf(MontoTotal >= 0, "''D''", "''C''")
+
+                        strMontosCambio = "(@strKey,4,0,NULL,''662102333001005''," & cod_deb_cred & "," & cod_moneda_cambio & "," & MontoTotal & "," &
+                                            MontoTotal * IIf(cod_moneda_cambio = 1, ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1), 1) & "," &
+                                            IIf(cod_moneda_cambio = 1, ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1), 1) & ",''ASIENTO PRIMA REASEGURO''),"
+
+                        strMontosISRCambio = "(@strKey,4,0," & Master.cod_suc & ",303,null,1145," &
+                                              "null,null,null,null,1145,null,null,null,null,null,null,null),"
+
+
+                        strMontosImputacionCambio = "(@strKey,4," & no_correlativo & ",NULL,NULL,0,0,0,'''',0,0,0,0,0," &
+                                                      cod_moneda_cambio & ",''662102333001005''," & cod_deb_cred & "," &
+                                                      MontoTotal & ",0,''ASIENTO PRIMA REASEGURO''),"
+
+                        no_correlativo = no_correlativo + 1
+                    End If
+
+                    'Diferencia en tipos de Cambio
+                    If Len(impCambio_pactado) > 0 And IsNumeric(impCambio_pactado) Then
+
+                        If cod_moneda_cambio = 1 Then
+                            Diferencia = ((SumaPrima - SumaComision - SumaISR) / impCambio_pactado) -
+                                         ((SumaPrima - SumaComision - SumaISR) / ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1))
+                        Else
+                            Diferencia = ((SumaPrima - SumaComision - SumaISR) * impCambio_pactado) -
+                                         ((SumaPrima - SumaComision - SumaISR) * ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1))
+                        End If
+
+                        cod_deb_cred = IIf(Diferencia >= 0, "''D''", "''C''")
+
+                        strMontosCambio = strMontosCambio & "(@strKey,4,1,NULL,''662102333001005''," & cod_deb_cred & "," &
+                                                            cod_moneda_cambio & "," & Diferencia & "," & Diferencia * IIf(cod_moneda_cambio = 1, impCambio_pactado, 1) & "," &
+                                                            IIf(cod_moneda_cambio = 1, impCambio_pactado, 1) & ",''DIFERENCIA EN TIPOS DE CAMBIO''),"
+
+                        strMontosISRCambio = strMontosISRCambio & "(@strKey,4,1," & Master.cod_suc & ",303,null,1145," &
+                                                                  "null,null,null,null,1145,null,null,null,null,null,null,null),"
+
+
+                        strMontosImputacionCambio = strMontosImputacionCambio & "(@strKey,4," & no_correlativo & ",NULL,NULL,0,0,0,'''',0,0,0,0,0," &
+                                                                                  cod_moneda_cambio & ",''662102333001005''," & cod_deb_cred & "," &
+                                                                                  Diferencia & ",0,''DIFERENCIA EN TIPOS DE CAMBIO''),"
+                    End If
+
+
+
+                    Datos = InsertaOrdenPago(id_imputacion, MontoTotal + Diferencia, cod_moneda_cambio, impCambio,
                                              cod_broker, Descripcion, cod_suc, id_persona, nro_nit,
                                              Cuenta, txt_swift, id_Cuenta, cod_banco, FechaPago, sn_transferencia,
-                                             strMontos, strMontosReas, strMontosISR, strMontosImputacion)
+                                             strMontos, strMontosReas, strMontosISR, strMontosImputacion, blnAsientoDiario,
+                                             strMontosCambio, strMontosISRCambio, strMontosImputacionCambio)
 
                     'Si la inserción fue satisfactoria
                     If Len(Datos) > 0 Then
                         id_imputacion = Split(Datos, "|")(0)
                         nro_op = Split(Datos, "|")(1)
+                        nro_asiento = Split(Datos, "|")(2)
+                        nro_recibo = Split(Datos, "|")(3)
 
                         'Actuliza movimientos Contables
                         Actualiza_Mov_Contable(id_imputacion, nro_op)
 
                         'Guarda Texto de Observaciones
+                        If nro_recibo <> 0 And nro_asiento <> 0 Then
+                            mop_texto = "Asiento: " & nro_asiento & vbCrLf &
+                                        "Recibo: " & nro_recibo & vbCrLf & vbCrLf & mop_texto
+                        End If
+
                         Resultado = GuardaTexto(nro_op, mop_texto)
                         If Resultado <> "1" Then
                             Mensaje("ORDEN DE PAGO-: GUARDA TEXTO", Resultado)
@@ -1624,6 +1863,63 @@ Partial Class Pages_OrdenPago
         End If
     End Sub
 
+    Private Sub GenerarDiferencia()
+        Dim Cuenta() As String = Split(hid_cuenta.Value, "|")
+        Dim Persona() As String = Split(hid_persona.Value, "|")
+        Dim cod_deb_cred As String
+        Dim Diferencia As Double
+        Dim strMontosCambio(0) As String
+        Dim strMontosISRCambio(0) As String
+        Dim cod_moneda_cambio As Integer
+        Dim impCambio As Double
+        Dim Resultado As String = ""
+        Dim Datos As String
+        Dim id_imputacion As Double = 0
+        Dim nro_op As Double = 0
+
+        cod_moneda_cambio = ddl_MonedaDif.SelectedValue
+
+        impCambio = ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), cod_moneda_cambio)
+
+        Diferencia = txt_MontoDif.Text
+
+        cod_deb_cred = IIf(Diferencia >= 0, "''D''", "''C''")
+
+        strMontosCambio(0) = strMontosCambio(0) & "(@strKey,4,0,NULL,''662102333001005''," & cod_deb_cred & "," &
+                                            cod_moneda_cambio & "," & Diferencia & "," & Diferencia * impCambio & "," &
+                                            impCambio & ",''DIFERENCIA EN TIPOS DE CAMBIO''),"
+
+        strMontosISRCambio(0) = strMontosISRCambio(0) & "(@strKey,4,0," & Master.cod_suc & ",303,null,1145," &
+                                                  "null,null,null,null,1145,null,null,null,null,null,null,null),"
+
+        Datos = InsertaOrdenPago(0, Diferencia, cod_moneda_cambio, impCambio,
+                                 hid_broker.Value, txt_BrokerDif.Text, Master.cod_suc, Persona(0), Persona(1),
+                                 txt_CuentaDif.Text, 0, Cuenta(0), Cuenta(1), FechaAIngles(txt_FechaPagoDif.Text), -1,
+                                 strMontosCambio, Nothing, strMontosISRCambio, Nothing, False, "", "")
+
+        'Si la inserción fue satisfactoria
+        If Len(Datos) > 0 Then
+            id_imputacion = Split(Datos, "|")(0)
+            nro_op = Split(Datos, "|")(1)
+
+            Actualiza_Mov_Contable(id_imputacion, nro_op)
+
+            'Guarda Texto de Observaciones
+            Resultado = GuardaTexto(nro_op, txt_DetalleDif.Text)
+            If Resultado <> "1" Then
+                Mensaje("ORDEN DE PAGO-: GUARDA TEXTO", Resultado)
+            End If
+
+            Mensaje("ORDEN DE PAGO-: GENERACIÓN", "Se generó la Orden de pago: " & nro_op)
+
+            Dim server As String = "http://siigmxapp02/ReportServer_SIIGMX02?%2fReportesGMX%2fOrdenPago&rs%3AFormat=PDF&rc:Parameters=false&nro_op=@nro_op"
+            ScriptManager.RegisterClientScriptBlock(Page, GetType(Page), "ImprimirOrden", "ImprimirOrden('" & server & "','" & nro_op & "');", True)
+
+            ScriptManager.RegisterStartupScript(Me, Me.GetType, "Close Modal Ordenes", "ClosePopup('#DiferenciasModalModal');", True)
+        End If
+    End Sub
+
+
     Private Function Actualiza_Mov_Contable(ByVal id_imputacion As Double, ByVal nro_op As Integer) As Boolean
         Dim sCnn As String = ""
         Dim sSel As String
@@ -1651,14 +1947,24 @@ Partial Class Pages_OrdenPago
                                       ByVal impCambio As Double, ByVal cod_broker As Integer, ByVal Broker As String, ByVal cod_suc As Integer,
                                       ByVal id_persona As Integer, ByVal nro_nit As String, ByVal Cuenta As String, ByVal Swift As String, ByVal id_Cuenta As Integer,
                                       ByVal cod_banco As Integer, ByVal FechaPago As String, ByVal sn_transferencia As Integer,
-                                      ByVal MontosGen() As String, ByVal MontosReas() As String, ByVal MontosISR() As String, ByVal MontosImputacion() As String) As String
+                                      ByVal MontosGen() As String, ByVal MontosReas() As String, ByVal MontosISR() As String, ByVal MontosImputacion() As String,
+                                      Optional ByVal blnAsientoDairio As Boolean = False, Optional ByVal MontosCambio As String = vbNullString,
+                                      Optional ByVal MontosContablesCambio As String = vbNullString, Optional ByVal MontosImputacionCambio As String = vbNullString) As String
         Dim sCnn As String = ""
         Dim sSel As String
         Dim nro_op As Integer
+        Dim dtResultado As SqlDataReader = Nothing
         Dim Comando As SqlClient.SqlCommand
 
         sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
         Dim conn As SqlConnection = New SqlConnection(sCnn)
+
+        Dim nro_asiento As Integer = 0
+        Dim nro_recibo As Integer = 0
+        Dim Llave As String
+
+        nro_op = 0
+        id_imputacion = 0
 
         '--------------------------------------------------------------------ORDEN PAGO---------------------------------------------------
         conn.Open()
@@ -1667,8 +1973,54 @@ Partial Class Pages_OrdenPago
 
         Try
 
-            nro_op = 0
-            id_imputacion = 0
+            If blnAsientoDairio = True Then
+                sSel = "DECLARE @nro_imputacion int " &
+                       "EXEC spiu_tvarias_ult_nro -1,'tmp_imputacion', @ult_nro = @nro_imputacion output"
+                Comando = New SqlClient.SqlCommand(sSel, conn)
+                Comando.Transaction = trOP
+                id_imputacion = Convert.ToInt32(Comando.ExecuteScalar())
+
+                'Detalle de Montos en Asiento Diario
+                If InsertaMovimientos(nro_op, id_imputacion, MontosGen, MontosReas, MontosISR, MontosImputacion, conn, trOP) = False Then
+                    Return ""
+                Else
+                    sSel = "sp_ev_cond_write_off_cta " & id_imputacion
+                    Comando = New SqlClient.SqlCommand(sSel, conn)
+                    Comando.Transaction = trOP
+                    Comando.ExecuteNonQuery()
+
+                    sSel = "spi_grabar_ids_imputacion NULL," & id_imputacion & ",1,'" & Today.ToString("yyyyMMdd") & "',1,4,'" & Master.cod_usuario & "',0"
+                    Comando = New SqlClient.SqlCommand(sSel, conn)
+                    Comando.Transaction = trOP
+                    Comando.ExecuteNonQuery()
+
+                    sSel = "declare @nro_asiento int " &
+                           "declare @nro_recibo int " &
+                           "exec spi_grabar_imputacion_ts -1,1," & id_imputacion & ",null,3,null,null,null,null,null,null,''," &
+                                                          "null,'ASIENTO ORDEN DE PAGO REASEGURO',null,1,'" & Today.ToString("yyyyMMdd") & "',0.00,0.00,4,'" & Master.cod_usuario & "',0," &
+                                                          "@nro_asiento_out = @nro_asiento output, @nro_recibo_out = @nro_recibo output," &
+                                                          "@sn_debug=0,@sn_aplicacion_planilla = 0"
+
+                    Comando = New SqlClient.SqlCommand(sSel, conn)
+                    Comando.Transaction = trOP
+                    dtResultado = Comando.ExecuteReader()
+
+                    While dtResultado.Read()
+                        nro_asiento = dtResultado("nro_asiento")
+                        nro_recibo = dtResultado("nro_recibo")
+                    End While
+
+                    If Not dtResultado Is Nothing Then
+                        dtResultado.Close()
+                    End If
+
+                    sSel = "update recibo_header set tdoc=1,nro_doc='' where nro_recibo=" & nro_recibo
+                    Comando = New SqlClient.SqlCommand(sSel, conn)
+                    Comando.Transaction = trOP
+                    Comando.ExecuteNonQuery()
+                End If
+            End If
+
 
             sSel = "DECLARE @nro_imputacion int " &
                    "EXEC spiu_tvarias_ult_nro -1,'tmp_imputacion', @ult_nro = @nro_imputacion output"
@@ -1689,30 +2041,49 @@ Partial Class Pages_OrdenPago
             Comando.Transaction = trOP
             nro_op = Convert.ToInt32(Comando.ExecuteScalar())
 
-            trOP.Commit()
-            conn.Close()
+            '--------------------------------------------------------------------MOVIMIENTOS-----------------------------------------------------
+            If nro_op > 0 Then
+
+                Llave = id_imputacion & "|" & nro_op & "|" & nro_asiento & "|" & nro_recibo
+
+                InsertaMovimientosDiferencia(nro_op, id_imputacion, MontosCambio, MontosContablesCambio, MontosImputacionCambio, conn, trOP)
+
+                If blnAsientoDairio = False Then
+                    If InsertaMovimientos(nro_op, id_imputacion, MontosGen, MontosReas, MontosISR, MontosImputacion, conn, trOP) = False Then
+                        Return ""
+                    Else
+                        InsertaMovimientosResp(nro_op, id_imputacion, MontosGen, MontosReas, MontosISR, conn, trOP)
+                    End If
+                End If
+
+                sSel = "UPDATE mop_imputaciones SET nro_recibo_cambiario = " & nro_recibo & " WHERE nro_op = " & nro_op
+                Comando = New SqlClient.SqlCommand(sSel, conn)
+                Comando.Transaction = trOP
+                Comando.ExecuteNonQuery()
+
+                sSel = "UPDATE mop_imputaciones SET nro_op = " & nro_op & ",nro_recibo = " & nro_recibo & " WHERE nro_op = 0"
+                Comando = New SqlClient.SqlCommand(sSel, conn)
+                Comando.Transaction = trOP
+                Comando.ExecuteNonQuery()
+
+                trOP.Commit()
+                conn.Close()
+
+                Return Llave
+            Else
+                Return ""
+            End If
+
         Catch ex As Exception
+            If Not dtResultado Is Nothing Then
+                dtResultado.Close()
+            End If
             trOP.Rollback()
             conn.Close()
             Mensaje("ORDEN DE PAGO-:", ex.Message)
             LogError("(Inserta Orden Pago)" & ex.Message)
             Return ""
         End Try
-
-        '--------------------------------------------------------------------MOVIMIENTOS-----------------------------------------------------
-        If nro_op > 0 Then
-
-            If InsertaMovimientos(nro_op, id_imputacion, MontosGen, MontosReas, MontosISR, MontosImputacion) = False Then
-                Return ""
-            Else
-                InsertaMovimientosResp(nro_op, id_imputacion, MontosGen, MontosReas, MontosISR)
-            End If
-
-            Return id_imputacion & "|" & nro_op
-        Else
-            Return ""
-        End If
-
     End Function
 
     'Private Function ConsultaImputacion(ByVal nro_op As Integer) As Double
@@ -1723,7 +2094,7 @@ Partial Class Pages_OrdenPago
 
     '    sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
 
-    '    sSel = "SELECT id_imputacion FROM mop WHERE nro_op = " & nro_op
+    '    sSel = "Select id_imputacion FROM mop WHERE nro_op = " & nro_op
 
     '    dtRes = New DataTable
     '    da = New SqlDataAdapter(sSel, sCnn)
@@ -1799,55 +2170,73 @@ Partial Class Pages_OrdenPago
     End Function
 
     Private Function InsertaMovimientos(ByVal nro_op As Integer, ByVal id_imputacion As Integer, ByVal MontosGen() As String, ByVal MontosReas() As String,
-                                        ByVal MontosISR() As String, ByVal MontosImputacion() As String) As Boolean
-        Dim sCnn As String = ""
+                                        ByVal MontosISR() As String, ByVal MontosImputacion() As String, Optional ByVal conexion As SqlConnection = Nothing,
+                                        Optional ByVal transaccion As SqlTransaction = Nothing) As Boolean
+        'Dim sCnn As String = ""
         Dim Resultado As String
         Dim Comando As SqlClient.SqlCommand
         Dim DatosMontos As String
 
-        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
-        Dim conn As SqlConnection = New SqlConnection(sCnn)
-        conn.Open()
+        'sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+        Dim conn As SqlConnection = conexion
+        'conn.Open()
 
         Try
             'MOVIMIENTOS GENERALES----------------------------------------------------------------------------------------------------------
-            For pagina = 0 To UBound(MontosGen)
-                If Len(MontosGen(pagina)) > 0 Then
-                    DatosMontos = Mid(MontosGen(pagina), 1, Len(MontosGen(pagina)) - 1)
-                    Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_general','" & id_imputacion & "','" & DatosMontos & "'", conn)
-                    Resultado = Convert.ToInt32(Comando.ExecuteScalar())
-                End If
-            Next
+            If Not MontosGen Is Nothing Then
+                For pagina = 0 To UBound(MontosGen)
+                    If Len(MontosGen(pagina)) > 0 Then
+                        DatosMontos = Mid(MontosGen(pagina), 1, Len(MontosGen(pagina)) - 1)
+                        Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_general','" & id_imputacion & "','" & DatosMontos & "'", conn)
+                        Comando.Transaction = transaccion
+                        Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+                    End If
+                Next
+            End If
+
 
             'MOVIMIENTOS REASEGURO----------------------------------------------------------------------------------------------------------
-            For pagina = 0 To UBound(MontosReas)
-                If Len(MontosReas(pagina)) > 0 Then
-                    DatosMontos = Mid(MontosReas(pagina), 1, Len(MontosReas(pagina)) - 1)
-                    Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_reas','" & id_imputacion & "','" & DatosMontos & "'", conn)
-                    Resultado = Convert.ToInt32(Comando.ExecuteScalar())
-                End If
-            Next
+            If Not MontosReas Is Nothing Then
+                For pagina = 0 To UBound(MontosReas)
+                    If Len(MontosReas(pagina)) > 0 Then
+                        DatosMontos = Mid(MontosReas(pagina), 1, Len(MontosReas(pagina)) - 1)
+                        Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_reas','" & id_imputacion & "','" & DatosMontos & "'", conn)
+                        Comando.Transaction = transaccion
+                        Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+                    End If
+                Next
+            End If
+
 
             'MOVIMIENTOS ISR----------------------------------------------------------------------------------------------------------------
-            For pagina = 0 To UBound(MontosISR)
-                If Len(MontosISR(pagina)) > 0 Then
-                    DatosMontos = Mid(MontosISR(pagina), 1, Len(MontosISR(pagina)) - 1)
-                    Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_contable','" & id_imputacion & "','" & DatosMontos & "'", conn)
-                    Resultado = Convert.ToInt32(Comando.ExecuteScalar())
-                End If
-            Next
+            If Not MontosISR Is Nothing Then
+                For pagina = 0 To UBound(MontosISR)
+                    If Len(MontosISR(pagina)) > 0 Then
+                        DatosMontos = Mid(MontosISR(pagina), 1, Len(MontosISR(pagina)) - 1)
+                        Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_contable','" & id_imputacion & "','" & DatosMontos & "'", conn)
+                        Comando.Transaction = transaccion
+                        Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+                    End If
+                Next
+            End If
+
 
             'MOVIMIENTOS IMPUTACION---------------------------------------------------------------------------------------------------------
-            For pagina = 0 To UBound(MontosImputacion)
-                If Len(MontosImputacion(pagina)) > 0 Then
-                    DatosMontos = Mid(MontosImputacion(pagina), 1, Len(MontosImputacion(pagina)) - 1)
-                    Comando = New SqlClient.SqlCommand("spI_OfGread 'mop_imputaciones','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
-                    Resultado = Convert.ToInt32(Comando.ExecuteScalar())
-                End If
-            Next
+            If Not MontosImputacion Is Nothing Then
+                For pagina = 0 To UBound(MontosImputacion)
+                    If Len(MontosImputacion(pagina)) > 0 Then
+                        DatosMontos = Mid(MontosImputacion(pagina), 1, Len(MontosImputacion(pagina)) - 1)
+                        Comando = New SqlClient.SqlCommand("spI_OfGread 'mop_imputaciones','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
+                        Comando.Transaction = transaccion
+                        Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+                    End If
+                Next
+            End If
+
         Catch ex As Exception
+            transaccion.Rollback()
             conn.Close()
-            DeshacerOrdenPago(nro_op)
+            'DeshacerOrdenPago(nro_op)
             Mensaje("ORDEN DE PAGO-:", ex.Message)
             LogError("(Inserta Movimientos)" & ex.Message)
             Return False
@@ -1856,44 +2245,59 @@ Partial Class Pages_OrdenPago
         Return True
     End Function
 
-    Private Function InsertaMovimientosResp(ByVal nro_op As Integer, ByVal id_imputacion As Integer, ByVal MontosGen() As String, ByVal MontosReas() As String, ByVal MontosISR() As String) As Boolean
-        Dim sCnn As String = ""
+    Private Function InsertaMovimientosResp(ByVal nro_op As Integer, ByVal id_imputacion As Integer, ByVal MontosGen() As String, ByVal MontosReas() As String, ByVal MontosISR() As String,
+                                            Optional ByVal conexion As SqlConnection = Nothing, Optional ByVal transaccion As SqlTransaction = Nothing) As Boolean
+        ' Dim sCnn As String = ""
         Dim Resultado As String
         Dim DatosMontos As String
         Dim Comando As SqlClient.SqlCommand
 
-        sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
-        Dim conn As SqlConnection = New SqlConnection(sCnn)
-        conn.Open()
+        ' sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+        ' Dim conn As SqlConnection = New SqlConnection(sCnn)
+        Dim conn As SqlConnection = conexion
+        ' conn.Open()
 
         Try
             'MOVIMIENTOS GENERALES----------------------------------------------------------------------------------------------------------
-            For pagina = 0 To UBound(MontosGen)
-                If Len(MontosGen(pagina)) > 0 Then
-                    DatosMontos = Mid(MontosGen(pagina), 1, Len(MontosGen(pagina)) - 1)
-                    Comando = New SqlClient.SqlCommand("spI_OfGread 'aMOV_OPGeneralPend','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
-                    Resultado = Convert.ToInt32(Comando.ExecuteScalar())
-                End If
-            Next
+            If Not MontosGen Is Nothing Then
+                For pagina = 0 To UBound(MontosGen)
+                    If Len(MontosGen(pagina)) > 0 Then
+                        DatosMontos = Mid(MontosGen(pagina), 1, Len(MontosGen(pagina)) - 1)
+                        Comando = New SqlClient.SqlCommand("spI_OfGread 'aMOV_OPGeneralPend','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
+                        Comando.Transaction = transaccion
+                        Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+                    End If
+                Next
+            End If
+
 
             'MOVIMIENTOS REASEGURO----------------------------------------------------------------------------------------------------------
-            For pagina = 0 To UBound(MontosReas)
-                If Len(MontosReas(pagina)) > 0 Then
-                    DatosMontos = Mid(MontosReas(pagina), 1, Len(MontosReas(pagina)) - 1)
-                    Comando = New SqlClient.SqlCommand("spI_OfGread 'aMOV_OPReasPend','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
-                    Resultado = Convert.ToInt32(Comando.ExecuteScalar())
-                End If
-            Next
+            If Not MontosReas Is Nothing Then
+                For pagina = 0 To UBound(MontosReas)
+                    If Len(MontosReas(pagina)) > 0 Then
+                        DatosMontos = Mid(MontosReas(pagina), 1, Len(MontosReas(pagina)) - 1)
+                        Comando = New SqlClient.SqlCommand("spI_OfGread 'aMOV_OPReasPend','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
+                        Comando.Transaction = transaccion
+                        Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+                    End If
+                Next
+            End If
+
 
             'MOVIMIENTOS ISR----------------------------------------------------------------------------------------------------------------
-            For pagina = 0 To UBound(MontosISR)
-                If Len(MontosISR(pagina)) > 0 Then
-                    DatosMontos = Mid(MontosISR(pagina), 1, Len(MontosISR(pagina)) - 1)
-                    Comando = New SqlClient.SqlCommand("spI_OfGread 'aMOV_OPContablePend','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
-                    Resultado = Convert.ToInt32(Comando.ExecuteScalar())
-                End If
-            Next
+            If Not MontosISR Is Nothing Then
+                For pagina = 0 To UBound(MontosISR)
+                    If Len(MontosISR(pagina)) > 0 Then
+                        DatosMontos = Mid(MontosISR(pagina), 1, Len(MontosISR(pagina)) - 1)
+                        Comando = New SqlClient.SqlCommand("spI_OfGread 'aMOV_OPContablePend','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
+                        Comando.Transaction = transaccion
+                        Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+                    End If
+                Next
+            End If
+
         Catch ex As Exception
+            transaccion.Rollback()
             conn.Close()
             Mensaje("ORDEN DE PAGO-:", ex.Message)
             LogError("(Inserta Movimientos Resp)" & ex.Message)
@@ -1903,6 +2307,55 @@ Partial Class Pages_OrdenPago
         Return True
     End Function
 
+    Private Function InsertaMovimientosDiferencia(ByVal nro_op As Integer, ByVal id_imputacion As Integer, ByVal MontosGen As String,
+                                                  ByVal MontosContable As String, ByVal MontosImputacion As String,
+                                                  Optional ByVal conexion As SqlConnection = Nothing, Optional ByVal transaccion As SqlTransaction = Nothing) As Boolean
+        'Dim sCnn As String = ""
+        Dim Resultado As String
+        Dim Comando As SqlClient.SqlCommand
+        Dim DatosMontos As String
+
+        'sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+        'Dim conn As SqlConnection = New SqlConnection(sCnn)
+        'conn.Open()
+
+        Dim conn As SqlConnection = conexion
+
+        Try
+            'MOVIMIENTOS GENERALES----------------------------------------------------------------------------------------------------------
+            If Len(MontosGen) > 0 Then
+                DatosMontos = Mid(MontosGen, 1, Len(MontosGen) - 1)
+                Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_general','" & id_imputacion & "','" & DatosMontos & "'", conn)
+                Comando.Transaction = transaccion
+                Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+            End If
+
+            'MOVIMIENTOS CONTABLES-------------------------------------------------------------------------------------------------------------
+            If Len(MontosContable) > 0 Then
+                DatosMontos = Mid(MontosContable, 1, Len(MontosContable) - 1)
+                Comando = New SqlClient.SqlCommand("spI_OfGread 'tmp_imputacion_contable','" & id_imputacion & "','" & DatosMontos & "'", conn)
+                Comando.Transaction = transaccion
+                Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+            End If
+
+            'MOVIMIENTOS IMPUTACION---------------------------------------------------------------------------------------------------------
+            If Len(MontosImputacion) > 0 Then
+                DatosMontos = Mid(MontosImputacion, 1, Len(MontosImputacion) - 1)
+                Comando = New SqlClient.SqlCommand("spI_OfGread 'mop_imputaciones','" & nro_op & "," & id_imputacion & "','" & DatosMontos & "'", conn)
+                Comando.Transaction = transaccion
+                Resultado = Convert.ToInt32(Comando.ExecuteScalar())
+            End If
+
+        Catch ex As Exception
+            transaccion.Rollback()
+            conn.Close()
+            Mensaje("ORDEN DE PAGO-:", ex.Message)
+            LogError("(Inserta Movimientos Asiento Diario)" & ex.Message)
+            Return False
+        End Try
+
+        Return True
+    End Function
     Private Function GuardaDatos(ByVal Tabla As String, ByVal Key As String, ByVal Datos As String) As String
         Dim sCnn As String = ""
 
@@ -2038,10 +2491,6 @@ Partial Class Pages_OrdenPago
             ElseIf e.CommandName.Equals("GeneraOP") Then
                 ddl_TipoGenera.SelectedValue = "EN"
 
-                lbl_MntParcial.Text = 0
-                lbl_MntImpuesto.Text = 0
-                lbl_MntTotal.Text = 0
-
                 Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
 
                 hid_Paquete.Value = "1"
@@ -2069,12 +2518,14 @@ Partial Class Pages_OrdenPago
                 If dtTemporal.Rows.Count > 0 Then
                     EvaluaOrdenPago(Session("dtCuotas"))
 
-                    Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
-                    lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
-                    lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
-                    lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
-
+                    'Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
+                    'lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
+                    'lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
+                    'lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
                     'lbl_MntParcial.Text = String.Format("{0:#,#0.00}", ConsultaParcial(hid_idPv.Value))
+
+                    MontosTotalesOP()
+
                     btn_ConfirmarOP.Visible = True
                     lbl_Cuotas.Visible = False
                     ddl_Cuotas.Visible = False
@@ -2128,6 +2579,24 @@ Partial Class Pages_OrdenPago
             Mensaje("ORDEN DE PAGO-: ROWCOMMAND Póliza", ex.Message)
             LogError("(gvd_Reaseguro_RowCommand)" & ex.Message)
         End Try
+    End Sub
+
+    Private Sub MontosTotalesOP()
+        Dim dblPrimaNeta As Double = 0
+        Dim dblImpuesto As Double = 0
+        Dim dblDiferencia As Double = 0
+        Dim dblTotal As Double = 0
+
+        For Each row In gvd_OrdenPago.Rows
+            dblPrimaNeta = dblPrimaNeta + Replace(DirectCast(row.FindControl("txt_Monto"), TextBox).Text, ",", ",")
+            dblImpuesto = dblImpuesto + Replace(DirectCast(row.FindControl("txt_Impuesto"), LinkButton).Text, ",", ",")
+            dblDiferencia = dblDiferencia + Replace(DirectCast(row.FindControl("txt_Diferencia"), TextBox).Text, ",", ",")
+        Next
+
+        lbl_MntParcial.Text = String.Format("{0:#,#0.0000}", dblPrimaNeta)
+        lbl_MntImpuesto.Text = String.Format("{0:#,#0.0000}", dblImpuesto)
+        lbl_MntDiferencia.Text = String.Format("{0:#,#0.0000}", dblDiferencia)
+        lbl_MntTotal.Text = String.Format("{0:#,#0.0000}", dblPrimaNeta - dblImpuesto + dblDiferencia)
     End Sub
 
     Private Sub gvd_Reaseguro_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles gvd_Reaseguro.PageIndexChanging
@@ -2588,7 +3057,7 @@ Partial Class Pages_OrdenPago
         Dim cuenta As String = ""
         Dim id_cuenta As Integer = 0
         Dim cod_banco As Integer = 0
-        Dim txt_swift As Integer = 0
+        Dim txt_swift As String = "0"
 
         Dim cod_aseg As Integer = 0
         Dim Asegurado As String = ""
@@ -2679,7 +3148,6 @@ Partial Class Pages_OrdenPago
 
             hid_Cambio = TryCast(Row.FindControl("hid_Cambio"), TextBox)
 
-            cod_moneda = GridView.DataKeys(Row.RowIndex)("cod_moneda")
             cod_moneda = GridView.DataKeys(Row.RowIndex)("cod_moneda")
             Moneda = GridView.DataKeys(Row.RowIndex)("Moneda")
             blnPendiente = GridView.DataKeys(Row.RowIndex)("blnPendiente")
@@ -2810,7 +3278,7 @@ Partial Class Pages_OrdenPago
         Dim cuenta As String = ""
         Dim id_cuenta As Integer = 0
         Dim cod_banco As Integer = 0
-        Dim txt_swift As Integer = 0
+        Dim txt_swift As String = 0
 
         Dim cod_aseg As Integer = 0
         Dim Asegurado As String = ""
@@ -2948,9 +3416,15 @@ Partial Class Pages_OrdenPago
                 txt_broker.Text = sender.DataKeys(Index)("Broker")
                 hid_cia.Value = sender.DataKeys(Index)("cod_cia")
                 txt_Reasegurador.Text = sender.DataKeys(Index)("Compañia")
+                ddl_MonedaDev.SelectedValue = hid_Moneda.Value
+                hid_MonedaDev.Value = hid_Moneda.Value
+
+                txt_TipoCambioDev.Text = ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1)  'Tipo de Cambio Dolares
+
                 txt_Cuenta.Text = sender.DataKeys(Index)("cuenta")
                 txt_Banco.Text = sender.DataKeys(Index)("banco")
                 txt_ISR.Text = sender.DataKeys(Index)("MontoISR")
+                txt_ISRAux.Text = sender.DataKeys(Index)("MontoISR")
                 txt_FechaRet.Text = sender.DataKeys(Index)("fec_cob_pago")
                 txt_Detalle.Text = "Devolución de ISR retenido en la Orden de Pago: " & txt_nroOP.Text & " Póliza: " & txt_Poliza.Text & " Asegurado: " & sender.DataKeys(Index)("Asegurado") & " Reasegurador: " & txt_Reasegurador.Text
                 hid_persona.Value = sender.DataKeys(Index)("id_persona") & "|" &
@@ -3000,6 +3474,7 @@ Partial Class Pages_OrdenPago
                                       sender.DataKeys(Index)("cod_cta_cb"),
                                       sender.DataKeys(Index)("cod_deb_cred"),
                                       txt_ISR.Text,
+                                      IIf(hid_Moneda.Value = 0, txt_ISR.Text / txt_TipoCambioDev.Text, txt_ISR.Text * txt_TipoCambioDev.Text),
                                       "ISR " & txt_Reasegurador.Text)
 
                 gvd_Acumulados.DataSource = dtAcumulados
@@ -3396,10 +3871,13 @@ Partial Class Pages_OrdenPago
                     ddl_TipoGenera.Visible = True
                     ddl_TipoGenera.SelectedValue = "EN"
                     btn_ConfirmarOP.Visible = True
-                    Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
-                    lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
-                    lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
-                    lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
+
+                    MontosTotalesOP()
+
+                    'Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
+                    'lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
+                    'lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
+                    'lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
 
                     dtBusqueda = New DataTable
                     dtBusqueda = Session("dtGeneral")
@@ -3616,8 +4094,19 @@ Partial Class Pages_OrdenPago
             Dim opt_TipoPago As RadioButtonList = TryCast(Row.FindControl("opt_TipoPago"), RadioButtonList)
             Dim txt_texto As TextBox = TryCast(Row.FindControl("txt_texto"), TextBox)
 
+
+            Dim hid_Moneda As TextBox = TryCast(Row.FindControl("hid_Moneda"), TextBox)
+            Dim ddl_Moneda As DropDownList = TryCast(Row.FindControl("ddl_Moneda"), DropDownList)
+
+            Dim txt_Pactado As TextBox = TryCast(Row.FindControl("txt_Pactado"), TextBox)
+
             ReDim Preserve arrayAdicional(i)
-            arrayAdicional(i) = txt_FechaPago.Text & "|" & IIf(opt_TipoPago.SelectedValue = "T", -1, 0) & "|" & txt_texto.Text
+            arrayAdicional(i) = txt_FechaPago.Text & "|" &
+                                IIf(opt_TipoPago.SelectedValue = "T", -1, 0) & "|" &
+                                txt_texto.Text & "|" &
+                                hid_Moneda.Text & "|" &
+                                ddl_Moneda.SelectedValue & "|" &
+                                txt_Pactado.Text
             i = i + 1
 
         Next
@@ -4096,12 +4585,14 @@ Partial Class Pages_OrdenPago
                 ddl_TipoGenera.Visible = True
             End If
 
-            Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
-            lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
-            lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
-            lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
+            MontosTotalesOP()
 
+            'Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
+            'lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
+            'lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
+            'lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
             'lbl_MntParcial.Text = String.Format("{0:#,#0.00}", ConsultaParcial(hid_idPv.Value))
+
             myRow = dtBusqueda.Select("id_pv ='" & hid_idPv.Value & "' AND Id_Pol=0")
             myRow(0)("Parcial") = lbl_MntParcial.Text
         Catch ex As Exception
@@ -4415,10 +4906,12 @@ Partial Class Pages_OrdenPago
                 Session("dtCuotas") = ConsultaCuotas(hid_idPv.Value)
                 EvaluaOrdenPago(Session("dtCuotas"))
 
-                Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
-                lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
-                lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
-                lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
+                'Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
+                'lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
+                'lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
+                'lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
+
+                MontosTotalesOP()
             Else
                 sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
 
@@ -4472,10 +4965,12 @@ Partial Class Pages_OrdenPago
             Session("dtCuotas") = ConsultaCuotas(strDatos)
             EvaluaOrdenPago(Session("dtCuotas"))
 
-            Montos = Split(ConsultaParcial(strDatos), "|")
-            lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
-            lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
-            lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
+            'Montos = Split(ConsultaParcial(strDatos), "|")
+            'lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
+            'lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
+            'lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
+
+            MontosTotalesOP()
 
             ScriptManager.RegisterStartupScript(Me, Me.GetType, "Close Modal", "ClosePopup('#EndososModal');", True)
 
@@ -4500,10 +4995,12 @@ Partial Class Pages_OrdenPago
             Session("dtCuotas") = ConsultaCuotas(hid_idPv.Value)
             EvaluaOrdenPago(Session("dtCuotas"))
 
-            Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
-            lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
-            lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
-            lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
+            MontosTotalesOP()
+
+            'Montos = Split(ConsultaParcial(hid_idPv.Value), "|")
+            'lbl_MntParcial.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)))
+            'lbl_MntImpuesto.Text = String.Format("{0:#,#0.00}", CDbl(Montos(1)))
+            'lbl_MntTotal.Text = String.Format("{0:#,#0.00}", CDbl(Montos(0)) - CDbl(Montos(1)))
 
             gvd_Endosos.DataSource = Nothing
             gvd_Endosos.DataBind()
@@ -5004,6 +5501,7 @@ Partial Class Pages_OrdenPago
 
     Private Sub btn_AcumularRet_Click(sender As Object, e As EventArgs) Handles btn_AcumularRet.Click
         Try
+
             Dim dtAcumulados As DataTable
             dtAcumulados = New DataTable
 
@@ -5033,6 +5531,8 @@ Partial Class Pages_OrdenPago
                                       gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb"),
                                       gvd_Acumulados.DataKeys(row.RowIndex)("cod_deb_cred"),
                                       gvd_Acumulados.DataKeys(row.RowIndex)("imp_mo"),
+                                      IIf(hid_Moneda.Value = 0, gvd_Acumulados.DataKeys(row.RowIndex)("imp_mo") / txt_TipoCambioDev.Text,
+                                                                gvd_Acumulados.DataKeys(row.RowIndex)("imp_mo") * txt_TipoCambioDev.Text),
                                       gvd_Acumulados.DataKeys(row.RowIndex)("txt_desc"))
             Next
 
@@ -5057,6 +5557,8 @@ Partial Class Pages_OrdenPago
                                           gvd_Retenciones.DataKeys(row.RowIndex)("cod_cta_cb"),
                                           gvd_Retenciones.DataKeys(row.RowIndex)("cod_deb_cred"),
                                           gvd_Retenciones.DataKeys(row.RowIndex)("imp_mo"),
+                                          IIf(hid_Moneda.Value = 0, gvd_Retenciones.DataKeys(row.RowIndex)("imp_mo") / txt_TipoCambioDev.Text,
+                                                                        gvd_Retenciones.DataKeys(row.RowIndex)("imp_mo") * txt_TipoCambioDev.Text),
                                           gvd_Retenciones.DataKeys(row.RowIndex)("txt_desc"))
                 Else
                     dtRetenciones.Rows.Add(gvd_Retenciones.DataKeys(row.RowIndex)("nro_op"),
@@ -5078,6 +5580,7 @@ Partial Class Pages_OrdenPago
                                            gvd_Retenciones.DataKeys(row.RowIndex)("cod_cta_cb"),
                                            gvd_Retenciones.DataKeys(row.RowIndex)("cod_deb_cred"),
                                            gvd_Retenciones.DataKeys(row.RowIndex)("imp_mo"),
+                                           0,
                                            gvd_Retenciones.DataKeys(row.RowIndex)("txt_desc"))
                 End If
             Next
@@ -5089,6 +5592,11 @@ Partial Class Pages_OrdenPago
             gvd_Retenciones.DataBind()
 
             txt_ISR.Text = SumaRetencion(gvd_Acumulados)
+            txt_ISRAux.Text = txt_ISR.Text
+
+            If hid_Moneda.Value <> hid_MonedaDev.Value Then
+                txt_ISR.Text = IIf(hid_Moneda.Value = 0, txt_ISR.Text / txt_TipoCambioDev.Text, txt_ISR.Text * txt_TipoCambioDev.Text)
+            End If
 
         Catch ex As Exception
             Mensaje("ORDEN DE PAGO-:  ", ex.Message)
@@ -5153,6 +5661,7 @@ Partial Class Pages_OrdenPago
         dtCuotas.Columns.Add("cod_cta_cb")
         dtCuotas.Columns.Add("cod_deb_cred")
         dtCuotas.Columns.Add("imp_mo")
+        dtCuotas.Columns.Add("imp_eq")
         dtCuotas.Columns.Add("txt_desc")
 
         Return dtCuotas
@@ -5206,6 +5715,7 @@ Partial Class Pages_OrdenPago
                                       gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb"),
                                       gvd_Acumulados.DataKeys(row.RowIndex)("cod_deb_cred"),
                                       gvd_Acumulados.DataKeys(row.RowIndex)("imp_mo"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("imp_eq"),
                                       gvd_Acumulados.DataKeys(row.RowIndex)("txt_desc"))
                 End If
             Next
@@ -5300,20 +5810,282 @@ Partial Class Pages_OrdenPago
         End Try
     End Sub
 
-    'Private Sub gvd_GrupoPolizas_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvd_GrupoPolizas.RowCommand
-    '        Try
+    Protected Sub ddl_Moneda_SelectedIndexChanged(sender As Object, e As EventArgs)
+        Try
+            Dim PrimaNeta As Double
+            Dim ISR As Double
 
-    '            If e.CommandName.Equals("Aclaracion") Then
-    '                Dim Index As Integer = e.CommandSource.NamingContainer.RowIndex
-    '                Dim id_pv As Integer
-    '                id_pv = gvd_GrupoPolizas.DataKeys(Index)("id_pv")
-    '                ObtieneDatosRTF(id_pv)
-    '            End If
-    '        Catch ex As Exception
-    '            Mensaje("ORDEN DE PAGO:", ex.Message)
-    '        End Try
-    'End Sub
+            Dim row As GridViewRow = TryCast(sender.NamingContainer, GridViewRow)
 
+            Dim hid_Moneda = DirectCast(row.FindControl("hid_Moneda"), TextBox)
+            Dim hid_cod_banco = DirectCast(row.FindControl("hid_cod_banco"), HiddenField)
+            Dim hid_id_cuenta = DirectCast(row.FindControl("hid_id_cuenta"), HiddenField)
+            Dim hid_nro_cuenta = DirectCast(row.FindControl("hid_nro_cuenta"), HiddenField)
+            Dim lbl_Banco = DirectCast(row.FindControl("lbl_Banco"), TextBox)
+            Dim lbl_Cuenta = DirectCast(row.FindControl("lbl_Cuenta"), TextBox)
+            Dim lbl_TipoCambio = DirectCast(row.FindControl("lbl_TipoCambio"), Label)
+            Dim txt_Pactado = DirectCast(row.FindControl("txt_Pactado"), TextBox)
+            Dim txt_Diferencia = DirectCast(row.FindControl("txt_Diferencia"), TextBox)
+            Dim txt_Monto = DirectCast(row.FindControl("txt_Monto"), TextBox)
+            Dim txt_Impuesto = DirectCast(row.FindControl("txt_Impuesto"), LinkButton)
+
+            hid_cod_banco.Value = ""
+            hid_id_cuenta.Value = ""
+            hid_nro_cuenta.Value = ""
+
+            lbl_Banco.Text = ""
+            lbl_Cuenta.Text = ""
+
+
+            If sender.selectedvalue <> hid_Moneda.Text Then
+                txt_Pactado.Enabled = True
+
+                PrimaNeta = Replace(txt_Monto.Text, ",", "")
+                ISR = Replace(txt_Impuesto.Text, ",", "")
+
+                lbl_TipoCambio.Text = ObtieneTipoCambio(Today.ToString("dd/MM/yyyy"), 1)
+
+                If sender.SelectedValue = 0 Then
+                    txt_Monto.Text = String.Format("{0:#,#0.0000}", PrimaNeta * lbl_TipoCambio.Text)
+                    txt_Impuesto.Text = String.Format("{0:#,#0.0000}", ISR * lbl_TipoCambio.Text)
+                Else
+                    txt_Monto.Text = String.Format("{0:#,#0.0000}", PrimaNeta / lbl_TipoCambio.Text)
+                    txt_Impuesto.Text = String.Format("{0:#,#0.0000}", ISR / lbl_TipoCambio.Text)
+                End If
+
+                Mensaje("ORDEN DE PAGO-:  ", "Al cambiar la moneda original, se generará un Asiento de Diario para la Orden de Pago")
+            Else
+                lbl_TipoCambio.Text = gvd_OrdenPago.DataKeys(row.RowIndex)("imp_cambio")
+                txt_Pactado.Text = ""
+                txt_Pactado.Enabled = False
+                txt_Diferencia.Text = "0.0000"
+                txt_Monto.Text = String.Format("{0:#,#0.0000}", CDbl(gvd_OrdenPago.DataKeys(row.RowIndex)("Parcial")))
+                txt_Impuesto.Text = String.Format("{0:#,#0.0000}", CDbl(gvd_OrdenPago.DataKeys(row.RowIndex)("Impuesto")))
+            End If
+
+            MontosTotalesOP()
+
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(ddl_Moneda_SelectedIndexChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Protected Sub txt_Pactado_TextChanged(sender As Object, e As EventArgs)
+        Try
+            Dim PrimaNetaOrig As Double
+            Dim ISROrig As Double
+
+            Dim PrimaNeta As Double
+            Dim ISR As Double
+
+            Dim row As GridViewRow = TryCast(sender.NamingContainer, GridViewRow)
+
+            Dim ddl_Moneda = DirectCast(row.FindControl("ddl_Moneda"), DropDownList)
+            Dim lbl_TipoCambio = DirectCast(row.FindControl("lbl_TipoCambio"), Label)
+
+            Dim txt_Diferencia = DirectCast(row.FindControl("txt_Diferencia"), TextBox)
+
+            PrimaNetaOrig = gvd_OrdenPago.DataKeys(row.RowIndex)("Parcial")
+            ISROrig = gvd_OrdenPago.DataKeys(row.RowIndex)("Impuesto")
+
+            PrimaNeta = Replace(DirectCast(row.FindControl("txt_Monto"), TextBox).Text, ",", "")
+            ISR = Replace(DirectCast(row.FindControl("txt_Impuesto"), LinkButton).Text, ",", "")
+
+            If ddl_Moneda.SelectedValue = 0 Then
+                txt_Diferencia.Text = String.Format("{0:#,#0.0000}", ((PrimaNetaOrig - ISROrig) * sender.Text) - (PrimaNeta - ISR))
+            Else
+                txt_Diferencia.Text = String.Format("{0:#,#0.0000}", ((PrimaNetaOrig - ISROrig) / sender.Text) - (PrimaNeta - ISR))
+            End If
+
+            MontosTotalesOP()
+
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(txt_Pactado_TextChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub gvd_OrdenPago_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles gvd_OrdenPago.RowDataBound
+        Try
+            If e.Row.RowType = DataControlRowType.DataRow Then
+                Dim ddl_Moneda As DropDownList = TryCast(e.Row.FindControl("ddl_Moneda"), DropDownList)
+                ddl_Moneda.SelectedValue = sender.DataKeys(e.Row.RowIndex)("cod_moneda")
+            End If
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(ddl_Moneda_SelectedIndexChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub txt_OPDif_TextChanged(sender As Object, e As EventArgs) Handles txt_OPDif.TextChanged
+        Try
+            Dim sCnn As String
+
+            sCnn = ConfigurationManager.ConnectionStrings("CadenaConexion").ConnectionString
+
+            Dim sSel As String = "spS_InfoOrdenPago " & txt_OPDif.Text
+            Dim da As SqlDataAdapter
+
+            Dim dtOP As New DataTable
+
+            da = New SqlDataAdapter(sSel, sCnn)
+
+            da.Fill(dtOP)
+
+            If dtOP.Rows.Count > 0 Then
+                hid_Moneda.Value = dtOP.Rows(0)("cod_moneda")
+                ddl_MonedaDif.SelectedValue = dtOP.Rows(0)("cod_moneda")
+                hid_broker.Value = dtOP.Rows(0)("cod_abona_vrs")
+                hid_persona.Value = dtOP.Rows(0)("id_persona") & "|" & dtOP.Rows(0)("nro_nit")
+                txt_BrokerDif.Text = dtOP.Rows(0)("broker")
+                hid_cuenta.Value = dtOP.Rows(0)("id_cuenta") & "|" & dtOP.Rows(0)("cod_banco") & "|0"
+                txt_CuentaDif.Text = dtOP.Rows(0)("nro_cuenta")
+                txt_BancoDif.Text = dtOP.Rows(0)("banco")
+            Else
+                Mensaje("ORDEN DE PAGO-:  ", "La Orden de Pago no existe")
+                hid_Moneda.Value = ""
+                ddl_MonedaDif.SelectedValue = 0
+                hid_broker.Value = ""
+                hid_persona.Value = ""
+                txt_BrokerDif.Text = ""
+                hid_cuenta.Value = ""
+                txt_CuentaDif.Text = ""
+                txt_BancoDif.Text = ""
+            End If
+
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(txt_OPDif_TextChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub ddl_MonedaDif_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddl_MonedaDif.SelectedIndexChanged
+        Try
+            hid_Moneda.Value = ddl_MonedaDif.SelectedValue
+            txt_CuentaDif.Text = ""
+            txt_BancoDif.Text = ""
+            hid_cuenta.Value = ""
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(ddl_MonedaDif_SelectedIndexChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub btn_GenerarDif_Click(sender As Object, e As EventArgs) Handles btn_GenerarDif.Click
+        Try
+            If hid_broker.Value = "" Then
+                Mensaje("ORDEN DE PAGO-:  ", "Orden de Pago no válida")
+                Exit Sub
+            ElseIf hid_cuenta.Value = ""
+                Mensaje("ORDEN DE PAGO-:  ", "Cuenta no válida")
+                Exit Sub
+            ElseIf Not isdate(txt_FechaPagoDif.text) Then
+                Mensaje("ORDEN DE PAGO-:  ", "Fecha de Pago no válida")
+                Exit Sub
+            ElseIf Not IsNumeric(txt_MontoDif.TEXT) Then
+                Mensaje("ORDEN DE PAGO-:  ", "Diferencia no válida")
+                Exit Sub
+            ElseIf Not len(txt_DetalleDif.text) > 0 Then
+                Mensaje("ORDEN DE PAGO-:  ", "Detalle de Orden de Pago no válido")
+                Exit Sub
+            End If
+            GenerarDiferencia()
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(btn_GenerarDif_Click)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub btn_Diferencias_Click(sender As Object, e As EventArgs) Handles btn_Diferencias.Click
+        Try
+            ScriptManager.RegisterStartupScript(Me, Me.GetType, "Open PopUp", "OpenPopup('#DiferenciasModal');", True)
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(btn_Diferencias_Click)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub ddl_MonedaDev_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddl_MonedaDev.SelectedIndexChanged
+        Try
+
+            hid_MonedaDev.Value = ddl_MonedaDev.SelectedValue
+            hid_cuenta.Value = vbNullString
+            txt_Cuenta.Text = vbNullString
+            txt_Banco.Text = vbNullString
+
+            If hid_Moneda.Value <> ddl_MonedaDev.SelectedValue Then
+
+                txt_ISR.Text = IIf(hid_Moneda.Value = 0, txt_ISR.Text / txt_TipoCambioDev.Text, txt_ISR.Text * txt_TipoCambioDev.Text)
+
+                txt_TipoCambioDev.Enabled = True
+                txt_TipoCambioDev.Focus()
+            Else
+                txt_TipoCambioDev.Enabled = False
+                txt_ISR.Text = txt_ISRAux.Text
+            End If
+
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(ddl_MonedaDev_SelectedIndexChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub txt_TipoCambioDev_TextChanged(sender As Object, e As EventArgs) Handles txt_TipoCambioDev.TextChanged
+        Try
+
+            Dim dtAcumulados As DataTable
+            dtAcumulados = New DataTable
+
+            dtAcumulados = GeneraDatatableAcumulacion()
+
+            For Each row In gvd_Acumulados.Rows
+                dtAcumulados.Rows.Add(gvd_Acumulados.DataKeys(row.RowIndex)("nro_op"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("Poliza"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("nro_recibo"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("fec_pago"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("id_pv"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("nro_reas"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("nro_layer"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("id_contrato"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("nro_tramo"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("cod_ramo_contable"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("ramo_contable"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("cod_broker"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("broker"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("cod_cia"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("compañia"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("nro_cuota"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("cod_cta_cb"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("cod_deb_cred"),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("imp_mo"),
+                                      IIf(hid_Moneda.Value = 0, gvd_Acumulados.DataKeys(row.RowIndex)("imp_mo") / txt_TipoCambioDev.Text,
+                                                                gvd_Acumulados.DataKeys(row.RowIndex)("imp_mo") * txt_TipoCambioDev.Text),
+                                      gvd_Acumulados.DataKeys(row.RowIndex)("txt_desc"))
+            Next
+
+
+            gvd_Acumulados.DataSource = dtAcumulados
+            gvd_Acumulados.DataBind()
+
+            txt_ISR.Text = SumaRetencion(gvd_Acumulados)
+            txt_ISRAux.Text = txt_ISR.Text
+
+            If hid_Moneda.Value <> hid_MonedaDev.Value Then
+                txt_ISR.Text = IIf(hid_Moneda.Value = 0, txt_ISR.Text / txt_TipoCambioDev.Text, txt_ISR.Text * txt_TipoCambioDev.Text)
+            End If
+
+
+            txt_FechaPago.Focus()
+        Catch ex As Exception
+            Mensaje("ORDEN DE PAGO-:  ", ex.Message)
+            LogError("(txt_TipoCambioDev_TextChanged)" & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub ddl_MonedaDev_TextChanged(sender As Object, e As EventArgs) Handles ddl_MonedaDev.TextChanged
+
+    End Sub
 End Class
 
 
